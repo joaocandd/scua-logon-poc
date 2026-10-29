@@ -28,4 +28,4 @@ Usar o `@storybook/angular-vite` (10.6), com os addons `a11y`, `docs` e `themes`
 
 - Uma só cadeia de build (`@angular/build`) para app e Storybook.
 - Por ser preview, pode haver mudanças até o Storybook 11. Se algo travar, a volta para o `@storybook/angular` é trocar o framework no `.storybook/main.ts` e os builders no `angular.json`; as stories não mudam.
-- O `@storybook/angular-vite` declara `@angular/animations` como dependência obrigatória, embora não o use. O pacote fica instalado (o npm instala as dependências obrigatórias sozinho), mas o nosso código não deve usá-lo: no Angular 22 ele está obsoleto.
+- O `@storybook/angular-vite` declara `@angular/animations` como dependência obrigatória, embora não o use. O pacote fica instalado (o npm instala as dependências obrigatórias sozinho), mas o nosso código não deve usá-lo: no Angular 22 ele está obsoleto. A regra `no-restricted-imports` do ESLint barra o import dele (e de `@angular/platform-browser/animations`) em `src/`.

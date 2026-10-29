@@ -35,6 +35,29 @@ module.exports = defineConfig([
     },
   },
   {
+    // @angular/animations só está instalado porque o @storybook/angular-vite o exige (ADR 0003).
+    files: ['src/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@angular/animations',
+                '@angular/animations/*',
+                '@angular/platform-browser/animations',
+                '@angular/platform-browser/animations/*',
+              ],
+              message:
+                '@angular/animations está obsoleto no Angular 22. Use animate.enter e animate.leave (ADR 0003).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
