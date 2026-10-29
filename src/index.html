@@ -6,6 +6,14 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <script>
+      // Aplica o tema escolhido antes do app carregar, para a página não abrir no tema errado.
+      // Mesma chave e mesmos valores de src/app/core/layout/theme.ts.
+      try {
+        var theme = localStorage.getItem('scua-tema');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <app-root></app-root>

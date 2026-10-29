@@ -11,7 +11,7 @@ A prova de conceito não tem backend (fora do escopo no CLAUDE.md), mas as telas
 
 1. **Um interceptor funcional** (`core/mock-api/mock-api.interceptor.ts`) responde a toda chamada que começa com `/api/`. O resto segue para a rede.
 2. **Banco em memória** (`mocks/db.ts`, serviço `MockDb`) começa com as fixtures de `mocks/fixtures/` e guarda as alterações até a página recarregar. `reset()` volta aos dados de demonstração.
-3. **Rotas em português** (`mocks/handlers.ts`), como os status da API: `/api/pedidos`, `/api/regras`, `/api/colaboradores`, `/api/grupos`, `/api/feriados`, `/api/excecoes`, `/api/historico` e `/api/estacoes`. Cada rota é uma função que recebe o banco e devolve status e corpo; os testes chamam as rotas sem Angular.
+3. **Rotas em português** (`mocks/handlers.ts`), como os status da API: `/api/pedidos`, `/api/regras`, `/api/colaboradores`, `/api/grupos`, `/api/feriados`, `/api/excecoes`, `/api/historico`, `/api/estacoes` e `/api/eu` (o usuário simulado, ADR 0007). Cada rota é uma função que recebe o banco e devolve status e corpo; os testes chamam as rotas sem Angular.
 4. **Erros como `{ message }` em português**, prontos para a tela: "Este pedido já foi aprovado por Bianca às 9h10." Nunca código HTTP ou JSON para o usuário.
 5. **Espera de 300 a 800 ms** em toda resposta, e simulação pela URL da página: `?simular=erro` (toda chamada falha), `?simular=lento` (3 a 5 s) e `?simular=vazio` (listas vazias).
 6. **Datas das fixtures relativas a "agora"**: pedidos em aberto sempre caem na próxima jornada da pessoa. A demo e o CI têm pedidos para aprovar em qualquer dia e hora.

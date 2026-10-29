@@ -36,6 +36,11 @@ interface Context {
 type Handler = (context: Context) => MockResponse;
 
 const ROUTES: [method: string, path: string, handler: Handler][] = [
+  [
+    'GET',
+    '/api/eu',
+    ({ db }) => found(db.data.employees, db.currentUserId, 'Não encontramos o seu usuário.'),
+  ],
   ['GET', '/api/colaboradores', ({ db }) => ok(db.data.employees)],
   ['GET', '/api/grupos', ({ db }) => ok(db.data.groups)],
   ['GET', '/api/feriados', ({ db }) => ok(db.data.holidays)],

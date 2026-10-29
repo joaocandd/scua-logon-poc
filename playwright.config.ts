@@ -20,7 +20,8 @@ export default defineConfig({
   // O tema escuro roda à parte para o axe conferir o contraste das telas nele também.
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'celular', use: { ...devices['Pixel 7'] } },
+    // 390 px: largura de celular de referência da equipe (Pixel 7 tem 412 px).
+    { name: 'celular', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } } },
     { name: 'desktop-escuro', use: { ...devices['Desktop Chrome'], colorScheme: 'dark' } },
   ],
   webServer: {

@@ -1,0 +1,82 @@
+<div class="field">
+  <label class="label" [id]="labelId" for="busca-campo">
+    Buscar páginas, colaboradores, grupos e regras
+  </label>
+  <div class="input-row">
+    <app-icon name="search" />
+    <!-- Esc fecha a paleta. O combobox não deixa o Esc chegar ao diálogo, por isso o ouvinte fica aqui. -->
+    <input
+      ngCombobox
+      #combobox="ngCombobox"
+      id="busca-campo"
+      class="input"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Digite um nome, grupo ou regra"
+      alwaysExpanded
+      [(value)]="query"
+      (keydown.escape)="ref.close()"
+    />
+    <button
+      app-button
+      type="button"
+      variant="ghost"
+      icon="close"
+      aria-label="Fechar busca"
+      (click)="ref.close()"
+    ></button>
+  </div>
+</div>
+
+<ng-template ngComboboxPopup [combobox]="combobox">
+  <div
+    ngListbox
+    ngComboboxWidget
+    #listbox="ngListbox"
+    class="listbox"
+    focusMode="activedescendant"
+    [tabindex]="-1"
+    [activeDescendant]="listbox.activeDescendant()"
+    [attr.aria-labelledby]="labelId"
+    [hidden]="sections().length === 0"
+    (click)="open($event)"
+    (keydown.enter)="open()"
+  >
+    @for (section of sections(); track section.kind) {
+      <div role="group" class="section" [attr.aria-labelledby]="'busca-secao-' + section.kind">
+        <div class="section-heading" [id]="'busca-secao-' + section.kind">
+          {{ section.heading }}
+        </div>
+        @for (result of section.results; track result.id) {
+          <div ngOption class="option" [id]="result.id" [value]="result.id" [label]="result.label">
+            <app-icon [name]="result.icon" />
+            <span class="option-text">
+              <span class="option-label">{{ result.label }}</span>
+              @if (result.detail) {
+                <span class="option-detail">{{ result.detail }}</span>
+              }
+            </span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+@if (failed()) {
+  <div class="message">
+    <p>Não conseguimos buscar colaboradores, grupos e regras agora. As páginas continuam aqui.</p>
+    <button app-button type="button" variant="secondary" size="sm" (click)="retry()">
+      Tentar de novo
+    </button>
+  </div>
+} @else if (query().trim() && loading()) {
+  <p class="message">Buscando colaboradores, grupos e regras…</p>
+} @else if (query().trim() && sections().length === 0) {
+  <p class="message">
+    Nada encontrado para “{{ query().trim() }}”. Tente outro nome, grupo ou regra.
+  </p>
+}
+
+<div class="cdk-visually-hidden" role="status">{{ status() }}</div>

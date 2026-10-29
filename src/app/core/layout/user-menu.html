@@ -1,0 +1,44 @@
+<button type="button" class="trigger" ngMenuTrigger #trigger="ngMenuTrigger" [menu]="menu">
+  <span class="avatar" aria-hidden="true">
+    @if (currentUser.initials(); as initials) {
+      {{ initials }}
+    } @else {
+      <app-icon name="person" />
+    }
+  </span>
+  <span class="name">{{ currentUser.profile()?.name ?? 'Sua conta' }}</span>
+</button>
+
+<!-- O menu fica sempre no HTML (o botão precisa dele); o painel só aparece com o menu aberto. -->
+<div class="panel" [class.open]="trigger.expanded()">
+  @if (currentUser.profile(); as user) {
+    <p class="identity">
+      <span class="identity-name">{{ user.name }}</span>
+      <span class="identity-role">{{ user.jobTitle }}</span>
+    </p>
+  }
+  <p class="heading" id="menu-usuario-tema">Tema</p>
+  <div
+    ngMenu
+    #menu="ngMenu"
+    class="menu"
+    aria-labelledby="menu-usuario-tema"
+    (itemSelected)="select($event)"
+  >
+    @for (option of themes; track option.value) {
+      <div
+        ngMenuItem
+        role="menuitemradio"
+        class="item"
+        [value]="option.value"
+        [attr.aria-checked]="theme.preference() === option.value"
+      >
+        <app-icon [name]="option.icon" />
+        <span class="item-label">{{ option.label }}</span>
+        @if (theme.preference() === option.value) {
+          <app-icon class="check" name="check" />
+        }
+      </div>
+    }
+  </div>
+</div>

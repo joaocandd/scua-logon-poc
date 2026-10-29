@@ -25,6 +25,10 @@ describe('API simulada', () => {
     expect(get<unknown[]>('/api/pedidos')).toHaveLength(25);
   });
 
+  it('diz quem está usando o app (usuária simulada)', () => {
+    expect(get('/api/eu')).toMatchObject({ id: 'col-25', name: 'Renata Albuquerque' });
+  });
+
   it('busca por id e responde 404 com mensagem humana', () => {
     expect(call('GET', '/api/pedidos/ped-04')).toMatchObject({
       status: 200,
