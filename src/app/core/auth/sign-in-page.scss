@@ -4,7 +4,7 @@
   min-height: 100dvh;
 }
 
-app-brand-panel {
+.brand-panel {
   display: none;
 }
 
@@ -26,8 +26,9 @@ app-brand-panel {
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   }
 
-  app-brand-panel {
-    display: flex;
+  // Grid: o painel ocupa a altura toda do <aside>.
+  .brand-panel {
+    display: grid;
   }
 
   .content {

@@ -1,0 +1,37 @@
+<a class="skip-link" href="#conteudo" (click)="skipToContent($event)">Pular para o conteúdo</a>
+
+<header class="header">
+  <a class="brand" routerLink="/hoje">
+    <span class="brand-mark" aria-hidden="true"></span>
+    Scua Logon
+  </a>
+  <button
+    type="button"
+    class="search"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="paletteOpen()"
+    aria-keyshortcuts="Control+K Meta+K"
+    (click)="togglePalette()"
+  >
+    <app-icon name="search" />
+    <span class="search-label">Buscar</span>
+    <kbd class="search-shortcut" aria-hidden="true">{{ shortcut }}</kbd>
+  </button>
+  <app-user-menu />
+</header>
+
+<div class="body">
+  <app-side-nav class="side-nav" [pendingCount]="pendingCount()" />
+  <!-- tabindex="-1": recebe o foco por código (pular para o conteúdo, troca de página), nunca pelo Tab. -->
+  <main #main id="conteudo" class="main" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
+
+<app-bottom-nav
+  class="bottom-nav"
+  [pendingCount]="pendingCount()"
+  [moreOpen]="moreOpen()"
+  [moreActive]="moreActive()"
+  (openMore)="openMore()"
+/>

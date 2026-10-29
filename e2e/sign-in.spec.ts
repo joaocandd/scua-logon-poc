@@ -19,6 +19,9 @@ test('/entrar abre sem violações de acessibilidade; no celular, só o formulá
   await expect(page).toHaveTitle('Entrar · Scua Logon');
   await expect(page.getByRole('heading', { level: 1, name: 'Entrar' })).toBeVisible();
   await expect(page.getByText('Hora extra só com aprovação.')).toBeVisible({ visible: !isMobile });
+  // Fora da casca do app: sem menu, mas com o próprio <main>.
+  await expect(page.getByRole('navigation')).toHaveCount(0);
+  await expect(page.getByRole('main')).toBeVisible();
   await expectNoA11yViolations(page);
 });
 
@@ -98,6 +101,7 @@ test('"Esqueci minha senha" abre a página de ajuda e volta', async ({ page }) =
   await expect(page).toHaveURL(/\/entrar\/esqueci-minha-senha$/);
   await expect(page).toHaveTitle('Esqueci minha senha · Scua Logon');
   await expect(page.getByRole('heading', { level: 1, name: 'Esqueci minha senha' })).toBeVisible();
+  await expect(page.getByRole('navigation')).toHaveCount(0);
   await expectNoA11yViolations(page);
 
   await page.getByRole('link', { name: 'Voltar para Entrar' }).click();

@@ -3,17 +3,14 @@ import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
-  beforeEach(async () => {
+  it('só desenha a rota; a casca (cabeçalho, menu e <main>) vem pela rota', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter([])],
     }).compileComponents();
-  });
-
-  it('coloca o conteúdo das rotas dentro do <main>', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const main = (fixture.nativeElement as HTMLElement).querySelector('main');
-    expect(main?.querySelector('router-outlet')).not.toBeNull();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('router-outlet')).not.toBeNull();
   });
 });

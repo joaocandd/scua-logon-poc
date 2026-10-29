@@ -44,7 +44,7 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 ## Stack
 - Angular na última versão estável (22.x em out/2026): componentes standalone, control flow `@if`/`@for`, signals, padrões atuais do `ng new` (zoneless, se for o padrão).
 - Estado: signals em serviços; `httpResource`/`resource` para dados do servidor. NgRx SignalStore só se uma feature crescer muito.
-- Formulários: Signal Forms (`@angular/forms/signals`) com o Field do design system; erros de campo só depois da primeira tentativa de envio (ADR 0005).
+- Formulários: Signal Forms (`@angular/forms/signals`) com o Field do design system; erros de campo só depois da primeira tentativa de envio (ADR 0008).
 - UI: Angular Material 3 + CDK, tematizado com os tokens abaixo. Angular Aria para widgets sob medida.
 - Estilos: SCSS + variáveis CSS. **Não usar** Tailwind, Bootstrap, jQuery nem PrimeNG (licença comercial desde a v22).
 - Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
@@ -137,7 +137,7 @@ Regras de uso (`npm run contrast` confere os pares nos dois temas):
 Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromium`.
 - `npm start`: servidor de desenvolvimento em http://localhost:4200.
 - `npm test`: testes unitários (Vitest), uma execução. `npm run test:watch` para o modo observação.
-- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop, celular e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
+- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop (1280 px), celular (390 px) e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
 - `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
 - `npm run build`: build de produção em `dist/`.
 - `npm run contrast`: contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro.

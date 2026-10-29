@@ -1,0 +1,33 @@
+<nav aria-label="Principal">
+  <ul class="list">
+    @for (item of items; track item.path) {
+      <li>
+        <a
+          class="link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <span class="icon"><app-icon [name]="item.icon" /></span>
+          <span class="label">{{ item.label }}</span>
+          @if (item.showsPendingCount && pendingCount()) {
+            <app-pending-count class="count" [count]="pendingCount()" />
+          }
+        </a>
+      </li>
+    }
+    <li>
+      <button
+        type="button"
+        class="link"
+        [class.active]="moreActive()"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="moreOpen()"
+        (click)="openMore.emit()"
+      >
+        <span class="icon"><app-icon name="more_horiz" /></span>
+        <span class="label">Mais</span>
+      </button>
+    </li>
+  </ul>
+</nav>

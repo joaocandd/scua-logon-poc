@@ -1,4 +1,4 @@
-// Horários do dia em minutos desde a meia-noite (0 a 1440). Datas e fuso ficam em outro lugar:
+// Horários do dia em minutos desde a meia-noite (0 a 1440). Datas e fuso ficam no date.ts:
 // aqui só entram horários já convertidos para America/Sao_Paulo.
 
 export const MINUTES_PER_DAY = 24 * 60;

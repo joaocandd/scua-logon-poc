@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  padding: var(--space-2) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+  color: var(--color-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+
+  > app-icon {
+    color: var(--color-text-muted);
+  }
+}
+
+.link:hover {
+  background: var(--color-bg-subtle);
+}
+
+.link.active {
+  background: var(--color-highlight-bg);
+  color: var(--color-text-on-highlight);
+
+  > app-icon {
+    color: inherit;
+  }
+}
