@@ -1,0 +1,20 @@
+<label class="app-field__label" [for]="controlId">
+  {{ label() }}
+  @if (required()) {
+    <!-- O leitor de tela já anuncia "obrigatório" pelo aria-required do controle. -->
+    <span class="app-field__required" aria-hidden="true">(obrigatório)</span>
+  }
+</label>
+@if (hint()) {
+  <p class="app-field__hint" [id]="hintId">{{ hint() }}</p>
+}
+<ng-content />
+<!-- A região existe antes do erro, para o leitor de tela anunciar o erro quando ele aparece. -->
+<div class="app-field__error-region" aria-live="polite">
+  @if (error()) {
+    <p class="app-field__error" [id]="errorId">
+      <app-icon name="error" />
+      <span>{{ error() }}</span>
+    </p>
+  }
+</div>

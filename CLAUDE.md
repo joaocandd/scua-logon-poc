@@ -46,8 +46,8 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 - Estado: signals em serviços; `httpResource`/`resource` para dados do servidor. NgRx SignalStore só se uma feature crescer muito.
 - UI: Angular Material 3 + CDK, tematizado com os tokens abaixo. Angular Aria para widgets sob medida.
 - Estilos: SCSS + variáveis CSS. **Não usar** Tailwind, Bootstrap, jQuery nem PrimeNG (licença comercial desde a v22).
-- Ícones: um único conjunto (Material Symbols). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
-- Testes: Vitest (unitário), Playwright + `@axe-core/playwright` (ponta a ponta e acessibilidade). Lint: angular-eslint com regras de acessibilidade de template. Storybook para o design system.
+- Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
+- Testes: Vitest (unitário), Playwright + `@axe-core/playwright` (ponta a ponta e acessibilidade). Lint: angular-eslint com regras de acessibilidade de template. Storybook 10 com `@storybook/angular-vite` (Vite, sem webpack; ADR 0003) para o design system.
 - Dados: API simulada por interceptor HTTP, com fixtures em `src/app/mocks/`.
 
 ## Estrutura
@@ -68,6 +68,7 @@ src/app/
 Cada feature tem `pages/` (rotas), `ui/` (apresentação, sem injetar serviços) e `data/` (serviços e signals). Rotas sob demanda. URLs em português, sem `#`.
 
 ## Tokens de design (marca atual da Scua, de scua.com.br)
+Implementados em `src/styles/tokens.css`, que vale como fonte; mantenha este resumo igual a ele. O tema do Material deriva desses tokens (ADR 0002).
 ```css
 :root {
   /* Primitivos */
@@ -83,7 +84,7 @@ Cada feature tem `pages/` (rotas), `ui/` (apresentação, sem injetar serviços)
   --color-border: var(--scua-sand-200);    --color-border-strong: var(--scua-ink-400);
   --color-primary: var(--scua-orange-600); --color-on-primary: var(--scua-white);
   --color-accent: var(--scua-orange-500);  --color-highlight-bg: var(--scua-peach-100);
-  --color-text-on-highlight: var(--scua-orange-800);
+  --color-link: var(--scua-orange-800);    --color-text-on-highlight: var(--scua-orange-800);
   --color-focus-ring: var(--scua-orange-600);
   --color-hatch: #E4E1DA;
 
@@ -95,17 +96,22 @@ Cada feature tem `pages/` (rotas), `ui/` (apresentação, sem injetar serviços)
   --leading-tight: 1.2; --leading-body: 1.5;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 999px;
-  --control-height: 44px;
-  --shadow-ring: 0 0 0 1px var(--color-border);
+  --control-height: 44px; --border-width: 1px; --focus-ring-width: 2px;
+  --shadow-ring: 0 0 0 var(--border-width) var(--color-border);
   --shadow-raised: 0 1px 2px rgba(28,28,28,.06), 0 8px 24px -12px rgba(143,61,6,.25);
 }
 /* Tema escuro: em @media (prefers-color-scheme: dark) com :root:not([data-theme="light"]) e em :root[data-theme="dark"] */
 /* --color-bg #141311 · --color-surface #1E1C19 · --color-bg-subtle #1A1816 · --color-text #F1EFEA · --color-text-muted #ABA79F
-   --color-border #36322D · --color-primary #F0883E · --color-on-primary #1C1C1C · --color-highlight-bg #3B2516
-   --color-text-on-highlight #F8B06A · --color-focus-ring #F0883E · --color-hatch #2C2925 */
+   --color-border #36322D · --color-border-strong #8A8A86 · --color-primary #F0883E · --color-on-primary #1C1C1C
+   --color-accent #EB6B06 · --color-link #F0883E · --color-highlight-bg #3B2516 · --color-text-on-highlight #F8B06A
+   --color-focus-ring #F0883E · --color-hatch #2C2925
+   --status-approved #47CD89 · --status-pending #FDB022 · --status-rejected #F97066 · --status-neutral #ABA79F
+   --status-blocked #F1EFEA */
 ```
-Regras de uso:
-- Botão ou link com texto branco: `--color-primary` (#C2560A, 4,54:1). O laranja #EB6B06 só em áreas grandes, ícones e gráficos (com texto branco ele reprova: 3,16:1).
+Regras de uso (`npm run contrast` confere os pares nos dois temas):
+- Botão com texto branco: `--color-primary` (#C2560A, 4,54:1, no limite). Hover e foco escurecem o botão, nunca clareiam.
+- Link de texto: `--color-link` (#8F3D06; 7,4:1 no branco, 6,7:1 na areia). #C2560A como texto reprova na areia (4,12:1).
+- O laranja #EB6B06 (`--color-accent`) só em áreas grandes, ícones e gráficos (com texto branco ele reprova: 3,16:1). Nunca sobre areia (2,88:1); ali use `--color-primary`.
 - Texto laranja pequeno sobre areia ou pêssego: #8F3D06.
 - Status nunca só por cor: sempre ícone + rótulo. Laranja é cor da marca, nunca significa "cancelado".
 - Estação bloqueada = hachura diagonal; liberada = laranja (padrão visual do site da Scua).
@@ -130,11 +136,13 @@ Regras de uso:
 Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromium`.
 - `npm start`: servidor de desenvolvimento em http://localhost:4200.
 - `npm test`: testes unitários (Vitest), uma execução. `npm run test:watch` para o modo observação.
-- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop e celular. Sobe o servidor sozinho; relatório em `playwright-report/`.
+- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop, celular e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
 - `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
 - `npm run build`: build de produção em `dist/`.
-- `npm run storybook`: ainda não existe; chega com o design system.
-- CI: `.github/workflows/ci.yml` roda, em cada push e pull request, a checagem da cópia do CLAUDE.md, lint, testes, build e e2e.
+- `npm run contrast`: contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro.
+- `npm run storybook`: Storybook em http://localhost:6006 (botão claro/escuro na barra). `npm run build-storybook` gera em `dist/storybook/`.
+- `npm run icons`: regenera `src/app/design-system/icon/icons.ts` depois de mudar a lista em `scripts/icons.mjs`.
+- CI: `.github/workflows/ci.yml` roda, em cada push e pull request, a checagem da cópia do CLAUDE.md, lint, contraste, testes, build, build do Storybook e e2e.
 
 ## Como trabalhar neste repositório
 - Antes de mudanças grandes, proponha um plano curto e espere aprovação.

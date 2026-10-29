@@ -1,1 +1,150 @@
-/* You can add global styles to this file, and also import other style files */
+// Estilos globais do app e do Storybook.
+// Ordem: fontes e tokens, tema do Material, base do HTML, foco e movimento.
+@use '@angular/cdk';
+@use '@angular/material' as mat;
+@use './styles/theme-colors' as theme;
+
+// CSS puro: o build resolve os caminhos das fontes dentro do node_modules.
+@import '@fontsource/montserrat/400.css';
+@import '@fontsource/montserrat/500.css';
+@import '@fontsource/montserrat/600.css';
+@import '@fontsource/montserrat/700.css';
+@import './styles/tokens.css';
+
+// Tema do Material 3. `color-scheme` (definido no tokens.css) escolhe claro ou escuro.
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: theme.$primary-palette,
+        tertiary: theme.$tertiary-palette,
+        theme-type: color-scheme,
+      ),
+      typography: var(--font-sans),
+      density: 0,
+    )
+  );
+
+  // O Material usa os nossos tokens: primário exato (#C2560A) e tema escuro vindo do tokens.css.
+  @include mat.theme-overrides(
+    (
+      primary: var(--color-primary),
+      on-primary: var(--color-on-primary),
+      background: var(--color-bg),
+      on-background: var(--color-text),
+      surface: var(--color-surface),
+      on-surface: var(--color-text),
+      on-surface-variant: var(--color-text-muted),
+      outline: var(--color-border-strong),
+      outline-variant: var(--color-border),
+      error: var(--status-rejected),
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-shape: var(--radius-sm),
+      outlined-container-shape: var(--radius-sm),
+      protected-container-shape: var(--radius-sm),
+      text-container-shape: var(--radius-sm),
+      tonal-container-shape: var(--radius-sm),
+      // Hover e foco não podem baixar o contraste. O padrão do Material clareia o botão cheio
+      // (branco sobre #C2560A cai para 3,87:1) e usa #C2560A nos rótulos dos outros botões.
+      // Conferido em scripts/check-contrast.mjs.
+      filled-state-layer-color: var(--color-text),
+      protected-label-text-color: var(--color-link),
+      protected-state-layer-color: var(--color-link),
+      outlined-label-text-color: var(--color-link),
+      outlined-state-layer-color: var(--color-link),
+      text-label-text-color: var(--color-link),
+      text-state-layer-color: var(--color-link),
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      filled-container-shape: var(--radius-sm),
+      outlined-container-shape: var(--radius-sm),
+    )
+  );
+
+  @include mat.card-overrides(
+    (
+      elevated-container-shape: var(--radius-lg),
+      filled-container-shape: var(--radius-lg),
+      outlined-container-shape: var(--radius-lg),
+    )
+  );
+}
+
+// Anel de foco dos componentes do Material: 2 px na cor de foco.
+@include mat.strong-focus-indicators(
+  (
+    border-width: var(--focus-ring-width),
+    border-style: solid,
+    border-color: var(--color-focus-ring),
+  )
+);
+
+// Base do HTML
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+
+h2 {
+  font-size: var(--text-xl);
+}
+
+h3 {
+  font-size: var(--text-lg);
+}
+
+a {
+  color: var(--color-link);
+}
+
+// Foco visível em todo elemento interativo.
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-width);
+}
+
+// .cdk-visually-hidden: texto só para leitor de tela. O LiveAnnouncer do CDK (usado pelo Toast)
+// depende dela; sem ela, o texto anunciado aparece na página.
+@include cdk.a11y-visually-hidden();
+
+// Esses componentes do Material já desenham o próprio anel (strong-focus-indicators acima)
+// ou o realce do campo; o contorno global viraria um segundo anel.
+.mat-mdc-button-base:focus-visible,
+.mat-mdc-input-element:focus-visible,
+.mat-mdc-select:focus-visible {
+  outline: none;
+}
+
+// Menos movimento para quem pediu isso no sistema operacional.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

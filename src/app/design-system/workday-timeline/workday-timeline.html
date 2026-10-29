@@ -1,0 +1,50 @@
+<!-- Parte visual: escondida do leitor de tela, que lê a lista em texto no fim. -->
+<div aria-hidden="true">
+  @if (nowMarker(); as marker) {
+    <div class="row now-row">
+      <span class="now-label" [style.left.%]="marker.percent" [attr.data-edge]="marker.edge">
+        Agora {{ marker.clock }}
+      </span>
+    </div>
+  }
+  <div class="bar">
+    @for (segment of unlocked(); track segment.start) {
+      <div
+        class="segment"
+        [class.joined]="segment.joined"
+        [style.left.%]="percent(segment.start)"
+        [style.width.%]="percent(segment.end - segment.start)"
+      ></div>
+    }
+    @if (nowMarker(); as marker) {
+      <div class="now-line" [style.left.%]="marker.percent"></div>
+    }
+  </div>
+  <div class="row">
+    @for (hour of ticks; track hour; let first = $first, last = $last) {
+      <span
+        [style.left.%]="(hour / 24) * 100"
+        [attr.data-edge]="first ? 'start' : last ? 'end' : null"
+        >{{ hour }}h</span
+      >
+    }
+  </div>
+  <ul class="legend">
+    <li><span class="swatch unlocked"></span>Liberada</li>
+    <li><span class="swatch locked"></span>Bloqueada</li>
+    @if (nowMarker()) {
+      <li><span class="swatch now"></span>Agora</li>
+    }
+  </ul>
+</div>
+
+<div class="cdk-visually-hidden">
+  <ul>
+    @for (text of description(); track $index) {
+      <li>{{ text }}</li>
+    }
+  </ul>
+  @if (nowMarker(); as marker) {
+    <p>{{ marker.description }}</p>
+  }
+</div>

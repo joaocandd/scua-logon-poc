@@ -1,0 +1,66 @@
+// Sem encapsulamento (ver field.ts): toda regra começa em .app-field.
+.app-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.app-field__label {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+.app-field__required {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.app-field__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.app-field__control {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--control-height);
+  margin: 0;
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  // 16 px também evita o zoom automático do iPhone ao focar o campo.
+  font-size: var(--text-md);
+}
+
+textarea.app-field__control {
+  min-height: calc(var(--control-height) * 2);
+  padding-block: var(--space-2);
+  resize: vertical;
+}
+
+.app-field__control[aria-invalid='true'] {
+  border-color: var(--status-rejected);
+}
+
+.app-field__control:disabled {
+  border-color: var(--color-border);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.app-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--status-rejected);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}

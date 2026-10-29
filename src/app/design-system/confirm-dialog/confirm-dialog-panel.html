@@ -1,0 +1,12 @@
+<h2 class="title" [id]="data.titleId">{{ data.title }}</h2>
+@if (data.message) {
+  <p class="message" [id]="data.messageId">{{ data.message }}</p>
+}
+<div class="actions">
+  <button app-button type="button" variant="secondary" data-autofocus (click)="ref.close(false)">
+    {{ data.cancelLabel ?? 'Cancelar' }}
+  </button>
+  <button app-button type="button" [variant]="data.variant ?? 'primary'" (click)="ref.close(true)">
+    {{ data.confirmLabel }}
+  </button>
+</div>

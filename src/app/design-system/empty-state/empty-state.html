@@ -1,0 +1,12 @@
+<span class="illustration">
+  <app-icon [name]="icon()" />
+</span>
+@if (headingLevel() === 3) {
+  <h3 class="heading">{{ heading() }}</h3>
+} @else {
+  <h2 class="heading">{{ heading() }}</h2>
+}
+@if (description()) {
+  <p class="description">{{ description() }}</p>
+}
+<div class="actions"><ng-content /></div>
