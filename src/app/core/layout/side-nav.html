@@ -1,0 +1,20 @@
+<nav aria-label="Principal">
+  <ul class="list">
+    @for (item of items; track item.path) {
+      <li>
+        <a
+          class="link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <app-icon [name]="item.icon" />
+          <span class="label">{{ item.label }}</span>
+          @if (item.showsPendingCount && pendingCount()) {
+            <app-pending-count class="count" [count]="pendingCount()" />
+          }
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

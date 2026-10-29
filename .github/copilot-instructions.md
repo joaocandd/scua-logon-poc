@@ -136,7 +136,7 @@ Regras de uso (`npm run contrast` confere os pares nos dois temas):
 Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromium`.
 - `npm start`: servidor de desenvolvimento em http://localhost:4200.
 - `npm test`: testes unitários (Vitest), uma execução. `npm run test:watch` para o modo observação.
-- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop, celular e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
+- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop (1280 px), celular (390 px) e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
 - `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
 - `npm run build`: build de produção em `dist/`.
 - `npm run contrast`: contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro.

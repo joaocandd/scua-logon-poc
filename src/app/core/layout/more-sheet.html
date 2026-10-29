@@ -1,0 +1,29 @@
+<div class="header">
+  <h2 class="title" [id]="titleId">Mais áreas</h2>
+  <button
+    app-button
+    type="button"
+    variant="ghost"
+    icon="close"
+    aria-label="Fechar"
+    (click)="ref.close()"
+  ></button>
+</div>
+<nav [attr.aria-labelledby]="titleId">
+  <ul class="list">
+    @for (item of items; track item.path) {
+      <li>
+        <a
+          class="link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          (click)="ref.close()"
+        >
+          <app-icon [name]="item.icon" />
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

@@ -1,0 +1,182 @@
+// Abaixo de 1024 px (64em): cabeçalho compacto e barra inferior. A partir daí: menu lateral.
+// Mesmo ponto de quebra do PageHeader.
+$desktop: 64em;
+
+:host {
+  --header-height: 4rem;
+  --side-nav-width: 15rem;
+  --bottom-nav-height: 4rem;
+
+  display: block;
+  min-height: 100dvh;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 2;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+  font-weight: 600;
+  // Fora da tela até receber foco.
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  height: var(--header-height);
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  margin-inline-end: auto;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: var(--space-3);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+
+// No celular, só a lupa; "Buscar" continua sendo o nome acessível do botão.
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.search:hover {
+  background: var(--color-bg-subtle);
+}
+
+.search-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.search-shortcut {
+  display: none;
+}
+
+.main {
+  display: block;
+  min-width: 0;
+  padding: var(--space-6) var(--space-4) calc(var(--bottom-nav-height) + var(--space-8));
+}
+
+// Só recebe foco por código (tabindex="-1"): o anel de foco não aparece.
+.main:focus,
+.main:focus-visible {
+  outline: none;
+}
+
+.side-nav {
+  display: none;
+}
+
+.bottom-nav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+@media (min-width: $desktop) {
+  .header {
+    padding-inline: var(--space-6);
+  }
+
+  // Parece um campo de busca, mas é um botão que abre a paleta.
+  .search {
+    justify-content: flex-start;
+    width: 20rem;
+    border: var(--border-width) solid var(--color-border-strong);
+    background: var(--color-bg-subtle);
+    color: var(--color-text-muted);
+  }
+
+  .search:hover {
+    background: var(--color-surface);
+  }
+
+  .search-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .search-shortcut {
+    display: block;
+    margin-inline-start: auto;
+    padding: 0 var(--space-1);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--space-1);
+    font-family: inherit;
+    font-size: var(--text-xs);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: var(--side-nav-width) minmax(0, 1fr);
+    min-height: calc(100dvh - var(--header-height));
+  }
+
+  .side-nav {
+    position: sticky;
+    top: var(--header-height);
+    display: block;
+    height: calc(100dvh - var(--header-height));
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .main {
+    padding: var(--space-8);
+  }
+
+  .bottom-nav {
+    display: none;
+  }
+}
