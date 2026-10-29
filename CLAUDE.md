@@ -134,7 +134,7 @@ Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromiu
 - `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
 - `npm run build`: build de produção em `dist/`.
 - `npm run storybook`: ainda não existe; chega com o design system.
-- CI: `.github/workflows/ci.yml` roda lint, testes, build e e2e em cada push e pull request.
+- CI: `.github/workflows/ci.yml` roda, em cada push e pull request, a checagem da cópia do CLAUDE.md, lint, testes, build e e2e.
 
 ## Como trabalhar neste repositório
 - Antes de mudanças grandes, proponha um plano curto e espere aprovação.
@@ -142,6 +142,7 @@ Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromiu
 - Todo componente do design system tem story e teste. Toda feature tem ao menos um teste de ponta a ponta com axe.
 - Ao terminar uma tarefa: rode lint, testes e build; corrija o que quebrar; resuma em português o que mudou e por quê.
 - Decisões de arquitetura viram ADR curta em `docs/adr/` (contexto, decisão, alternativas, consequências).
+- Ao mudar este arquivo, copie para `.github/copilot-instructions.md`. O CI falha se os dois forem diferentes.
 - Não adicione dependência sem justificar no resumo.
 - A equipe precisa dominar o código para a defesa: prefira soluções simples e explique quando pedirem.
 
