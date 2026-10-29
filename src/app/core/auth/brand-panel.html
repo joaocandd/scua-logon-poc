@@ -1,0 +1,32 @@
+<p class="wordmark"><span class="brand">Scua</span> Logon</p>
+
+<div class="pitch">
+  <p class="headline">Hora extra só com aprovação.</p>
+  <p class="lede">
+    A estação libera no início da jornada, bloqueia no fim e cada extensão aprovada fica registrada.
+  </p>
+
+  <div class="card" aria-hidden="true">
+    <p class="card-title">Jornada Comercial · 8h às 17h</p>
+    <ul class="week">
+      @for (row of week; track row.day) {
+        <li>
+          <span class="day">{{ row.day }}</span>
+          <span class="bar">
+            @for (span of row.spans; track span.start) {
+              <span
+                class="span"
+                [class.extra]="span.extra"
+                [style.left.%]="percent(span.start)"
+                [style.width.%]="percent(span.end - span.start)"
+              ></span>
+            }
+          </span>
+        </li>
+      }
+    </ul>
+    <p class="card-note"><span class="swatch"></span>Quinta: hora extra aprovada até 19h</p>
+  </div>
+</div>
+
+<p class="footnote">Protótipo com dados fictícios</p>

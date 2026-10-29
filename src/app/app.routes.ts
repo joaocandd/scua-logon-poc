@@ -4,6 +4,17 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'hoje' },
   {
+    path: 'entrar',
+    title: 'Entrar',
+    loadComponent: () => import('./core/auth/sign-in-page').then((m) => m.SignInPage),
+  },
+  {
+    path: 'entrar/esqueci-minha-senha',
+    title: 'Esqueci minha senha',
+    loadComponent: () =>
+      import('./core/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
+  },
+  {
     path: 'hoje',
     title: 'Hoje',
     loadComponent: () => import('./features/today/pages/today-page').then((m) => m.TodayPage),

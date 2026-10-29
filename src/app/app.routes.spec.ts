@@ -18,6 +18,8 @@ describe('Rotas do app', () => {
   });
 
   it.each([
+    ['/entrar', 'Entrar'],
+    ['/entrar/esqueci-minha-senha', 'Esqueci minha senha'],
     ['/hoje', 'Hoje'],
     ['/aprovacoes', 'Aprovações'],
     ['/regras', 'Regras de jornada'],

@@ -19,6 +19,7 @@ const ICONS = [
   'coffee',
   'delete',
   'do_not_disturb_on',
+  'domain',
   'download',
   'error',
   'hourglass_top',
@@ -29,6 +30,8 @@ const ICONS = [
   'pending_actions',
   'search_off',
   'timer_off',
+  'visibility',
+  'visibility_off',
 ];
 
 const OUTPUT = new URL('../src/app/design-system/icon/icons.ts', import.meta.url);

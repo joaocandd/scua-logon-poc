@@ -26,7 +26,6 @@
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 120ms ease-out;
 }
 
 :host([data-variant='danger']) {
@@ -70,8 +69,11 @@
   display: none;
 }
 
+// Só o hover anima. Numa rota sob demanda, o navegador pode desenhar um quadro antes de o Angular
+// aplicar o data-variant; com a transição sempre ligada, o botão secundário "piscava" laranja.
 :host(:hover:not(:disabled, [aria-disabled='true'])) {
   background: var(--button-bg-hover);
+  transition: background-color 120ms ease-out;
 }
 
 :host([aria-busy='true']) {

@@ -1,0 +1,79 @@
+<app-brand-panel />
+
+<div class="content">
+  <div class="panel">
+    <!-- No desktop, o nome do produto está no painel da marca. -->
+    <p class="wordmark"><span class="brand">Scua</span> Logon</p>
+    <h1 class="title">Entrar</h1>
+    <p class="intro">Use seu usuário e senha do Scua Logon.</p>
+
+    <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
+    <div role="alert">
+      @if (credentialError(); as message) {
+        <p class="alert">
+          <app-icon name="error" />
+          <span>{{ message }}</span>
+        </p>
+      }
+    </div>
+
+    <form class="form" [formRoot]="credentials">
+      <app-field label="Usuário" [error]="errorOf(credentials.username)">
+        <input
+          appFieldControl
+          type="text"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+          [formField]="credentials.username"
+        />
+      </app-field>
+
+      <app-field label="Senha" [error]="errorOf(credentials.password)">
+        <div class="password">
+          <input
+            #password
+            appFieldControl
+            autocomplete="current-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            [formField]="credentials.password"
+          />
+          <button
+            app-button
+            type="button"
+            variant="secondary"
+            aria-label="Mostrar senha"
+            [icon]="passwordVisible() ? 'visibility_off' : 'visibility'"
+            [attr.aria-pressed]="passwordVisible()"
+            (click)="passwordVisible.set(!passwordVisible())"
+          ></button>
+        </div>
+      </app-field>
+
+      <a class="forgot" routerLink="/entrar/esqueci-minha-senha">Esqueci minha senha</a>
+
+      <button app-button type="submit" class="wide" [loading]="credentials().submitting()">
+        Entrar
+      </button>
+    </form>
+
+    <p class="divider">ou</p>
+
+    <button
+      app-button
+      type="button"
+      variant="secondary"
+      icon="domain"
+      class="wide"
+      [loading]="corporateLoading()"
+      (click)="signInWithCorporateAccount()"
+    >
+      Entrar com conta corporativa
+    </button>
+
+    <p class="demo-note">
+      Demonstração: qualquer usuário e senha entram. Use a senha <strong>erro</strong> para ver a
+      mensagem de credencial inválida.
+    </p>
+  </div>
+</div>

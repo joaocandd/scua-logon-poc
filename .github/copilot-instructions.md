@@ -44,6 +44,7 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 ## Stack
 - Angular na última versão estável (22.x em out/2026): componentes standalone, control flow `@if`/`@for`, signals, padrões atuais do `ng new` (zoneless, se for o padrão).
 - Estado: signals em serviços; `httpResource`/`resource` para dados do servidor. NgRx SignalStore só se uma feature crescer muito.
+- Formulários: Signal Forms (`@angular/forms/signals`) com o Field do design system; erros de campo só depois da primeira tentativa de envio (ADR 0005).
 - UI: Angular Material 3 + CDK, tematizado com os tokens abaixo. Angular Aria para widgets sob medida.
 - Estilos: SCSS + variáveis CSS. **Não usar** Tailwind, Bootstrap, jQuery nem PrimeNG (licença comercial desde a v22).
 - Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).

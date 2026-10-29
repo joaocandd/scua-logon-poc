@@ -1,0 +1,131 @@
+// Mesma hachura da WorkdayTimeline: estação bloqueada (padrão visual do site da Scua).
+$hatch: repeating-linear-gradient(
+  135deg,
+  var(--color-hatch) 0 var(--space-1),
+  var(--color-bg-subtle) var(--space-1) var(--space-2)
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-8);
+  box-sizing: border-box;
+  padding: calc(var(--space-8) * 1.5);
+  background: var(--color-highlight-bg);
+  color: var(--color-text);
+}
+
+.wordmark {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+}
+
+.brand {
+  color: var(--color-text-on-highlight);
+  font-weight: 700;
+}
+
+.pitch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.headline {
+  max-width: 14em;
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+
+.lede {
+  max-width: 30em;
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+// "Recorte" do produto: a semana de uma jornada, como na linha do tempo do app.
+.card {
+  max-width: calc(var(--space-8) * 14);
+  margin-block-start: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.card-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: var(--space-8) 1fr;
+    align-items: center;
+    gap: var(--space-3);
+  }
+}
+
+.day,
+.card-note {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.bar {
+  position: relative;
+  height: var(--space-4);
+  overflow: hidden;
+  border-radius: calc(var(--radius-sm) / 2);
+  background: $hatch;
+  box-shadow: var(--shadow-ring);
+}
+
+.span {
+  position: absolute;
+  inset-block: 0;
+  box-sizing: border-box;
+  background: var(--color-accent);
+}
+
+// Hora extra: outro tom de laranja e a divisória da WorkdayTimeline entre trechos seguidos.
+.span.extra,
+.swatch {
+  background: var(--color-primary);
+}
+
+.span.extra {
+  border-inline-start: calc(var(--border-width) * 2) solid var(--color-surface);
+}
+
+.card-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+}
+
+.swatch {
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: calc(var(--radius-sm) / 2);
+}
+
+.footnote {
+  margin: 0;
+  font-size: var(--text-sm);
+}
