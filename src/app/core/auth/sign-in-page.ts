@@ -9,7 +9,10 @@ import {
 } from '@angular/core';
 import { type FieldTree, form, FormField, FormRoot, required } from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
-import { Button, Field, FieldControl, Icon } from '../../design-system';
+// Direto dos arquivos, não do índice do design system: ver o comentário em design-system/index.ts.
+import { Button } from '../../design-system/button/button';
+import { Field, FieldControl } from '../../design-system/field/field';
+import { Icon } from '../../design-system/icon/icon';
 import { Auth, InvalidCredentialsError } from './auth';
 import { BrandPanel } from './brand-panel';
 

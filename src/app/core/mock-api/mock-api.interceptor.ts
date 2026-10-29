@@ -1,8 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpResponse } from '@angular/common/http';
-import { DOCUMENT, inject } from '@angular/core';
-import { mergeMap, of, throwError, timer } from 'rxjs';
-import { MockDb } from '../../mocks/db';
-import { ApiError, handleApiRequest } from '../../mocks/handlers';
+import { DOCUMENT, EnvironmentInjector, inject } from '@angular/core';
+import { from, mergeMap, of, throwError, timer } from 'rxjs';
+import type { ApiError } from '../../mocks/handlers';
 
 /** Estado forçado pela URL da página: ?simular=erro, ?simular=lento ou ?simular=vazio. */
 export type Simulation = 'erro' | 'lento' | 'vazio';
@@ -14,6 +13,18 @@ const SERVER_DOWN: ApiError = {
   message: 'Não conseguimos falar com o servidor. Tente de novo em instantes.',
 };
 
+type MockServer = typeof import('../../mocks/server');
+let mockServer: Promise<MockServer> | undefined;
+
+/**
+ * Baixa a API simulada (banco, fixtures e rotas) na primeira chamada e guarda para as próximas.
+ * Fica fora do pacote inicial: a tela de entrada, por exemplo, não chama a API.
+ */
+export function loadMockServer(): Promise<MockServer> {
+  mockServer ??= import('../../mocks/server');
+  return mockServer;
+}
+
 /**
  * API simulada: responde às chamadas a /api/... a partir do banco em memória (MockDb), com uma
  * espera de rede de 300 a 800 ms. O parâmetro `simular` na URL da página força os estados de
@@ -22,18 +33,21 @@ const SERVER_DOWN: ApiError = {
 export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
   if (!request.url.startsWith('/api/')) return next(request);
 
-  const db = inject(MockDb);
+  const injector = inject(EnvironmentInjector);
   const simulation = readSimulation(inject(DOCUMENT).location.search);
   const [min, max] = LATENCY[simulation === 'lento' ? 'lento' : 'normal'];
+  // O download da API simulada começa já, em paralelo com a espera.
+  const server = loadMockServer();
 
   // A resposta é calculada depois da espera: aprovar muda o banco só quando "chega no servidor".
   return timer(min + Math.random() * (max - min)).pipe(
-    mergeMap(() => {
+    mergeMap(() => from(server)),
+    mergeMap(({ MockDb, handleApiRequest }) => {
       const url = request.url;
       if (simulation === 'erro') {
         return throwError(() => new HttpErrorResponse({ status: 503, error: SERVER_DOWN, url }));
       }
-      const { status, body } = handleApiRequest(db, {
+      const { status, body } = handleApiRequest(injector.get(MockDb), {
         method: request.method,
         url: request.urlWithParams,
         body: request.body,
