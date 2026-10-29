@@ -3,6 +3,7 @@ const eslint = require('@eslint/js');
 const { defineConfig } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
+const storybook = require('eslint-plugin-storybook');
 
 module.exports = defineConfig([
   {
@@ -38,4 +39,6 @@ module.exports = defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
+  // Regras para as stories e para a configuração do Storybook.
+  storybook.configs['flat/recommended'],
 ]);

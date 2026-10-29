@@ -78,8 +78,25 @@
               "src/**/*.ts",
               "src/**/*.html",
               "e2e/**/*.ts",
-              "playwright.config.ts"
+              "playwright.config.ts",
+              ".storybook/**/*.ts"
             ]
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular-vite:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "styles": ["src/styles.scss"],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular-vite:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "styles": ["src/styles.scss"],
+            "outputDir": "dist/storybook"
           }
         }
       }

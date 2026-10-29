@@ -38,11 +38,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Contraste das cores
+        run: npm run contrast
+
       - name: Testes unitários
         run: npm test
 
       - name: Build
         run: npm run build
+
+      - name: Build do Storybook
+        run: npm run build-storybook
 
       - name: Instalar o Chromium do Playwright
         run: npx playwright install --with-deps chromium

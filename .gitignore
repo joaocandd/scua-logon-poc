@@ -48,3 +48,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Storybook (o build vai para /dist/storybook)
+*storybook.log
