@@ -1,0 +1,9 @@
+/* Checagem de tipos dos testes de ponta a ponta (o Playwright só remove os tipos, não os verifica). */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["e2e/**/*.ts", "playwright.config.ts"]
+}

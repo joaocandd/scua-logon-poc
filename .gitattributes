@@ -1,0 +1,2 @@
+# Fim de linha LF em todo o repositório, inclusive no Windows (o Prettier exige LF).
+* text=auto eol=lf

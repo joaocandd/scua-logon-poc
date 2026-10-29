@@ -127,8 +127,14 @@ Regras de uso:
 - Respeitar `prefers-reduced-motion`. Nunca usar `alert`/`confirm` nativos: usar o ConfirmDialog.
 
 ## Comandos
-Atualize esta seção quando o projeto existir.
-- `npm start` · `npm test` · `npm run e2e` · `npm run lint` · `npm run build` · `npm run storybook`
+Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromium`.
+- `npm start`: servidor de desenvolvimento em http://localhost:4200.
+- `npm test`: testes unitários (Vitest), uma execução. `npm run test:watch` para o modo observação.
+- `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop e celular. Sobe o servidor sozinho; relatório em `playwright-report/`.
+- `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
+- `npm run build`: build de produção em `dist/`.
+- `npm run storybook`: ainda não existe; chega com o design system.
+- CI: `.github/workflows/ci.yml` roda lint, testes, build e e2e em cada push e pull request.
 
 ## Como trabalhar neste repositório
 - Antes de mudanças grandes, proponha um plano curto e espere aprovação.

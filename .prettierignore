@@ -1,0 +1,10 @@
+/dist
+/coverage
+/.angular
+/playwright-report
+/test-results
+/blob-report
+package-lock.json
+
+# Documentos ficam como a equipe escreve (o CLAUDE.md é compacto de propósito).
+*.md
