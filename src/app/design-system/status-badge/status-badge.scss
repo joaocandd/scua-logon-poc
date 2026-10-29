@@ -1,0 +1,47 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  box-sizing: border-box;
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+:host([data-tone='approved']) {
+  color: var(--status-approved);
+}
+
+:host([data-tone='pending']) {
+  color: var(--status-pending);
+}
+
+:host([data-tone='rejected']) {
+  color: var(--status-rejected);
+}
+
+:host([data-tone='neutral']) {
+  color: var(--status-neutral);
+}
+
+// Estação liberada: laranja da marca (padrão visual do site da Scua).
+:host([data-tone='unlocked']) {
+  border-color: var(--color-accent);
+  background: var(--color-highlight-bg);
+  color: var(--color-text-on-highlight);
+}
+
+// Estação bloqueada: hachura diagonal.
+:host([data-tone='blocked']) {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-hatch) 0 var(--space-1),
+    var(--color-surface) var(--space-1) var(--space-2)
+  );
+  color: var(--status-blocked);
+}

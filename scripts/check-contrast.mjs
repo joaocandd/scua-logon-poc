@@ -23,6 +23,8 @@ const TEXT_PAIRS = [
     '--status-blocked',
   ].flatMap((fg) => BACKGROUNDS.map((bg) => [fg, bg])),
   ['--color-on-primary', '--color-primary'], // botão primário
+  ['--color-on-primary', '--status-rejected'], // botão danger
+  ['--status-blocked', '--color-hatch'], // status "Bloqueada" sobre a hachura
   ['--color-text', '--color-highlight-bg'],
   ['--color-text-on-highlight', '--color-highlight-bg'],
   ['--color-link', '--color-highlight-bg'],
@@ -34,6 +36,7 @@ const STATE_LAYER_OPACITY = 0.1;
 const STATE_PAIRS = [
   // [texto, camada de estado, fundo do botão]
   ['--color-on-primary', '--color-text', '--color-primary'], // botão cheio
+  ['--color-on-primary', '--color-text', '--status-rejected'], // botão danger
   ['--color-link', '--color-link', '--color-bg'], // botão de texto e com contorno
   ['--color-link', '--color-link', '--color-surface'],
 ];

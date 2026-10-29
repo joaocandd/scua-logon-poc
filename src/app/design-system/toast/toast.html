@@ -1,0 +1,18 @@
+<!-- O anúncio para leitor de tela é feito pelo LiveAnnouncer no serviço; aqui não há região viva. -->
+@if (toast.current(); as current) {
+  <div class="toast">
+    <p class="message">{{ current.message }}</p>
+    @if (current.undo) {
+      <button app-button type="button" variant="ghost" size="sm" (click)="undo()">Desfazer</button>
+    }
+    <button
+      app-button
+      type="button"
+      variant="ghost"
+      size="sm"
+      icon="close"
+      aria-label="Fechar aviso"
+      (click)="close()"
+    ></button>
+  </div>
+}

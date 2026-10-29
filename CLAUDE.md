@@ -46,7 +46,7 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 - Estado: signals em serviços; `httpResource`/`resource` para dados do servidor. NgRx SignalStore só se uma feature crescer muito.
 - UI: Angular Material 3 + CDK, tematizado com os tokens abaixo. Angular Aria para widgets sob medida.
 - Estilos: SCSS + variáveis CSS. **Não usar** Tailwind, Bootstrap, jQuery nem PrimeNG (licença comercial desde a v22).
-- Ícones: um único conjunto (Material Symbols). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
+- Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
 - Testes: Vitest (unitário), Playwright + `@axe-core/playwright` (ponta a ponta e acessibilidade). Lint: angular-eslint com regras de acessibilidade de template. Storybook 10 com `@storybook/angular-vite` (Vite, sem webpack; ADR 0003) para o design system.
 - Dados: API simulada por interceptor HTTP, com fixtures em `src/app/mocks/`.
 
@@ -96,8 +96,8 @@ Implementados em `src/styles/tokens.css`, que vale como fonte; mantenha este res
   --leading-tight: 1.2; --leading-body: 1.5;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;
   --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 999px;
-  --control-height: 44px;
-  --shadow-ring: 0 0 0 1px var(--color-border);
+  --control-height: 44px; --border-width: 1px; --focus-ring-width: 2px;
+  --shadow-ring: 0 0 0 var(--border-width) var(--color-border);
   --shadow-raised: 0 1px 2px rgba(28,28,28,.06), 0 8px 24px -12px rgba(143,61,6,.25);
 }
 /* Tema escuro: em @media (prefers-color-scheme: dark) com :root:not([data-theme="light"]) e em :root[data-theme="dark"] */
@@ -141,6 +141,7 @@ Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromiu
 - `npm run build`: build de produção em `dist/`.
 - `npm run contrast`: contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro.
 - `npm run storybook`: Storybook em http://localhost:6006 (botão claro/escuro na barra). `npm run build-storybook` gera em `dist/storybook/`.
+- `npm run icons`: regenera `src/app/design-system/icon/icons.ts` depois de mudar a lista em `scripts/icons.mjs`.
 - CI: `.github/workflows/ci.yml` roda, em cada push e pull request, a checagem da cópia do CLAUDE.md, lint, contraste, testes, build, build do Storybook e e2e.
 
 ## Como trabalhar neste repositório

@@ -1,5 +1,6 @@
 // Estilos globais do app e do Storybook.
 // Ordem: fontes e tokens, tema do Material, base do HTML, foco e movimento.
+@use '@angular/cdk';
 @use '@angular/material' as mat;
 @use './styles/theme-colors' as theme;
 
@@ -79,7 +80,7 @@ html {
 // Anel de foco dos componentes do Material: 2 px na cor de foco.
 @include mat.strong-focus-indicators(
   (
-    border-width: 2px,
+    border-width: var(--focus-ring-width),
     border-style: solid,
     border-color: var(--color-focus-ring),
   )
@@ -120,9 +121,13 @@ a {
 
 // Foco visível em todo elemento interativo.
 :focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-width);
 }
+
+// .cdk-visually-hidden: texto só para leitor de tela. O LiveAnnouncer do CDK (usado pelo Toast)
+// depende dela; sem ela, o texto anunciado aparece na página.
+@include cdk.a11y-visually-hidden();
 
 // Esses componentes do Material já desenham o próprio anel (strong-focus-indicators acima)
 // ou o realce do campo; o contorno global viraria um segundo anel.

@@ -1,0 +1,13 @@
+<!-- role="alert": quem usa leitor de tela fica sabendo do erro assim que ele aparece. -->
+<div class="message" role="alert">
+  <app-icon class="icon" name="error" />
+  @if (headingLevel() === 3) {
+    <h3 class="heading">{{ heading() }}</h3>
+  } @else {
+    <h2 class="heading">{{ heading() }}</h2>
+  }
+  <p class="description">{{ description() }}</p>
+</div>
+<button app-button type="button" variant="secondary" [loading]="retrying()" (click)="retry.emit()">
+  Tentar de novo
+</button>

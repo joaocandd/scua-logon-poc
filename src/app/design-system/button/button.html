@@ -1,0 +1,6 @@
+@if (isButton && loading()) {
+  <span class="spinner" aria-hidden="true"></span>
+} @else if (icon(); as name) {
+  <app-icon [name]="name" />
+}
+<span class="label"><ng-content /></span>

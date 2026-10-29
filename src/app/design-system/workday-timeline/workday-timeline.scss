@@ -1,0 +1,110 @@
+// Hachura diagonal = estação bloqueada (padrão visual do site da Scua).
+$hatch: repeating-linear-gradient(
+  135deg,
+  var(--color-hatch) 0 var(--space-1),
+  var(--color-bg-subtle) var(--space-1) var(--space-2)
+);
+
+:host {
+  display: block;
+}
+
+// A barra inteira é hachurada; os trechos liberados ficam por cima, em laranja.
+.bar {
+  position: relative;
+  height: var(--space-8);
+  margin-block: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: $hatch;
+  box-shadow: var(--shadow-ring);
+}
+
+.segment {
+  position: absolute;
+  inset-block: 0;
+  box-sizing: border-box;
+  background: var(--color-accent);
+}
+
+// Divisória entre dois trechos liberados seguidos, como a jornada e a hora extra.
+.segment.joined {
+  border-inline-start: calc(var(--border-width) * 2) solid var(--color-surface);
+}
+
+.now-line {
+  position: absolute;
+  inset-block: 0;
+  width: calc(var(--border-width) * 2);
+  transform: translateX(-50%);
+  background: var(--color-text);
+  // Contorno na cor da superfície: a linha aparece tanto no laranja quanto na hachura.
+  box-shadow: 0 0 0 var(--border-width) var(--color-surface);
+}
+
+// Linha de rótulos posicionados ao longo do dia (horas e "agora").
+.row {
+  position: relative;
+  height: calc(var(--text-xs) * var(--leading-body));
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+
+  > span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  > [data-edge='start'] {
+    transform: none;
+  }
+
+  > [data-edge='end'] {
+    transform: translateX(-100%);
+  }
+}
+
+.now-label {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}
+
+.swatch {
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: calc(var(--radius-sm) / 2);
+
+  &.unlocked {
+    background: var(--color-accent);
+  }
+
+  &.locked {
+    background: $hatch;
+    box-shadow: var(--shadow-ring);
+  }
+
+  &.now {
+    width: calc(var(--border-width) * 2);
+    border-radius: 0;
+    background: var(--color-text);
+  }
+}

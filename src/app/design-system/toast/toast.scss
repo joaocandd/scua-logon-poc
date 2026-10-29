@@ -1,0 +1,19 @@
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  max-width: 40em;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.message {
+  flex: 1;
+  margin: 0;
+  font-weight: 500;
+}

@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "e2e": "playwright test",
     "contrast": "node scripts/check-contrast.mjs",
+    "icons": "node scripts/icons.mjs",
     "storybook": "ng run scua-logon-poc:storybook",
     "build-storybook": "ng run scua-logon-poc:build-storybook"
   },
@@ -36,6 +37,7 @@
     "@angular/compiler-cli": "^22.2.0",
     "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
+    "@material-symbols/svg-400": "^0.48.2",
     "@playwright/test": "^1.64.1",
     "@storybook/addon-a11y": "^10.6.5",
     "@storybook/addon-docs": "^10.6.5",

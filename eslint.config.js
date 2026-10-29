@@ -24,10 +24,11 @@ module.exports = defineConfig([
           style: 'camelCase',
         },
       ],
+      // Atributo só para componentes que precisam ser o elemento nativo, como <button app-button>.
       '@angular-eslint/component-selector': [
         'error',
         {
-          type: 'element',
+          type: ['element', 'attribute'],
           prefix: 'app',
           style: 'kebab-case',
         },
