@@ -3,10 +3,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { ExtensionRequest } from '../../shared/models';
-import { mockApiInterceptor, readSimulation } from './mock-api.interceptor';
+import { loadMockServer, mockApiInterceptor, readSimulation } from './mock-api.interceptor';
 
 describe('mockApiInterceptor', () => {
   let http: HttpClient;
+
+  // A API simulada é baixada sob demanda. Aqui ela já fica pronta, para os testes medirem só a
+  // espera simulada (os timers são falsos; o download do módulo, não).
+  beforeAll(() => loadMockServer());
 
   beforeEach(() => {
     vi.useFakeTimers();

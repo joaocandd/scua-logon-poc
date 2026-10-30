@@ -22,6 +22,7 @@ const ICONS = [
   'dark_mode',
   'delete',
   'do_not_disturb_on',
+  'domain',
   'download',
   'error',
   'fact_check',
@@ -41,6 +42,8 @@ const ICONS = [
   'settings',
   'timer_off',
   'today',
+  'visibility',
+  'visibility_off',
 ];
 
 const OUTPUT = new URL('../src/app/design-system/icon/icons.ts', import.meta.url);

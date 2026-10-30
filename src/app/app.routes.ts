@@ -1,13 +1,24 @@
 import { Routes } from '@angular/router';
-import { AppShell } from './core/layout/app-shell';
 
 // Cada página é carregada sob demanda. O `title` vira "<title> · Scua Logon" (ver PageTitleStrategy).
 // As páginas do app ficam dentro da casca (menu e cabeçalho). Páginas sem menu, como o login e a
-// aprovação pelo link do e-mail, entram como irmãs da casca, antes dela.
+// aprovação pelo link do e-mail, entram como irmãs da casca, antes dela. A casca também vem sob
+// demanda: quem abre o login não baixa menu, busca nem diálogos.
 export const routes: Routes = [
   {
+    path: 'entrar',
+    title: 'Entrar',
+    loadComponent: () => import('./core/auth/sign-in-page').then((m) => m.SignInPage),
+  },
+  {
+    path: 'entrar/esqueci-minha-senha',
+    title: 'Esqueci minha senha',
+    loadComponent: () =>
+      import('./core/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
+  },
+  {
     path: '',
-    component: AppShell,
+    loadComponent: () => import('./core/layout/app-shell').then((m) => m.AppShell),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'hoje' },
       {
