@@ -10,6 +10,7 @@ const meta: Meta<WorkdayTimeline> = {
       description: {
         component: [
           'Um dia de 0h a 24h: laranja onde a estação está liberada, hachura onde está bloqueada.',
+          'A hora extra que aguarda aprovação (`requested`) tem contorno tracejado.',
           'Horário sem segmento fica bloqueado. Na sobreposição vale o segmento que vem depois na lista (o almoço por cima da jornada).',
           'Um segmento com fim antes do início atravessa a meia-noite e vira dois trechos na barra.',
           'O leitor de tela recebe a lista dos horários em texto.',
@@ -44,6 +45,19 @@ export const ComHoraExtra: Story = {
       { start: '08:00', end: '17:00', kind: 'unlocked', label: 'Jornada' },
       { start: '12:00', end: '13:00', kind: 'locked', label: 'Almoço' },
       { start: '17:00', end: '19:30', kind: 'unlocked', label: 'Hora extra aprovada' },
+    ],
+  },
+};
+
+export const HoraExtraPedida: Story = {
+  name: 'Com hora extra pedida, acima do limite de 2 h',
+  args: {
+    label: 'Pedido de Lucas Bittencourt, até 19h30',
+    segments: [
+      { start: '08:00', end: '17:00', kind: 'unlocked', label: 'Jornada' },
+      { start: '12:00', end: '13:00', kind: 'locked', label: 'Almoço' },
+      { start: '17:00', end: '19:00', kind: 'requested', label: 'Hora extra pedida' },
+      { start: '19:00', end: '19:30', kind: 'locked', label: 'Acima do limite de 2 h' },
     ],
   },
 };

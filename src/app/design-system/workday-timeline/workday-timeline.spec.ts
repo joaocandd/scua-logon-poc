@@ -62,6 +62,19 @@ describe('resolveDay', () => {
     expect(day[1]).toMatchObject({ start: 480, end: 1020 });
   });
 
+  it('descreve a hora extra pedida como aguardando aprovação', () => {
+    const day = resolveDay([
+      ...COMERCIAL,
+      { start: '17:00', end: '19:00', kind: 'requested', label: 'Hora extra pedida' },
+      { start: '19:00', end: '19:30', kind: 'locked', label: 'Acima do limite de 2 h' },
+    ]);
+    expect(day.slice(-3).map(describeSegment)).toEqual([
+      'Aguardando aprovação das 17h às 19h (Hora extra pedida)',
+      'Bloqueada das 19h às 19h30 (Acima do limite de 2 h)',
+      'Bloqueada das 19h30 às 24h',
+    ]);
+  });
+
   it('recusa horário em formato errado', () => {
     expect(() => resolveDay([{ start: '8h', end: '17:00', kind: 'unlocked' }])).toThrow(
       'Horário inválido',
@@ -113,6 +126,22 @@ describe('WorkdayTimeline', () => {
     ]);
     const segments = Array.from(host.querySelectorAll('.segment'));
     expect(segments.map((s) => s.classList.contains('joined'))).toEqual([false, false, true]);
+  });
+
+  it('desenha a hora extra pedida à parte e a explica na legenda', async () => {
+    const host = await render([
+      ...COMERCIAL,
+      { start: '17:00', end: '19:00', kind: 'requested', label: 'Hora extra pedida' },
+    ]);
+    const segments = Array.from(host.querySelectorAll('.segment'));
+    expect(segments.map((s) => s.classList.contains('requested'))).toEqual([false, false, true]);
+    expect(segments[2].classList.contains('joined')).toBe(true);
+    expect(host.querySelector('.legend')?.textContent).toContain('Aguardando aprovação');
+  });
+
+  it('sem hora extra pedida, a legenda não fala dela', async () => {
+    const host = await render(COMERCIAL);
+    expect(host.querySelector('.legend')?.textContent).not.toContain('Aguardando aprovação');
   });
 
   it('esconde a parte visual do leitor de tela e mostra a legenda', async () => {

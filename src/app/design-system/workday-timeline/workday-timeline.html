@@ -8,9 +8,10 @@
     </div>
   }
   <div class="bar">
-    @for (segment of unlocked(); track segment.start) {
+    @for (segment of drawn(); track segment.start) {
       <div
         class="segment"
+        [class.requested]="segment.kind === 'requested'"
         [class.joined]="segment.joined"
         [style.left.%]="percent(segment.start)"
         [style.width.%]="percent(segment.end - segment.start)"
@@ -32,6 +33,9 @@
   <ul class="legend">
     <li><span class="swatch unlocked"></span>Liberada</li>
     <li><span class="swatch locked"></span>Bloqueada</li>
+    @if (hasRequested()) {
+      <li><span class="swatch requested"></span>Aguardando aprovação</li>
+    }
     @if (nowMarker()) {
       <li><span class="swatch now"></span>Agora</li>
     }

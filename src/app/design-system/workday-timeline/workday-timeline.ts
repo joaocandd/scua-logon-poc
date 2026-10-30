@@ -1,7 +1,11 @@
 import { Component, computed, input } from '@angular/core';
 import { formatClock, formatRange, MINUTES_PER_DAY, toMinutes } from '../../shared/time';
 
-export type TimelineSegmentKind = 'unlocked' | 'locked';
+/**
+ * `unlocked`: estação liberada; `locked`: bloqueada; `requested`: hora extra pedida, que libera a
+ * estação só se for aprovada.
+ */
+export type TimelineSegmentKind = 'unlocked' | 'locked' | 'requested';
 
 export interface TimelineSegment {
   /** Início, "HH:mm". */
@@ -60,6 +64,7 @@ export function resolveDay(segments: readonly TimelineSegment[]): DaySegment[] {
 const KIND_LABEL: Record<TimelineSegmentKind, string> = {
   unlocked: 'Liberada',
   locked: 'Bloqueada',
+  requested: 'Aguardando aprovação',
 };
 
 /** "Liberada das 8h às 12h (Jornada)". */
@@ -68,9 +73,9 @@ export function describeSegment({ start, end, kind, label }: DaySegment): string
 }
 
 /**
- * Barra de um dia (0h a 24h): laranja onde a estação está liberada e hachura onde está
- * bloqueada, com marcador opcional de "agora" e legenda. A barra é só visual; o leitor de tela
- * recebe a lista dos horários em texto.
+ * Barra de um dia (0h a 24h): laranja onde a estação está liberada, hachura onde está
+ * bloqueada e contorno tracejado na hora extra que aguarda aprovação, com marcador opcional de
+ * "agora" e legenda. A barra é só visual; o leitor de tela recebe a lista dos horários em texto.
  */
 @Component({
   selector: 'app-workday-timeline',
@@ -87,11 +92,19 @@ export class WorkdayTimeline {
 
   protected readonly ticks = [0, 6, 12, 18, 24];
   protected readonly day = computed(() => resolveDay(this.segments()));
-  /** Trechos laranja. `joined`: encosta em outro trecho liberado (ex.: jornada e hora extra). */
-  protected readonly unlocked = computed(() =>
+  /**
+   * Trechos desenhados sobre a hachura: liberados e pedidos. `joined`: encosta em outro trecho
+   * desenhado (ex.: jornada e hora extra), e ganha uma divisória.
+   */
+  protected readonly drawn = computed(() =>
     this.day().flatMap((segment, i, day) =>
-      segment.kind === 'unlocked' ? [{ ...segment, joined: day[i - 1]?.kind === 'unlocked' }] : [],
+      segment.kind === 'locked'
+        ? []
+        : [{ ...segment, joined: !!day[i - 1] && day[i - 1].kind !== 'locked' }],
     ),
+  );
+  protected readonly hasRequested = computed(() =>
+    this.day().some((segment) => segment.kind === 'requested'),
   );
   protected readonly description = computed(() => this.day().map(describeSegment));
 

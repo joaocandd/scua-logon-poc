@@ -9,6 +9,7 @@ export { Field, FieldControl } from './field/field';
 export { Icon } from './icon/icon';
 export { type IconName } from './icon/icons';
 export { PageHeader } from './page-header/page-header';
+export { Skeleton, type SkeletonVariant } from './skeleton/skeleton';
 export { STATUS_INFO, StatusBadge, type Status } from './status-badge/status-badge';
 export { Toast, type ToastOptions } from './toast/toast';
 export {
