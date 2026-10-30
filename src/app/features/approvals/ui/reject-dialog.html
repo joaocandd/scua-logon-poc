@@ -1,0 +1,32 @@
+<h2 class="title" [id]="titleId">Recusar o pedido de {{ data.employeeName }}?</h2>
+<p class="summary">{{ data.summary }}</p>
+
+<!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
+<div role="alert">
+  @if (formError(); as message) {
+    <p class="alert">
+      <app-icon name="error" />
+      <span>{{ message }}</span>
+    </p>
+  }
+</div>
+
+<form class="form" [formRoot]="rejection">
+  <app-field
+    label="Motivo da recusa"
+    [hint]="data.employeeName.split(' ')[0] + ' vê este motivo.'"
+    [error]="reasonError()"
+    required
+  >
+    <textarea appFieldControl rows="3" [formField]="rejection.reason"></textarea>
+  </app-field>
+
+  <div class="actions">
+    <button app-button type="button" variant="secondary" (click)="ref.close(false)">
+      Cancelar
+    </button>
+    <button app-button type="submit" variant="danger" [loading]="rejection().submitting()">
+      Recusar pedido
+    </button>
+  </div>
+</form>

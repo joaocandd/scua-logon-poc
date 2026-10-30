@@ -1,0 +1,48 @@
+// Mesmo desenho do ConfirmDialog do design system.
+:host {
+  display: block;
+  box-sizing: border-box;
+  width: 32em;
+  max-width: 100%;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+  color: var(--color-text);
+}
+
+.title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.summary {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--status-rejected);
+  border-inline-start-width: var(--space-1);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+
+  app-icon {
+    flex: none;
+    color: var(--status-rejected);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}

@@ -1,0 +1,171 @@
+// Celular primeiro: uma coluna, botões dividindo a largura. Mesmo ponto de quebra da casca (64em).
+:host {
+  display: block;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.who {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+}
+
+.meta,
+.reason,
+.until,
+.expires {
+  margin: 0;
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.until {
+  font-size: var(--text-lg);
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.extra {
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+}
+
+.expires {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+
+  // Falta menos de 1 h: cor e peso de atenção, além do texto.
+  &.soon {
+    color: var(--status-pending);
+    font-weight: 600;
+  }
+}
+
+.context {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  font-size: var(--text-sm);
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  app-icon {
+    flex: none;
+    margin-top: 0.15em;
+    color: var(--color-text-muted);
+    font-size: var(--text-md);
+  }
+}
+
+// Alerta: ícone e título na cor de pendência; o texto continua na cor do corpo.
+.alert {
+  strong,
+  app-icon {
+    color: var(--status-pending);
+  }
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.outcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.outcome-text {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  border-radius: var(--radius-sm);
+
+  app-icon {
+    flex: none;
+    margin-top: 0.15em;
+  }
+
+  // Recebe o foco por código; sem anel de foco quando foi por clique.
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+.outcome[data-tone='approved'] .outcome-text app-icon {
+  color: var(--status-approved);
+}
+
+.outcome[data-tone='rejected'] .outcome-text app-icon {
+  color: var(--status-rejected);
+}
+
+.outcome[data-tone='neutral'] .outcome-text app-icon {
+  color: var(--status-neutral);
+}
+
+.note {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.undo-blocked {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 64em) {
+  .actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+}

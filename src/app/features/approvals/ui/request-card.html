@@ -1,0 +1,107 @@
+@let card = view();
+<article class="card" [attr.aria-labelledby]="'pedido-' + card.id">
+  <header class="head">
+    <div class="who">
+      <h2 class="name" [id]="'pedido-' + card.id">{{ card.employeeName }}</h2>
+      <p class="meta">{{ card.groupName }} · {{ card.day }}</p>
+    </div>
+    @if (card.showStatus) {
+      <app-status-badge [status]="card.status" />
+    }
+  </header>
+
+  <p class="until">
+    <strong>{{ card.until }}</strong
+    ><span class="extra">&nbsp;({{ card.extra }})</span>
+  </p>
+  <p class="reason"><span class="cdk-visually-hidden">Motivo: </span>{{ card.reason }}</p>
+
+  @if (card.expires; as expires) {
+    <p class="expires" [class.soon]="expires.soon">
+      <app-icon name="schedule" />
+      <span>{{ expires.text }}</span>
+    </p>
+  }
+
+  @if (card.alerts.length || card.monthOvertime || card.hrNote) {
+    <ul class="context" aria-label="Contexto para decidir">
+      @for (alert of card.alerts; track alert.kind) {
+        <li class="alert">
+          <app-icon name="warning" />
+          <span
+            ><strong>{{ alert.title }}.</strong> {{ alert.detail }}</span
+          >
+        </li>
+      }
+      @if (card.monthOvertime) {
+        <li>
+          <app-icon name="more_time" />
+          <span>{{ card.monthOvertime }}</span>
+        </li>
+      }
+      @if (card.hrNote) {
+        <li>
+          <app-icon name="pending_actions" />
+          <span>{{ card.hrNote }}</span>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (card.outcome; as outcome) {
+    <div class="outcome" [attr.data-tone]="outcome.tone">
+      <!-- tabindex="-1": recebe o foco quando o botão clicado some (pedido decidido por outra pessoa). -->
+      <p class="outcome-text" [id]="'resultado-' + card.id" tabindex="-1">
+        <app-icon [name]="outcomeIcons[outcome.tone]" />
+        <span>
+          <strong>{{ outcome.text }}</strong>
+          @if (outcome.note) {
+            <span class="note">{{ outcome.note }}</span>
+          }
+        </span>
+      </p>
+      @if (card.undo; as undoState) {
+        @if (undoState.available) {
+          <button
+            app-button
+            type="button"
+            variant="secondary"
+            icon="undo"
+            [id]="'desfazer-' + card.id"
+            [loading]="card.busy === 'undo'"
+            (click)="undo.emit()"
+          >
+            Desfazer<span class="cdk-visually-hidden">
+              a decisão sobre {{ card.employeeName }}</span
+            >
+          </button>
+        } @else {
+          <p class="undo-blocked">{{ undoState.reason }}</p>
+        }
+      }
+    </div>
+  } @else if (card.canDecide) {
+    <div class="actions">
+      <button
+        app-button
+        type="button"
+        icon="check"
+        [id]="'aprovar-' + card.id"
+        [loading]="card.busy === 'approve'"
+        (click)="approve.emit()"
+      >
+        Aprovar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
+      </button>
+      <button
+        app-button
+        type="button"
+        variant="secondary"
+        icon="close"
+        [disabled]="card.busy === 'approve'"
+        (click)="reject.emit()"
+      >
+        Recusar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
+      </button>
+    </div>
+  }
+</article>
