@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Employee, WorkSchedule } from '../shared/models';
 import { appliesTo } from '../shared/schedule-engine';
-import { NewActivityEvent, requestExpired } from './activity';
-import { createFixtures, CURRENT_USER_ID, Fixtures } from './fixtures';
+import { NewActivityEvent, requestCreated, requestExpired } from './activity';
+import { createFixtures, createLiveRequest, CURRENT_USER_ID, Fixtures } from './fixtures';
+
+/** No modo demo ao vivo, um pedido novo chega a cada 30 s. */
+export const LIVE_INTERVAL_MS = 30_000;
 
 /**
  * Banco em memória da API simulada. Começa com as fixtures; aprovar, recusar e salvar regra
@@ -14,13 +17,17 @@ export class MockDb {
   /** Quem está usando o app. Na demonstração, todo login entra como esta pessoa. */
   currentUserId = CURRENT_USER_ID;
 
+  /** Modo demo ao vivo: desde quando está ligado e quantos pedidos novos já chegaram. */
+  private live: { since: number; delivered: number } | null = null;
+
   constructor() {
     this.reset();
   }
 
-  /** Volta aos dados de demonstração, com datas relativas a `now`. */
+  /** Volta aos dados de demonstração, com datas relativas a `now`, e desliga o modo ao vivo. */
   reset(now = new Date()): void {
     this.data = createFixtures(now);
+    this.live = null;
   }
 
   employee(id: string): Employee | undefined {
@@ -46,6 +53,29 @@ export class MockDb {
         request.status = 'expirado';
         this.log(requestExpired(request, employee));
       }
+    }
+  }
+
+  /**
+   * Liga o modo demo ao vivo (?demo=ao-vivo): o primeiro pedido novo chega 30 s depois. Fica ligado
+   * até a página recarregar, mesmo que a URL perca o parâmetro. Ligar de novo não reinicia a conta.
+   */
+  startLiveDemo(now = new Date()): void {
+    this.live ??= { since: now.getTime(), delivered: 0 };
+  }
+
+  /** Entrega os pedidos do modo demo ao vivo que já deveriam ter chegado, até a fila acabar. */
+  deliverLiveRequests(now: Date): void {
+    if (!this.live) return;
+    const due = Math.floor((now.getTime() - this.live.since) / LIVE_INTERVAL_MS);
+    while (this.live.delivered < due) {
+      const at = new Date(this.live.since + (this.live.delivered + 1) * LIVE_INTERVAL_MS);
+      const id = `ped-${String(this.data.requests.length + 1).padStart(2, '0')}`;
+      const request = createLiveRequest({ ...this.data, now: at }, this.live.delivered, id);
+      if (!request) return;
+      this.data.requests.push(request);
+      this.log(requestCreated(request, this.employee(request.employeeId)!));
+      this.live.delivered++;
     }
   }
 }

@@ -18,18 +18,33 @@ export class ExtensionRequests {
       .sort((a, b) => a.expiresAt.localeCompare(b.expiresAt)),
   );
 
-  /** Aprova. Se a regra pedir validação do RH, o pedido passa para "aguardando_rh". */
+  /**
+   * Aprova como gestor. Se a regra pedir validação do RH, o pedido passa para "aguardando_rh".
+   * Se outra pessoa já decidiu, a API responde 409 dizendo quem e quando.
+   */
   approve(id: string): Promise<ExtensionRequest> {
-    return this.decide(this.http.post<ExtensionRequest>(`/api/pedidos/${id}/aprovar`, {}));
+    const body = { step: 'gestor' };
+    return this.replace(this.http.post<ExtensionRequest>(`/api/pedidos/${id}/aprovar`, body));
   }
 
-  /** Recusa. O motivo é obrigatório. */
+  /** Recusa como gestor. O motivo é obrigatório. */
   reject(id: string, reason: string): Promise<ExtensionRequest> {
-    return this.decide(this.http.post<ExtensionRequest>(`/api/pedidos/${id}/recusar`, { reason }));
+    const body = { reason, step: 'gestor' };
+    return this.replace(this.http.post<ExtensionRequest>(`/api/pedidos/${id}/recusar`, body));
+  }
+
+  /** Desfaz a decisão do gestor: o pedido volta a aguardar o gestor. */
+  undo(id: string): Promise<ExtensionRequest> {
+    return this.replace(this.http.post<ExtensionRequest>(`/api/pedidos/${id}/desfazer`, {}));
+  }
+
+  /** Busca de novo um pedido, por exemplo depois que outra pessoa decidiu antes. */
+  refresh(id: string): Promise<ExtensionRequest> {
+    return this.replace(this.http.get<ExtensionRequest>(`/api/pedidos/${id}`));
   }
 
   /** Troca o pedido na lista pela versão que o servidor devolveu, sem recarregar tudo. */
-  private async decide(call: Observable<ExtensionRequest>): Promise<ExtensionRequest> {
+  private async replace(call: Observable<ExtensionRequest>): Promise<ExtensionRequest> {
     const updated = await firstValueFrom(call);
     if (this.list.hasValue()) {
       this.list.update((list) => list.map((r) => (r.id === updated.id ? updated : r)));

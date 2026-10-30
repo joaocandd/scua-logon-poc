@@ -5,7 +5,8 @@ import { toLocal } from '../shared/date';
 import { ExtensionDecision, ExtensionRequest, Workstation, WorkSchedule } from '../shared/models';
 import { evaluateWorkstation } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
-import { requestDecided, scheduleSaved } from './activity';
+import { undoBlocker } from '../shared/undo-decision';
+import { decisionUndone, requestDecided, scheduleSaved } from './activity';
 import { MockDb } from './db';
 
 export interface MockRequest {
@@ -64,6 +65,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
   ],
   ['POST', '/api/pedidos/:id/aprovar', (context) => decide(context, 'aprovado')],
   ['POST', '/api/pedidos/:id/recusar', (context) => decide(context, 'recusado')],
+  ['POST', '/api/pedidos/:id/desfazer', undo],
 
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
@@ -73,6 +75,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 export function handleApiRequest(db: MockDb, request: MockRequest, now = new Date()): MockResponse {
   const url = new URL(request.url, 'http://localhost');
   db.expirePending(now);
+  db.deliverLiveRequests(now);
   for (const [method, path, handler] of ROUTES) {
     const params = matchPath(path, url.pathname);
     if (method === request.method && params) {
@@ -99,6 +102,10 @@ function signIn(context: Context): MockResponse {
   return currentUser(context);
 }
 
+/**
+ * Aprova ou recusa a etapa atual do pedido. O corpo pode dizer qual etapa a tela está decidindo
+ * (`step`): se outra pessoa já passou dessa etapa, a resposta é 409 dizendo quem decidiu e quando.
+ */
 function decide(
   { db, params, body, now }: Context,
   outcome: ExtensionDecision['outcome'],
@@ -107,31 +114,94 @@ function decide(
   const employee = request && db.employee(request.employeeId);
   const approver = db.employee(db.currentUserId);
   if (!request || !employee || !approver) return fail(404, 'Não encontramos este pedido.');
-  if (request.status !== 'aguardando_gestor' && request.status !== 'aguardando_rh') {
-    return fail(409, alreadyClosed(db, request));
-  }
+  const step = currentStep(request);
+  const expected = readStep(body);
+  if (!step || (expected && expected !== step)) return fail(409, alreadyDecided(db, request));
 
   const reason = readReason(body);
   if (outcome === 'recusado' && !reason) return fail(422, 'Escreva o motivo da recusa.');
 
-  const step = request.status === 'aguardando_gestor' ? 'gestor' : 'rh';
-  const decision: ExtensionDecision = {
-    step,
-    outcome,
-    approverId: approver.id,
-    at: now.toISOString(),
-    ...(reason && { reason }),
-  };
-  const needsHr =
-    step === 'gestor' && outcome === 'aprovado' && db.scheduleFor(employee)?.requiresHrValidation;
-  request.decisions.push(decision);
-  request.status = needsHr ? 'aguardando_rh' : outcome;
-  db.log(requestDecided(request, decision, employee, approver));
+  applyDecision(
+    db,
+    request,
+    { step, outcome, approverId: approver.id, at: now.toISOString() },
+    reason,
+  );
   return ok(request);
 }
 
+/** Etapa em que o pedido está: gestor ou RH. Nulo quando o pedido já fechou. */
+function currentStep(request: ExtensionRequest): ExtensionDecision['step'] | null {
+  if (request.status === 'aguardando_gestor') return 'gestor';
+  if (request.status === 'aguardando_rh') return 'rh';
+  return null;
+}
+
+/** Registra a decisão: muda o status (para o RH, se a regra pedir) e anota no histórico. */
+function applyDecision(
+  db: MockDb,
+  request: ExtensionRequest,
+  decision: ExtensionDecision,
+  reason?: string,
+): void {
+  const employee = db.employee(request.employeeId)!;
+  const needsHr =
+    decision.step === 'gestor' &&
+    decision.outcome === 'aprovado' &&
+    db.scheduleFor(employee)?.requiresHrValidation;
+  request.decisions.push({ ...decision, ...(reason && { reason }) });
+  request.status = needsHr ? 'aguardando_rh' : decision.outcome;
+  db.log(
+    requestDecided(request, request.decisions.at(-1)!, employee, db.employee(decision.approverId)!),
+  );
+}
+
+/**
+ * Desfaz a decisão do gestor: o pedido volta a aguardar o gestor e o histórico registra. Não dá
+ * depois que o RH decidiu nem depois que o pedido venceu (mesma regra da tela, em undoBlocker).
+ */
+function undo({ db, params, now }: Context): MockResponse {
+  const request = db.data.requests.find((r) => r.id === params['id']);
+  const employee = request && db.employee(request.employeeId);
+  const approver = db.employee(db.currentUserId);
+  if (!request || !employee || !approver) return fail(404, 'Não encontramos este pedido.');
+  const mine = request.decisions.find((d) => d.step === 'gestor' && d.approverId === approver.id);
+  if (!mine) return fail(409, 'Não há decisão sua para desfazer neste pedido.');
+  const blocker = undoBlocker(request, now);
+  if (blocker) return fail(409, blocker);
+
+  request.decisions = request.decisions.filter((d) => d !== mine);
+  request.status = 'aguardando_gestor';
+  db.log(decisionUndone(request, mine, employee, approver, now.toISOString()));
+  return ok(request);
+}
+
+/**
+ * Simulação `?simular=decidido`: antes de a decisão chegar, o gestor da área (o primeiro aprovador
+ * do grupo) aprova o pedido. A tela recebe 409, "Este pedido já foi aprovado por Marina às 18h03.",
+ * como aconteceria com dois gestores decidindo ao mesmo tempo.
+ */
+export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = new Date()): void {
+  const { pathname } = new URL(request.url, 'http://localhost');
+  const params = matchPath('/api/pedidos/:id/:action', pathname);
+  const target = db.data.requests.find((r) => r.id === params?.['id']);
+  const employee = target && db.employee(target.employeeId);
+  const group = employee && db.data.groups.find((g) => g.id === employee.groupId);
+  if (request.method !== 'POST' || !target || !group || target.status !== 'aguardando_gestor') {
+    return;
+  }
+  if (params?.['action'] !== 'aprovar' && params?.['action'] !== 'recusar') return;
+  const at = new Date(now.getTime() - 2 * 60_000).toISOString();
+  applyDecision(db, target, {
+    step: 'gestor',
+    outcome: 'aprovado',
+    approverId: group.approverIds[0],
+    at,
+  });
+}
+
 /** "Este pedido já foi aprovado por Carlos às 17h52." */
-function alreadyClosed(db: MockDb, request: ExtensionRequest): string {
+function alreadyDecided(db: MockDb, request: ExtensionRequest): string {
   const firstName = (id: string) => db.employee(id)?.name.split(' ')[0] ?? 'outra pessoa';
   const clock = (instant: string) => formatClock(toLocal(instant).minutes);
   const last = request.decisions.at(-1);
@@ -142,7 +212,7 @@ function alreadyClosed(db: MockDb, request: ExtensionRequest): string {
       return `${firstName(request.employeeId)} cancelou este pedido.`;
     default:
       return last
-        ? `Este pedido já foi ${request.status} por ${firstName(last.approverId)} às ${clock(last.at)}.`
+        ? `Este pedido já foi ${last.outcome} por ${firstName(last.approverId)} às ${clock(last.at)}.`
         : 'Este pedido já foi decidido.';
   }
 }
@@ -183,14 +253,19 @@ function scheduleProblem(body: unknown): string | null {
   return null;
 }
 
-/** Histórico, do mais novo para o mais antigo. Filtros: ?pedido=ped-01 e ?regra=regra-tarde. */
+/**
+ * Histórico, do mais novo para o mais antigo; no mesmo instante, o último registrado vem antes.
+ * Filtros: ?pedido=ped-01 e ?regra=regra-tarde.
+ */
 function listActivity({ db, query }: Context): MockResponse {
   const requestId = query.get('pedido');
   const scheduleId = query.get('regra');
   const events = db.data.events
-    .filter((e) => !requestId || e.requestId === requestId)
-    .filter((e) => !scheduleId || e.scheduleId === scheduleId)
-    .sort((a, b) => b.at.localeCompare(a.at));
+    .map((event, order) => ({ event, order }))
+    .filter(({ event }) => !requestId || event.requestId === requestId)
+    .filter(({ event }) => !scheduleId || event.scheduleId === scheduleId)
+    .sort((a, b) => b.event.at.localeCompare(a.event.at) || b.order - a.order)
+    .map(({ event }) => event);
   return ok(events);
 }
 
@@ -227,6 +302,12 @@ function matchPath(pattern: string, pathname: string): Record<string, string> | 
 function readReason(body: unknown): string {
   const reason = (body as { reason?: unknown } | null)?.reason;
   return typeof reason === 'string' ? reason.trim() : '';
+}
+
+/** Etapa que a tela diz estar decidindo. Sem etapa, vale a etapa atual do pedido. */
+function readStep(body: unknown): ExtensionDecision['step'] | null {
+  const step = (body as { step?: unknown } | null)?.step;
+  return step === 'gestor' || step === 'rh' ? step : null;
 }
 
 function found<T extends { id: string }>(list: T[], id: string, notFound: string): MockResponse {

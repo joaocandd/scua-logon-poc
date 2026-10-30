@@ -51,11 +51,11 @@ describe('ExtensionRequests', () => {
     expect(service.pending().map((r) => r.id)).toEqual(['ped-c', 'ped-a']);
   });
 
-  it('aprovar troca o pedido na lista pela resposta do servidor', async () => {
+  it('aprovar diz que é a etapa do gestor e troca o pedido na lista pela resposta', async () => {
     const approval = service.approve('ped-c');
-    http
-      .expectOne({ method: 'POST', url: '/api/pedidos/ped-c/aprovar' })
-      .flush(request('ped-c', 'aprovado', '2026-11-12T21:00:00.000Z'));
+    const call = http.expectOne({ method: 'POST', url: '/api/pedidos/ped-c/aprovar' });
+    expect(call.request.body).toEqual({ step: 'gestor' });
+    call.flush(request('ped-c', 'aprovado', '2026-11-12T21:00:00.000Z'));
 
     expect((await approval).status).toBe('aprovado');
     expect(service.list.value().find((r) => r.id === 'ped-c')?.status).toBe('aprovado');
@@ -65,8 +65,32 @@ describe('ExtensionRequests', () => {
   it('recusar manda o motivo', async () => {
     const rejection = service.reject('ped-a', 'Fila normalizada');
     const call = http.expectOne({ method: 'POST', url: '/api/pedidos/ped-a/recusar' });
-    expect(call.request.body).toEqual({ reason: 'Fila normalizada' });
+    expect(call.request.body).toEqual({ reason: 'Fila normalizada', step: 'gestor' });
     call.flush(request('ped-a', 'recusado', '2026-11-12T22:00:00.000Z'));
     expect((await rejection).status).toBe('recusado');
+  });
+
+  it('desfazer volta o pedido para os pendentes', async () => {
+    const approval = service.approve('ped-c');
+    http
+      .expectOne('/api/pedidos/ped-c/aprovar')
+      .flush(request('ped-c', 'aprovado', '2026-11-12T21:00:00.000Z'));
+    await approval;
+
+    const undo = service.undo('ped-c');
+    http
+      .expectOne({ method: 'POST', url: '/api/pedidos/ped-c/desfazer' })
+      .flush(request('ped-c', 'aguardando_gestor', '2026-11-12T21:00:00.000Z'));
+    await undo;
+    expect(service.pending().map((r) => r.id)).toEqual(['ped-c', 'ped-a']);
+  });
+
+  it('busca de novo um pedido e troca na lista', async () => {
+    const refresh = service.refresh('ped-a');
+    http
+      .expectOne({ method: 'GET', url: '/api/pedidos/ped-a' })
+      .flush(request('ped-a', 'aguardando_rh', '2026-11-12T22:00:00.000Z'));
+    await refresh;
+    expect(service.list.value().find((r) => r.id === 'ped-a')?.status).toBe('aguardando_rh');
   });
 });

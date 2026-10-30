@@ -4,6 +4,7 @@ export type ActivityEventType =
   | 'pedido_recusado'
   | 'pedido_expirado'
   | 'pedido_cancelado'
+  | 'decisao_desfeita'
   | 'regra_criada'
   | 'regra_salva';
 

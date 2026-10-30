@@ -14,6 +14,7 @@ import { createScenario } from './scenario';
 import { WORK_SCHEDULES } from './work-schedules';
 
 export { CURRENT_USER_ID, HR_VALIDATOR_ID } from './employees';
+export { createLiveRequest } from './scenario';
 
 export interface Fixtures {
   employees: Employee[];
