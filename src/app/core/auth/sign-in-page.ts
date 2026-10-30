@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Button } from '../../design-system/button/button';
 import { Field, FieldControl } from '../../design-system/field/field';
 import { Icon } from '../../design-system/icon/icon';
+import { apiErrorMessage } from '../../shared/api-error';
 import { Auth, InvalidCredentialsError } from './auth';
 import { BrandPanel } from './brand-panel';
 
@@ -52,12 +53,15 @@ export class SignInPage {
     {
       submission: {
         action: async (fields) => {
-          this.credentialError.set(null);
+          this.formError.set(null);
           try {
             await this.auth.signIn(fields.username().value(), fields.password().value());
           } catch (error) {
-            if (!(error instanceof InvalidCredentialsError)) throw error;
-            this.credentialError.set('Usuário ou senha incorretos. Confira e tente de novo.');
+            if (!(error instanceof InvalidCredentialsError)) {
+              this.formError.set(apiErrorMessage(error));
+              return;
+            }
+            this.formError.set('Usuário ou senha incorretos. Confira e tente de novo.');
             // Não dá para saber qual dos dois está errado; quase sempre é a senha. Ela fica
             // selecionada para quem for digitar de novo.
             this.afterRender(() => {
@@ -69,7 +73,7 @@ export class SignInPage {
           await this.router.navigateByUrl(HOME_URL);
         },
         onInvalid: (fields) => {
-          this.credentialError.set(null);
+          this.formError.set(null);
           this.showFieldErrors.set(true);
           const firstInvalid = [fields.username, fields.password].find((f) => f().invalid());
           this.afterRender(() => firstInvalid?.().focusBoundControl());
@@ -79,7 +83,8 @@ export class SignInPage {
   );
 
   protected readonly showFieldErrors = signal(false);
-  protected readonly credentialError = signal<string | null>(null);
+  /** Erro que não é de um campo: credencial inválida ou servidor fora do ar. */
+  protected readonly formError = signal<string | null>(null);
   protected readonly passwordVisible = signal(false);
   protected readonly corporateLoading = signal(false);
 
@@ -88,10 +93,13 @@ export class SignInPage {
   }
 
   protected async signInWithCorporateAccount(): Promise<void> {
+    this.formError.set(null);
     this.corporateLoading.set(true);
     try {
       await this.auth.signInWithCorporateAccount();
       await this.router.navigateByUrl(HOME_URL);
+    } catch (error) {
+      this.formError.set(apiErrorMessage(error));
     } finally {
       this.corporateLoading.set(false);
     }

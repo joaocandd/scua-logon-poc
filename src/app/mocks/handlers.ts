@@ -35,12 +35,13 @@ interface Context {
 
 type Handler = (context: Context) => MockResponse;
 
+/** Senha que simula credencial inválida na demonstração. */
+export const DEMO_INVALID_PASSWORD = 'erro';
+
 const ROUTES: [method: string, path: string, handler: Handler][] = [
-  [
-    'GET',
-    '/api/eu',
-    ({ db }) => found(db.data.employees, db.currentUserId, 'Não encontramos o seu usuário.'),
-  ],
+  ['GET', '/api/eu', currentUser],
+  ['POST', '/api/sessao', signIn],
+  ['POST', '/api/sessao/corporativa', currentUser],
   ['GET', '/api/colaboradores', ({ db }) => ok(db.data.employees)],
   ['GET', '/api/grupos', ({ db }) => ok(db.data.groups)],
   ['GET', '/api/feriados', ({ db }) => ok(db.data.holidays)],
@@ -79,6 +80,23 @@ export function handleApiRequest(db: MockDb, request: MockRequest, now = new Dat
     }
   }
   return fail(404, 'Não encontramos o que você procurou.');
+}
+
+/** Quem está usando o app (a sessão aberta). */
+function currentUser({ db }: Context): MockResponse {
+  return found(db.data.employees, db.currentUserId, 'Não encontramos o seu usuário.');
+}
+
+/**
+ * Login simulado: qualquer usuário e senha preenchidos entram como a usuária da demonstração
+ * (Renata Albuquerque, que aprova todos os grupos). A senha "erro" simula credencial inválida.
+ */
+function signIn(context: Context): MockResponse {
+  const { username, password } = (context.body ?? {}) as Record<string, unknown>;
+  const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
+  if (!filled(username) || !filled(password)) return fail(422, 'Informe o usuário e a senha.');
+  if (password === DEMO_INVALID_PASSWORD) return fail(401, 'Usuário ou senha incorretos.');
+  return currentUser(context);
 }
 
 function decide(

@@ -11,7 +11,7 @@ import { createFixtures, CURRENT_USER_ID, Fixtures } from './fixtures';
 @Injectable({ providedIn: 'root' })
 export class MockDb {
   data!: Fixtures;
-  /** Quem está usando o app, até existir o login simulado. */
+  /** Quem está usando o app. Na demonstração, todo login entra como esta pessoa. */
   currentUserId = CURRENT_USER_ID;
 
   constructor() {

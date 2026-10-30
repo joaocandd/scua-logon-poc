@@ -29,6 +29,29 @@ describe('API simulada', () => {
     expect(get('/api/eu')).toMatchObject({ id: 'col-25', name: 'Renata Albuquerque' });
   });
 
+  describe('login', () => {
+    it('qualquer usuário e senha, e a conta corporativa, entram como a usuária da demonstração', () => {
+      const renata = { status: 200, body: { id: 'col-25', name: 'Renata Albuquerque' } };
+      expect(
+        call('POST', '/api/sessao', { username: 'marina.alves', password: 'qualquer' }),
+      ).toMatchObject(renata);
+      expect(call('POST', '/api/sessao/corporativa', {})).toMatchObject(renata);
+    });
+
+    it('a senha "erro" simula credencial inválida', () => {
+      expect(call('POST', '/api/sessao', { username: 'marina.alves', password: 'erro' })).toEqual({
+        status: 401,
+        body: { message: 'Usuário ou senha incorretos.' },
+      });
+    });
+
+    it('usuário ou senha vazios não entram', () => {
+      for (const body of [{ username: ' ', password: 'x' }, { username: 'ana' }, null]) {
+        expect(call('POST', '/api/sessao', body).status).toBe(422);
+      }
+    });
+  });
+
   it('busca por id e responde 404 com mensagem humana', () => {
     expect(call('GET', '/api/pedidos/ped-04')).toMatchObject({
       status: 200,

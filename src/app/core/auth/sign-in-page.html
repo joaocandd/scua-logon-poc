@@ -10,7 +10,7 @@
 
     <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
     <div role="alert">
-      @if (credentialError(); as message) {
+      @if (formError(); as message) {
         <p class="alert">
           <app-icon name="error" />
           <span>{{ message }}</span>
@@ -73,8 +73,8 @@
     </button>
 
     <p class="demo-note">
-      Demonstração: qualquer usuário e senha entram. Use a senha <strong>erro</strong> para ver a
-      mensagem de credencial inválida.
+      Demonstração: qualquer usuário e senha entram como Renata Albuquerque, a aprovadora simulada.
+      Use a senha <strong>erro</strong> para ver a mensagem de credencial inválida.
     </p>
   </div>
 </main>
