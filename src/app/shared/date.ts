@@ -60,6 +60,33 @@ export function weekdayOf(date: string): Weekday {
   return new Date(dayStart(date)).getUTCDay() as Weekday;
 }
 
+const WEEKDAY_NAMES = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const MONTH_NAMES = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+/** Formato curto da interface: "2026-11-12" → "qui, 12/11". */
+export function formatDate(date: string): string {
+  const [, month, day] = date.split('-');
+  return `${WEEKDAY_NAMES[weekdayOf(date)]}, ${day}/${month}`;
+}
+
+/** "2026-11-12" → "novembro". */
+export function monthName(date: string): string {
+  return MONTH_NAMES[Number(date.slice(5, 7)) - 1];
+}
+
 /** Meia-noite da data, como se fosse UTC. Serve só para contas de calendário. */
 function dayStart(date: string): number {
   const [year, month, day] = date.split('-').map(Number);

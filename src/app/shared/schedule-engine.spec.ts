@@ -1,5 +1,5 @@
 import { ExtensionRequest, Holiday, ScheduleException, WorkSchedule } from './models';
-import { appliesTo, evaluateWorkstation, WorkstationInput } from './schedule-engine';
+import { appliesTo, evaluateWorkstation, plannedShift, WorkstationInput } from './schedule-engine';
 
 // Datas de referência (novembro de 2026): 02 é segunda (Finados), 11 é quarta, 12 é quinta,
 // 13 é sexta e 14 é sábado. Os instantes estão no horário de São Paulo (-03:00).
@@ -339,5 +339,50 @@ describe('appliesTo', () => {
     expect(appliesTo(rule, employee('col-01', 'grp-comercial'))).toBe(true);
     expect(appliesTo(rule, employee('col-02', 'grp-comercial'))).toBe(false);
     expect(appliesTo(rule, employee('col-03', 'grp-ti'))).toBe(false);
+  });
+});
+
+describe('plannedShift', () => {
+  it('jornada da regra, com os intervalos, em minutos desde a meia-noite do dia', () => {
+    expect(plannedShift(COMERCIAL, [], HOLIDAYS, '2026-11-12')).toEqual({
+      name: 'jornada Comercial',
+      start: 480,
+      end: 1020,
+      breaks: [{ label: 'Almoço', start: 720, end: 780 }],
+    });
+  });
+
+  it('o fim da jornada que atravessa a meia-noite passa de 24 h', () => {
+    expect(plannedShift(NOTURNA, [], HOLIDAYS, '2026-11-12')).toMatchObject({
+      start: 1320,
+      end: 1800,
+      breaks: [{ label: 'Pausa', start: 1560, end: 1620 }],
+    });
+  });
+
+  it('feriado, fim de semana e folga não têm jornada; o horário alternativo vale mais', () => {
+    const exceptions: ScheduleException[] = [
+      {
+        id: 'exc',
+        employeeId: 'col-01',
+        date: '2026-11-02',
+        kind: 'horario',
+        start: '10:00',
+        end: '14:00',
+        breaks: [],
+        reason: 'Plantão',
+      },
+    ];
+    expect(plannedShift(COMERCIAL, [], HOLIDAYS, '2026-11-02')).toEqual({
+      off: 'feriado (Finados)',
+    });
+    expect(plannedShift(COMERCIAL, [], HOLIDAYS, '2026-11-14')).toEqual({
+      off: 'dia sem jornada Comercial',
+    });
+    expect(plannedShift(COMERCIAL, exceptions, HOLIDAYS, '2026-11-02')).toMatchObject({
+      name: 'jornada especial',
+      start: 600,
+      end: 840,
+    });
   });
 });

@@ -178,10 +178,12 @@ const REQUESTS: RequestSpec[] = [
     approverId: 'col-25',
   },
   {
+    // Lucas (ped-02) e Larissa (ped-03) já têm hora extra aprovada: a caixa de aprovações mostra
+    // as horas do mês ao lado do pedido novo.
     id: 'ped-16',
-    employeeId: 'col-10',
+    employeeId: 'col-14',
     requestedEnd: '18:30',
-    reason: 'Fechamento do mês',
+    reason: 'Apresentação para cliente',
     status: 'aprovado',
     shiftsAgo: 1,
   },
@@ -195,7 +197,7 @@ const REQUESTS: RequestSpec[] = [
   },
   {
     id: 'ped-18',
-    employeeId: 'col-13',
+    employeeId: 'col-02',
     requestedEnd: '19:00',
     reason: 'Fechamento do mês',
     status: 'aprovado',

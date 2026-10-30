@@ -22,6 +22,11 @@ export function formatClock(minutes: number): string {
   return rest === 0 ? `${hours}h` : `${hours}h${String(rest).padStart(2, '0')}`;
 }
 
+/** Duração: 90 → "1h30", 120 → "2h", 45 → "45 min". */
+export function formatDuration(minutes: number): string {
+  return minutes < 60 ? `${minutes} min` : formatClock(minutes);
+}
+
 /** "das 8h às 12h". 0h e 1h pedem singular: "da 0h à 1h30". */
 export function formatRange(start: number, end: number): string {
   const singular = (minutes: number) => minutes < 2 * 60;

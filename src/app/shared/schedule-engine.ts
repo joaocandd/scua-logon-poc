@@ -90,34 +90,48 @@ interface Span {
   end: number;
 }
 
-/** Jornada de um dia. */
-interface Shift extends Span {
+/**
+ * Jornada planejada de um dia, sem hora extra. Os horários são minutos desde a meia-noite desse
+ * dia: na jornada das 22h às 6h, o fim é 1800 (6h do dia seguinte).
+ */
+export interface PlannedShift extends Span {
   /** "jornada Comercial", ou "jornada especial" quando vem de uma exceção. */
   name: string;
-  breaks: Span[];
+  breaks: (Span & { label: string })[];
+}
+
+/** Dia sem jornada, com o motivo: "feriado (Finados)". */
+export interface DayOff {
+  off: string;
+}
+
+/** Jornada de um dia, já com a hora extra aprovada. */
+interface Shift extends PlannedShift {
   /** Maior fim aprovado em pedidos de extensão, mesmo além do limite. Sem pedido, é o `end`. */
   approvedEnd: number;
   /** Até quando a estação fica liberada: o fim aprovado, limitado a 2 h depois do `end`. */
   overtimeEnd: number;
 }
 
-/** Dia sem jornada, com o motivo: "feriado (Finados)". */
-interface DayOff {
-  off: string;
-}
-
-function isShift(plan: Shift | DayOff): plan is Shift {
+export function isShift<T extends PlannedShift>(plan: T | DayOff): plan is T {
   return !('off' in plan);
 }
 
-/** Jornada do dia `date`. `offset` são os minutos entre a meia-noite desse dia e a do dia avaliado. */
-function planDay(input: WorkstationInput, date: string, offset: number): Shift | DayOff {
-  const { schedule } = input;
-  const exception = input.exceptions.find((e) => e.date === date);
+/**
+ * Jornada que a regra e as exceções preveem para o dia `date`, ou o motivo de não haver jornada.
+ * Ordem: exceção do colaborador, depois feriado, depois os dias da semana da regra.
+ */
+export function plannedShift(
+  schedule: WorkSchedule,
+  exceptions: readonly ScheduleException[],
+  holidays: readonly Holiday[],
+  date: string,
+): PlannedShift | DayOff {
+  const exception = exceptions.find((e) => e.date === date);
   if (exception?.kind === 'folga') return { off: `folga (${exception.reason})` };
 
   if (!exception) {
-    const holiday = input.holidays.find((h) => h.date === date);
+    const holiday = holidays.find((h) => h.date === date);
     if (holiday) return { off: `feriado (${holiday.name})` };
     if (!schedule.weekdays.includes(weekdayOf(date))) {
       return { off: `dia sem jornada ${schedule.name}` };
@@ -126,28 +140,41 @@ function planDay(input: WorkstationInput, date: string, offset: number): Shift |
 
   const hours = exception ?? schedule;
   const start = toMinutes(hours.start);
-  const end = afterStart(start, hours.end);
-  const approvedEnd = Math.max(
-    end,
-    ...input.extensions
-      .filter((e) => e.status === 'aprovado' && e.date === date)
-      .map((e) => afterStart(start, e.requestedEnd)),
-  );
   return {
     name: exception ? 'jornada especial' : `jornada ${schedule.name}`,
-    start: offset + start,
-    end: offset + end,
+    start,
+    end: afterStart(start, hours.end),
     breaks: hours.breaks.map((b) => ({
-      start: offset + afterStart(start, b.start),
-      end: offset + afterStart(start, b.end),
+      label: b.label,
+      start: afterStart(start, b.start),
+      end: afterStart(start, b.end),
     })),
+  };
+}
+
+/** Jornada do dia `date`. `offset` são os minutos entre a meia-noite desse dia e a do dia avaliado. */
+function planDay(input: WorkstationInput, date: string, offset: number): Shift | DayOff {
+  const plan = plannedShift(input.schedule, input.exceptions, input.holidays, date);
+  if (!isShift(plan)) return plan;
+
+  const approvedEnd = Math.max(
+    plan.end,
+    ...input.extensions
+      .filter((e) => e.status === 'aprovado' && e.date === date)
+      .map((e) => afterStart(plan.start, e.requestedEnd)),
+  );
+  return {
+    name: plan.name,
+    start: offset + plan.start,
+    end: offset + plan.end,
+    breaks: plan.breaks.map((b) => ({ ...b, start: offset + b.start, end: offset + b.end })),
     approvedEnd: offset + approvedEnd,
-    overtimeEnd: offset + Math.min(approvedEnd, end + MAX_OVERTIME_MINUTES),
+    overtimeEnd: offset + Math.min(approvedEnd, plan.end + MAX_OVERTIME_MINUTES),
   };
 }
 
 /** Horário que não vem depois do início é do dia seguinte: na jornada das 22h, 6h vira 30h. */
-function afterStart(start: number, time: string): number {
+export function afterStart(start: number, time: string): number {
   const minutes = toMinutes(time);
   return minutes <= start ? minutes + MINUTES_PER_DAY : minutes;
 }
