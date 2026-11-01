@@ -32,8 +32,12 @@ export interface RequestContext {
    * extras. Em minutos desde a meia-noite do dia do pedido (passa de 1440 depois da meia-noite).
    */
   unlockedUntil: number;
-  /** Horas extras do colaborador já aprovadas no mês do pedido, sem contar este, em minutos. */
-  monthOvertimeMinutes: number;
+  /**
+   * Horas extras do colaborador aprovadas nos últimos 30 dias até a data do pedido, sem contar
+   * este, em minutos. Mostra se a pessoa tem feito hora extra com frequência, sem zerar na virada
+   * do mês.
+   */
+  recentOvertimeMinutes: number;
   alerts: RequestAlert[];
   /** Depois do gestor, o pedido ainda vai para a validação do RH. */
   needsHrValidation: boolean;
@@ -46,7 +50,7 @@ export interface RequestContextInput {
   /** Exceções do colaborador. */
   exceptions: readonly ScheduleException[];
   holidays: readonly Holiday[];
-  /** Pedidos do colaborador. Pode incluir o próprio pedido: ele não conta no mês. */
+  /** Pedidos do colaborador. Pode incluir o próprio pedido: ele não conta nas horas recentes. */
   history: readonly ExtensionRequest[];
 }
 
@@ -76,7 +80,7 @@ export function requestContext(input: RequestContextInput): RequestContext {
   return {
     extraMinutes,
     unlockedUntil,
-    monthOvertimeMinutes: monthOvertime(input),
+    recentOvertimeMinutes: recentOvertime(input),
     alerts,
     needsHrValidation: schedule.requiresHrValidation,
   };
@@ -114,12 +118,19 @@ function restConflict(
   return unlocksAt > scheduledStart ? { unlocksAt, scheduledStart } : null;
 }
 
-/** Soma das horas extras aprovadas no mês do pedido. Cada dia conta no máximo 2 h, como na estação. */
-function monthOvertime(input: RequestContextInput): number {
-  const month = input.request.date.slice(0, 7);
+/** Quantos dias, contando o do pedido, entram nas horas extras recentes. */
+export const RECENT_OVERTIME_DAYS = 30;
+
+/**
+ * Soma das horas extras aprovadas nos últimos 30 dias até a data do pedido. Cada dia conta no
+ * máximo 2 h, como na estação.
+ */
+function recentOvertime(input: RequestContextInput): number {
+  const { date } = input.request;
+  const from = addDays(date, -(RECENT_OVERTIME_DAYS - 1));
   return input.history
     .filter((r) => r.id !== input.request.id && r.status === 'aprovado')
-    .filter((r) => r.date.startsWith(month))
+    .filter((r) => r.date >= from && r.date <= date)
     .reduce((total, r) => {
       const { end, requestedEnd } = spanOf(input, r);
       return total + Math.min(requestedEnd - end, MAX_OVERTIME_MINUTES);

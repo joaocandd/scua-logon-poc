@@ -54,10 +54,10 @@ describe('requestContext', () => {
       expect(contextOf('ped-04').needsHrValidation).toBe(false); // Tarde
     });
 
-    it('soma as horas extras já aprovadas no mês', () => {
-      expect(contextOf('ped-02').monthOvertimeMinutes).toBe(90); // ped-16: 17h → 18h30
-      expect(contextOf('ped-03').monthOvertimeMinutes).toBe(120); // ped-18: 17h → 19h
-      expect(contextOf('ped-05').monthOvertimeMinutes).toBe(0);
+    it('soma as horas extras aprovadas nos últimos 30 dias', () => {
+      expect(contextOf('ped-02').recentOvertimeMinutes).toBe(90); // ped-16: 17h → 18h30
+      expect(contextOf('ped-03').recentOvertimeMinutes).toBe(120); // ped-18: 17h → 19h
+      expect(contextOf('ped-05').recentOvertimeMinutes).toBe(0);
     });
   });
 
@@ -144,15 +144,17 @@ describe('requestContext', () => {
       expect(kinds(pedido('23:00'))).toEqual([]);
     });
 
-    it('no mês, só conta pedido aprovado do mesmo mês, até 2 h por dia', () => {
+    it('nos últimos 30 dias, só conta pedido aprovado, até 2 h por dia', () => {
+      // Pedido de 12/11: a janela vai de 14/10 a 12/11, inclusive.
       const history = [
         pedido('23:00', { id: 'a', date: '2026-11-03', status: 'aprovado' }), // 1 h
-        pedido('01:00', { id: 'b', date: '2026-11-04', status: 'aprovado' }), // 3 h, conta 2 h
+        pedido('01:00', { id: 'b', date: '2026-10-14', status: 'aprovado' }), // 3 h, conta 2 h
         pedido('23:00', { id: 'c', date: '2026-11-05', status: 'recusado' }),
-        pedido('23:00', { id: 'd', date: '2026-10-30', status: 'aprovado' }), // outro mês
+        pedido('23:00', { id: 'd', date: '2026-10-13', status: 'aprovado' }), // fora da janela
+        pedido('23:00', { id: 'e', date: '2026-11-13', status: 'aprovado' }), // depois do pedido
         pedido('23:00', { id: 'ped-x', status: 'aprovado' }), // o próprio pedido
       ];
-      expect(context(pedido('23:00'), { history }).monthOvertimeMinutes).toBe(180);
+      expect(context(pedido('23:00'), { history }).recentOvertimeMinutes).toBe(180);
     });
   });
 });

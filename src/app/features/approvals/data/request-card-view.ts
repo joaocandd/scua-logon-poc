@@ -1,11 +1,11 @@
 // O que cada cartão da caixa de aprovações mostra, já em texto. Funções puras: o cartão (ui/) só
 // desenha, e as frases ficam testadas aqui.
 
-import { addDays, formatDate, monthName, toLocal } from '../../../shared/date';
+import { addDays, formatDate, toLocal } from '../../../shared/date';
 import { Employee, ExtensionRequest, ExtensionRequestStatus } from '../../../shared/models';
 import { formatClock, formatDuration, MINUTES_PER_DAY, toMinutes } from '../../../shared/time';
 import { undoBlocker } from '../../../shared/undo-decision';
-import { InboxItem } from './approval-inbox';
+import { InboxItem, managerDecision } from './approval-inbox';
 import { RequestAlert } from './request-context';
 
 /** Ação em andamento num cartão. */
@@ -13,7 +13,7 @@ export type CardBusy = 'approve' | 'reject' | 'undo';
 
 /** O que a página guarda de cada cartão enquanto ele está na tela. */
 export interface CardSession {
-  /** Decidido nesta visita à página: o cartão mostra o resultado e o "Desfazer". */
+  /** Decidido nesta visita à página: o resultado diz só "Aprovado às 18h03", sem "por você". */
   decidedHere: boolean;
   busy: CardBusy | null;
   /** A API recusou o "Desfazer": por quê. */
@@ -45,13 +45,13 @@ export interface RequestCardView {
   /** Tempo para decidir; só em pedido que aguarda o gestor. `soon`: falta menos de 1 h. */
   expires: { text: string; soon: boolean } | null;
   alerts: RequestAlert[];
-  /** "1h30 de hora extra aprovada em outubro". */
-  monthOvertime: string | null;
+  /** "1h30 de hora extra nos últimos 30 dias". */
+  recentOvertime: string | null;
   /** Se ainda vai para o RH depois do gestor. */
   hrNote: string | null;
   canDecide: boolean;
   outcome: CardOutcome | null;
-  /** Desfazer: disponível, ou o motivo de não estar mais. Nulo quando não é decisão desta visita. */
+  /** Desfazer: disponível, ou o motivo de não estar mais. Nulo quando a decisão não é sua. */
   undo: { available: true } | { available: false; reason: string } | null;
   busy: CardBusy | null;
 }
@@ -74,7 +74,7 @@ export function toCardView(item: InboxItem, options: CardViewOptions): RequestCa
     context?.extraMinutes ??
     (toMinutes(request.requestedEnd) - toMinutes(request.currentEnd) + MINUTES_PER_DAY) %
       MINUTES_PER_DAY;
-  const monthOvertime = context ? describeMonth(context.monthOvertimeMinutes, request.date) : null;
+  const recentOvertime = context ? describeRecent(context.recentOvertimeMinutes) : null;
 
   return {
     id: request.id,
@@ -88,7 +88,7 @@ export function toCardView(item: InboxItem, options: CardViewOptions): RequestCa
     showStatus: !canDecide,
     expires: canDecide ? expiresLabel(request.expiresAt, now) : null,
     alerts: context?.alerts ?? [],
-    monthOvertime,
+    recentOvertime,
     hrNote:
       canDecide && context
         ? context.needsHrValidation
@@ -135,11 +135,10 @@ export function expiresLabel(expiresAt: string, now: number): { text: string; so
   return { text: `Expira ${day} às ${formatClock(local.minutes)}`, soon: false };
 }
 
-function describeMonth(minutes: number, date: string): string {
-  const month = monthName(date);
+function describeRecent(minutes: number): string {
   return minutes > 0
-    ? `${formatDuration(minutes)} de hora extra aprovada em ${month}`
-    : `Nenhuma hora extra aprovada em ${month}`;
+    ? `${formatDuration(minutes)} de hora extra nos últimos 30 dias`
+    : 'Nenhuma hora extra nos últimos 30 dias';
 }
 
 /**
@@ -191,9 +190,15 @@ export function outcomeOf(request: ExtensionRequest, options: CardViewOptions): 
   return { text: `${approved ? 'Aprovado' : 'Recusado'}${who} às ${clock(last.at)}`, note, tone };
 }
 
+/**
+ * "Desfazer" em toda decisão de gestor da pessoa que está usando o app, desta visita ou de antes,
+ * enquanto a API ainda permitir (mesma regra dela, em undoBlocker). Quando não dá mais, o cartão
+ * diz por quê.
+ */
 function undoState(request: ExtensionRequest, options: CardViewOptions): RequestCardView['undo'] {
-  const { session, now } = options;
-  if (!session?.decidedHere || request.status === 'aguardando_gestor') return null;
-  const reason = session.undoError ?? undoBlocker(request, now);
+  const { session, now, meId } = options;
+  const mine = meId !== null && managerDecision(request)?.approverId === meId;
+  if (!mine || request.status === 'aguardando_gestor') return null;
+  const reason = session?.undoError ?? undoBlocker(request, now);
   return reason ? { available: false, reason } : { available: true };
 }

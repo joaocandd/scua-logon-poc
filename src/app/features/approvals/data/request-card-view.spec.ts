@@ -60,7 +60,7 @@ function item(overrides: Partial<ExtensionRequest> = {}): InboxItem {
     context: {
       extraMinutes: 150,
       unlockedUntil: 19 * 60,
-      monthOvertimeMinutes: 90,
+      recentOvertimeMinutes: 90,
       alerts: [
         { kind: 'limite_diario', title: 'Passa de 2 h extras no dia', detail: 'Pede 2h30.' },
       ],
@@ -86,7 +86,7 @@ describe('toCardView', () => {
       extra: '+2h30',
       showStatus: false,
       expires: { text: 'Expira em 1h30', soon: false },
-      monthOvertime: '1h30 de hora extra aprovada em novembro',
+      recentOvertime: '1h30 de hora extra nos últimos 30 dias',
       hrNote: 'Depois de você, vai para a validação do RH.',
       canDecide: true,
       outcome: null,
@@ -94,13 +94,16 @@ describe('toCardView', () => {
     });
   });
 
-  it('sem hora extra no mês e sem validação do RH', () => {
+  it('sem hora extra recente e sem validação do RH', () => {
     const base = item();
     const view = toCardView(
-      { ...base, context: { ...base.context!, monthOvertimeMinutes: 0, needsHrValidation: false } },
+      {
+        ...base,
+        context: { ...base.context!, recentOvertimeMinutes: 0, needsHrValidation: false },
+      },
       options(),
     );
-    expect(view.monthOvertime).toBe('Nenhuma hora extra aprovada em novembro');
+    expect(view.recentOvertime).toBe('Nenhuma hora extra nos últimos 30 dias');
     expect(view.hrNote).toBe('Sem validação do RH: a sua aprovação libera a estação.');
   });
 
@@ -133,6 +136,32 @@ describe('toCardView', () => {
       available: false,
       reason: 'Não dá mais para desfazer: o RH já validou o pedido.',
     });
+  });
+
+  it('decisão sua de outra visita também tem "Desfazer", enquanto a API permitir', () => {
+    const view = toCardView(
+      item({ status: 'aprovado', decisions: [decision(RENATA.id)] }),
+      options(),
+    );
+    expect(view.outcome?.text).toBe('Aprovado por você às 18h03');
+    expect(view.undo).toEqual({ available: true });
+
+    const expired = toCardView(
+      item({ status: 'aprovado', decisions: [decision(RENATA.id)] }),
+      options({ now: Date.parse('2026-11-12T19:30:00-03:00') }),
+    );
+    expect(expired.undo).toEqual({
+      available: false,
+      reason: 'Não dá mais para desfazer: o pedido venceu às 19h30.',
+    });
+  });
+
+  it('decisão de outra pessoa não tem "Desfazer"', () => {
+    const view = toCardView(
+      item({ status: 'aguardando_rh', decisions: [decision(MARINA.id)] }),
+      options({ session: { decidedHere: false, busy: null } }),
+    );
+    expect(view.undo).toBeNull();
   });
 
   it('a API recusou o "Desfazer": o cartão mostra o motivo dela', () => {

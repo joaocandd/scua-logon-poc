@@ -23,7 +23,7 @@
     </p>
   }
 
-  @if (card.alerts.length || card.monthOvertime || card.hrNote) {
+  @if (card.alerts.length || card.recentOvertime || card.hrNote) {
     <ul class="context" aria-label="Contexto para decidir">
       @for (alert of card.alerts; track alert.kind) {
         <li class="alert">
@@ -33,10 +33,10 @@
           >
         </li>
       }
-      @if (card.monthOvertime) {
+      @if (card.recentOvertime) {
         <li>
           <app-icon name="more_time" />
-          <span>{{ card.monthOvertime }}</span>
+          <span>{{ card.recentOvertime }}</span>
         </li>
       }
       @if (card.hrNote) {

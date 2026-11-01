@@ -17,7 +17,8 @@ async function open(page: Page, url = '/aprovacoes'): Promise<void> {
 
 async function openWithRequests(page: Page, url = '/aprovacoes'): Promise<void> {
   await open(page, url);
-  await expect(card(page, 'Lucas Bittencourt')).toBeVisible();
+  // Em "Todos", o Lucas tem dois cartões (o pedido aguardando e o ped-16, já aprovado).
+  await expect(card(page, 'Lucas Bittencourt').first()).toBeVisible();
 }
 
 test('mostra o contexto para decidir, sem violações de acessibilidade', async ({ page }) => {
@@ -29,6 +30,8 @@ test('mostra o contexto para decidir, sem violações de acessibilidade', async 
   await expect(lucas).toContainText('Passa de 2 h extras no dia.');
   await expect(lucas).toContainText('Pede 2h30. Se aprovar, a estação libera só até 19h.');
   await expect(lucas).toContainText('Depois de você, vai para a validação do RH.');
+  // ped-16: 1h30 aprovada na jornada anterior.
+  await expect(lucas).toContainText('1h30 de hora extra nos últimos 30 dias');
   await expect(lucas).toContainText(/Expira /);
 
   // ped-04: sai às 23h30 e entra às 10h do dia seguinte.
@@ -140,6 +143,19 @@ test('Esc fecha o diálogo de recusa sem recusar', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(reject).toBeFocused();
   await expect(lucas).not.toContainText('Recusado');
+});
+
+test('decisão sua de outra visita também tem "Desfazer"', async ({ page }) => {
+  await openWithRequests(page, '/aprovacoes?filtro=todos');
+  // ped-15: a usuária simulada aprovou o pedido da Tatiane antes de abrir a página.
+  const tatiane = card(page, 'Tatiane Brito');
+  await expect(tatiane).toContainText(/Aprovado por você às/);
+
+  await tatiane.getByRole('button', { name: 'Desfazer a decisão sobre Tatiane Brito' }).click();
+
+  await expect(
+    tatiane.getByRole('button', { name: 'Aprovar o pedido de Tatiane Brito' }),
+  ).toBeFocused();
 });
 
 test('filtro por grupo fica na URL', async ({ page }) => {

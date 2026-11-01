@@ -179,7 +179,7 @@ const REQUESTS: RequestSpec[] = [
   },
   {
     // Lucas (ped-02) e Larissa (ped-03) já têm hora extra aprovada: a caixa de aprovações mostra
-    // as horas do mês ao lado do pedido novo.
+    // as horas dos últimos 30 dias ao lado do pedido novo.
     id: 'ped-16',
     employeeId: 'col-14',
     requestedEnd: '18:30',

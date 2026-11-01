@@ -1,4 +1,4 @@
-import { addDays, formatDate, monthName, toInstant, toLocal, weekdayOf } from './date';
+import { addDays, formatDate, toInstant, toLocal, weekdayOf } from './date';
 
 describe('toLocal', () => {
   it('lê o instante no relógio de São Paulo (UTC-3)', () => {
@@ -56,12 +56,5 @@ describe('formatDate', () => {
     expect(formatDate('2026-11-12')).toBe('qui, 12/11');
     expect(formatDate('2026-11-14')).toBe('sáb, 14/11');
     expect(formatDate('2026-03-01')).toBe('dom, 01/03');
-  });
-});
-
-describe('monthName', () => {
-  it('nome do mês por extenso, em minúsculas', () => {
-    expect(monthName('2026-01-05')).toBe('janeiro');
-    expect(monthName('2026-11-12')).toBe('novembro');
   });
 });
