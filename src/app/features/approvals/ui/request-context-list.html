@@ -1,0 +1,25 @@
+@let card = view();
+@if (card.alerts.length || card.recentOvertime || card.hrNote) {
+  <ul class="context" aria-label="Contexto para decidir">
+    @for (alert of card.alerts; track alert.kind) {
+      <li class="alert">
+        <app-icon name="warning" />
+        <span
+          ><strong>{{ alert.title }}.</strong> {{ alert.detail }}</span
+        >
+      </li>
+    }
+    @if (card.recentOvertime) {
+      <li>
+        <app-icon name="more_time" />
+        <span>{{ card.recentOvertime }}</span>
+      </li>
+    }
+    @if (card.hrNote) {
+      <li>
+        <app-icon name="pending_actions" />
+        <span>{{ card.hrNote }}</span>
+      </li>
+    }
+  </ul>
+}

@@ -39,85 +39,24 @@
     </p>
   }
 
-  @if (card.alerts.length || card.recentOvertime || card.hrNote) {
-    <ul class="context" aria-label="Contexto para decidir">
-      @for (alert of card.alerts; track alert.kind) {
-        <li class="alert">
-          <app-icon name="warning" />
-          <span
-            ><strong>{{ alert.title }}.</strong> {{ alert.detail }}</span
-          >
-        </li>
-      }
-      @if (card.recentOvertime) {
-        <li>
-          <app-icon name="more_time" />
-          <span>{{ card.recentOvertime }}</span>
-        </li>
-      }
-      @if (card.hrNote) {
-        <li>
-          <app-icon name="pending_actions" />
-          <span>{{ card.hrNote }}</span>
-        </li>
-      }
-    </ul>
-  }
+  <app-request-context-list [view]="card" />
 
-  @if (card.outcome; as outcome) {
-    <div class="outcome" [attr.data-tone]="outcome.tone">
-      <!-- tabindex="-1": recebe o foco quando o botão clicado some (pedido decidido por outra pessoa). -->
-      <p class="outcome-text" [id]="'resultado-' + card.id" tabindex="-1">
-        <app-icon [name]="outcomeIcons[outcome.tone]" />
-        <span>
-          <strong>{{ outcome.text }}</strong>
-          @if (outcome.note) {
-            <span class="note">{{ outcome.note }}</span>
-          }
-        </span>
-      </p>
-      @if (card.undo; as undoState) {
-        @if (undoState.available) {
-          <button
-            app-button
-            type="button"
-            variant="secondary"
-            icon="undo"
-            [id]="'desfazer-' + card.id"
-            [loading]="card.busy === 'undo'"
-            (click)="undo.emit()"
-          >
-            Desfazer<span class="cdk-visually-hidden">
-              a decisão sobre {{ card.employeeName }}</span
-            >
-          </button>
-        } @else {
-          <p class="undo-blocked">{{ undoState.reason }}</p>
-        }
-      }
-    </div>
-  } @else if (card.canDecide) {
-    <div class="actions">
-      <button
-        app-button
-        type="button"
-        icon="check"
-        [id]="'aprovar-' + card.id"
-        [loading]="card.busy === 'approve'"
-        (click)="approve.emit()"
-      >
-        Aprovar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
-      </button>
-      <button
-        app-button
-        type="button"
-        variant="secondary"
-        icon="close"
-        [disabled]="card.busy === 'approve'"
-        (click)="reject.emit()"
-      >
-        Recusar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
-      </button>
-    </div>
-  }
+  <app-request-decision
+    [view]="card"
+    (approve)="approve.emit()"
+    (reject)="reject.emit()"
+    (undo)="undo.emit()"
+  />
+
+  <a
+    class="details"
+    [id]="'detalhes-' + card.id"
+    [routerLink]="['/aprovacoes', card.id]"
+    queryParamsHandling="preserve"
+    routerLinkActive="active"
+    [ariaCurrentWhenActive]="true"
+  >
+    Ver detalhes<span class="cdk-visually-hidden"> do pedido de {{ card.employeeName }}</span>
+    <app-icon name="chevron_right" />
+  </a>
 </article>

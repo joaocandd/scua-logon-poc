@@ -1,17 +1,20 @@
 import { booleanAttribute, Component, input, output } from '@angular/core';
-import { Button, Icon, IconName, StatusBadge } from '../../../design-system';
-import { CardOutcome, RequestCardView } from '../data/request-card-view';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Icon, StatusBadge } from '../../../design-system';
+import { RequestCardView } from '../data/request-card-view';
+import { RequestContextList } from './request-context-list';
+import { RequestDecision } from './request-decision';
 
 /**
- * Cartão de um pedido na caixa de aprovações: quem, quando, até que horas, o motivo e o contexto
- * para decidir. Só desenha; a página decide o que fazer com cada ação.
+ * Cartão de um pedido na caixa de aprovações: quem, quando, até que horas, o motivo, o contexto
+ * para decidir e o link para o detalhe. Só desenha; a página decide o que fazer com cada ação.
  *
- * Os botões têm id previsível para a página mover o foco depois de uma ação:
- * `aprovar-<id>`, `desfazer-<id>` e `resultado-<id>` (o texto do resultado).
+ * Ids que recebem o foco depois de uma ação: `aprovar-<id>`, `desfazer-<id>`, `resultado-<id>`
+ * (na decisão) e `detalhes-<id>` (o link, quando o detalhe fecha).
  */
 @Component({
   selector: 'app-request-card',
-  imports: [Button, Icon, StatusBadge],
+  imports: [Icon, RequestContextList, RequestDecision, RouterLink, RouterLinkActive, StatusBadge],
   templateUrl: './request-card.html',
   styleUrl: './request-card.scss',
 })
@@ -27,10 +30,4 @@ export class RequestCard {
   readonly approve = output();
   readonly reject = output();
   readonly undo = output();
-
-  protected readonly outcomeIcons: Record<CardOutcome['tone'], IconName> = {
-    approved: 'check_circle',
-    rejected: 'cancel',
-    neutral: 'timer_off',
-  };
 }

@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import {
   Button,
   EmptyState,
@@ -38,6 +38,10 @@ import { ApprovalActions, summaryOf } from './approval-actions';
  *
  * Filtros na URL (?filtro=decididos-hoje&grupo=grp-comercial): dá para compartilhar e voltar.
  *
+ * O detalhe do pedido (/aprovacoes/:id) é rota filha: no celular, ocupa a página no lugar da
+ * lista; no desktop (a partir de 64em), fica num painel ao lado. A troca é só de CSS, como na
+ * casca. Ao fechar o detalhe, o foco volta para o "Ver detalhes" do cartão.
+ *
  * Ao vivo: enquanto a página está aberta e visível, consulta os pedidos a cada 15 s e mostra
  * "Atualizado há X s". Pedido novo ganha a marca "Novo" e é anunciado numa região de status
  * (educada: o leitor de tela fala quando terminar o que está lendo). No modo demo
@@ -45,8 +49,19 @@ import { ApprovalActions, summaryOf } from './approval-actions';
  */
 @Component({
   selector: 'app-approvals-page',
-  imports: [Button, EmptyState, ErrorState, Field, FieldControl, PageHeader, RequestCard, Skeleton],
+  imports: [
+    Button,
+    EmptyState,
+    ErrorState,
+    Field,
+    FieldControl,
+    PageHeader,
+    RequestCard,
+    RouterOutlet,
+    Skeleton,
+  ],
   providers: [ApprovalActions],
+  host: { '[class.has-detail]': 'detailOpen()' },
   templateUrl: './approvals-page.html',
   styleUrl: './approvals-page.scss',
 })
@@ -70,6 +85,11 @@ export class ApprovalsPage {
   protected readonly newIds = signal<ReadonlySet<string>>(new Set());
   /** A última consulta falhou; a lista na tela é a da consulta anterior. */
   protected readonly refreshFailed = signal(false);
+  /** Há um pedido aberto no detalhe (rota filha ativa). */
+  protected readonly detailOpen = signal(false);
+  /** Pedido aberto por último no detalhe: o foco volta para o link dele quando o detalhe fecha. */
+  private lastDetailId: string | null = null;
+
   /** Último anúncio de pedido novo, lido pela região de status. */
   private readonly announcement = signal('');
   private refreshing = false;
@@ -161,6 +181,21 @@ export class ApprovalsPage {
 
   protected setGroup(groupId: string): void {
     this.navigate({ grupo: groupId || null });
+  }
+
+  protected detailOpened(): void {
+    this.detailOpen.set(true);
+    this.lastDetailId = this.route.firstChild?.snapshot.paramMap.get('id') ?? null;
+  }
+
+  protected detailClosed(): void {
+    this.detailOpen.set(false);
+    const id = this.lastDetailId;
+    if (!id) return;
+    // Registrado antes do foco da casca: ela vê o foco já dentro do <main> e não mexe.
+    afterNextRender(() => document.getElementById(`detalhes-${id}`)?.focus(), {
+      injector: this.injector,
+    });
   }
 
   protected selectAll(selected: boolean): void {

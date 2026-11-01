@@ -22,121 +22,137 @@
     />
   }
   @default {
-    <div class="toolbar">
-      <fieldset class="filters">
-        <legend class="cdk-visually-hidden">Mostrar</legend>
-        @for (option of filters; track option.value) {
-          <label class="filter">
-            <input
-              type="radio"
-              name="filtro"
-              [value]="option.value"
-              [checked]="filter() === option.value"
-              (change)="setFilter(option.value)"
-            />
-            <span>{{ option.label }}</span>
-            @if (option.value === 'aguardando' && inbox.state() === 'ready') {
-              <span class="count">{{ pendingCount() }}</span>
+    <div class="layout">
+      <div class="list-column">
+        <div class="toolbar">
+          <fieldset class="filters">
+            <legend class="cdk-visually-hidden">Mostrar</legend>
+            @for (option of filters; track option.value) {
+              <label class="filter">
+                <input
+                  type="radio"
+                  name="filtro"
+                  [value]="option.value"
+                  [checked]="filter() === option.value"
+                  (change)="setFilter(option.value)"
+                />
+                <span>{{ option.label }}</span>
+                @if (option.value === 'aguardando' && inbox.state() === 'ready') {
+                  <span class="count">{{ pendingCount() }}</span>
+                }
+              </label>
             }
-          </label>
-        }
-      </fieldset>
+          </fieldset>
 
-      <app-field label="Grupo" class="group">
-        <select appFieldControl #groupSelect (change)="setGroup(groupSelect.value)">
-          <option value="" [selected]="!groupId()">Todos os grupos</option>
-          @for (group of inbox.groups(); track group.id) {
-            <option [value]="group.id" [selected]="group.id === groupId()">{{ group.name }}</option>
+          <app-field label="Grupo" class="group">
+            <select appFieldControl #groupSelect (change)="setGroup(groupSelect.value)">
+              <option value="" [selected]="!groupId()">Todos os grupos</option>
+              @for (group of inbox.groups(); track group.id) {
+                <option [value]="group.id" [selected]="group.id === groupId()">
+                  {{ group.name }}
+                </option>
+              }
+            </select>
+          </app-field>
+        </div>
+
+        @if (inbox.state() === 'ready') {
+          <div class="list-header">
+            @if (selectableCount() > 1) {
+              <label class="select-all">
+                <input
+                  #all
+                  id="selecionar-todos"
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  [indeterminate]="selectedCards().length > 0 && !allSelected()"
+                  (change)="selectAll(all.checked)"
+                />
+                <span>Selecionar todos ({{ selectableCount() }})</span>
+              </label>
+            }
+            <!-- Fora da região de status: mudar a cada segundo não pode virar anúncio. -->
+            @if (updated(); as label) {
+              <p class="updated" [class.failed]="refreshFailed()">
+                {{ label }}
+                @if (refreshFailed()) {
+                  · Sem resposta do servidor. Tentando de novo.
+                }
+              </p>
+            }
+          </div>
+        }
+
+        @if (inbox.state() === 'loading') {
+          <ul class="list" aria-busy="true">
+            @for (placeholder of [1, 2, 3]; track placeholder) {
+              <li class="skeleton-card" aria-hidden="true">
+                <app-skeleton variant="heading" width="55%" />
+                <app-skeleton width="35%" />
+                <app-skeleton variant="heading" width="45%" />
+                <app-skeleton width="80%" />
+                <app-skeleton variant="block" />
+              </li>
+            }
+          </ul>
+        } @else if (cards().length === 0) {
+          <app-empty-state [heading]="empty().heading" [description]="empty().description">
+            @if (groupId()) {
+              <button app-button type="button" variant="secondary" (click)="setGroup('')">
+                Ver todos os grupos
+              </button>
+            }
+          </app-empty-state>
+        } @else {
+          <ul class="list">
+            @for (card of cards(); track card.id) {
+              <li>
+                <app-request-card
+                  [view]="card"
+                  [isNew]="newIds().has(card.id)"
+                  [selectable]="card.canDecide && selectableCount() > 1"
+                  [selected]="actions.selected().has(card.id)"
+                  (selectedChange)="actions.select(card.id, $event)"
+                  (approve)="actions.approve(card.id)"
+                  (reject)="actions.reject(card.id, summaryOf(card))"
+                  (undo)="actions.undo(card.id)"
+                />
+              </li>
+            }
+          </ul>
+
+          @if (selectedCards().length; as count) {
+            <!-- Fica presa ao rodapé (acima da barra inferior no celular) enquanto há seleção. -->
+            <section class="batch-bar" aria-label="Pedidos selecionados">
+              <p class="batch-count">
+                <strong>{{ count }}</strong>
+                {{ count === 1 ? 'pedido selecionado' : 'pedidos selecionados' }}
+              </p>
+              <button app-button type="button" variant="ghost" (click)="clearSelection()">
+                Limpar
+              </button>
+              <button
+                app-button
+                type="button"
+                icon="check"
+                (click)="actions.approveMany(selectedCards())"
+              >
+                Aprovar selecionados
+              </button>
+            </section>
           }
-        </select>
-      </app-field>
-    </div>
-
-    @if (inbox.state() === 'ready') {
-      <div class="list-header">
-        @if (selectableCount() > 1) {
-          <label class="select-all">
-            <input
-              #all
-              id="selecionar-todos"
-              type="checkbox"
-              [checked]="allSelected()"
-              [indeterminate]="selectedCards().length > 0 && !allSelected()"
-              (change)="selectAll(all.checked)"
-            />
-            <span>Selecionar todos ({{ selectableCount() }})</span>
-          </label>
-        }
-        <!-- Fora da região de status: mudar a cada segundo não pode virar anúncio. -->
-        @if (updated(); as label) {
-          <p class="updated" [class.failed]="refreshFailed()">
-            {{ label }}
-            @if (refreshFailed()) {
-              · Sem resposta do servidor. Tentando de novo.
-            }
-          </p>
         }
       </div>
-    }
 
-    @if (inbox.state() === 'loading') {
-      <ul class="list" aria-busy="true">
-        @for (placeholder of [1, 2, 3]; track placeholder) {
-          <li class="skeleton-card" aria-hidden="true">
-            <app-skeleton variant="heading" width="55%" />
-            <app-skeleton width="35%" />
-            <app-skeleton variant="heading" width="45%" />
-            <app-skeleton width="80%" />
-            <app-skeleton variant="block" />
-          </li>
-        }
-      </ul>
-    } @else if (cards().length === 0) {
-      <app-empty-state [heading]="empty().heading" [description]="empty().description">
-        @if (groupId()) {
-          <button app-button type="button" variant="secondary" (click)="setGroup('')">
-            Ver todos os grupos
-          </button>
-        }
-      </app-empty-state>
-    } @else {
-      <ul class="list">
-        @for (card of cards(); track card.id) {
-          <li>
-            <app-request-card
-              [view]="card"
-              [isNew]="newIds().has(card.id)"
-              [selectable]="card.canDecide && selectableCount() > 1"
-              [selected]="actions.selected().has(card.id)"
-              (selectedChange)="actions.select(card.id, $event)"
-              (approve)="actions.approve(card.id)"
-              (reject)="actions.reject(card.id, summaryOf(card))"
-              (undo)="actions.undo(card.id)"
-            />
-          </li>
-        }
-      </ul>
-
-      @if (selectedCards().length; as count) {
-        <!-- Fica presa ao rodapé (acima da barra inferior no celular) enquanto há seleção. -->
-        <section class="batch-bar" aria-label="Pedidos selecionados">
-          <p class="batch-count">
-            <strong>{{ count }}</strong>
-            {{ count === 1 ? 'pedido selecionado' : 'pedidos selecionados' }}
+      <!-- Detalhe do pedido (rota filha). Celular: ocupa a página no lugar da lista. Desktop: painel ao lado. -->
+      <section class="detail-column" aria-label="Detalhe do pedido">
+        <router-outlet (activate)="detailOpened()" (deactivate)="detailClosed()" />
+        @if (!detailOpen()) {
+          <p class="detail-hint">
+            Escolha "Ver detalhes" em um pedido para ver a linha do tempo do dia e o histórico.
           </p>
-          <button app-button type="button" variant="ghost" (click)="clearSelection()">
-            Limpar
-          </button>
-          <button
-            app-button
-            type="button"
-            icon="check"
-            (click)="actions.approveMany(selectedCards())"
-          >
-            Aprovar selecionados
-          </button>
-        </section>
-      }
-    }
+        }
+      </section>
+    </div>
   }
 }

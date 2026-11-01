@@ -1,7 +1,24 @@
-// Celular primeiro. A partir de 64em (o ponto de quebra da casca), filtros e grupo na mesma linha.
+// Celular primeiro. A partir de 64em (o ponto de quebra da casca), filtros e grupo na mesma linha,
+// e o detalhe do pedido num painel ao lado da lista.
 :host {
   display: block;
   max-width: 48rem;
+}
+
+// Celular: a lista ou o detalhe, nunca os dois. A coluna escondida sai do Tab e do leitor de tela.
+.detail-column,
+.detail-hint {
+  display: none;
+}
+
+:host(.has-detail) {
+  .list-column {
+    display: none;
+  }
+
+  .detail-column {
+    display: block;
+  }
 }
 
 .toolbar {
@@ -158,6 +175,43 @@
 }
 
 @media (min-width: 64em) {
+  :host {
+    max-width: 84rem;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  :host(.has-detail) .list-column,
+  .detail-column {
+    display: block;
+  }
+
+  // Painel preso abaixo do cabeçalho da casca, com rolagem própria. --header-height vem da casca.
+  .detail-column {
+    position: sticky;
+    top: calc(var(--header-height, 4rem) + var(--space-4));
+    max-height: calc(100dvh - var(--header-height, 4rem) - var(--space-8));
+    box-sizing: border-box;
+    padding: var(--space-4) var(--space-6) var(--space-6);
+    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-ring);
+  }
+
+  .detail-hint {
+    display: block;
+    margin: 0;
+    padding: var(--space-4) 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
   .batch-bar {
     bottom: var(--space-4);
 

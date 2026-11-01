@@ -137,11 +137,18 @@ a {
   outline: none;
 }
 
-// O aviso (Toast) fica no overlay, fora da casca. Abaixo de 64em, enquanto a casca mostra a barra
-// inferior (4rem, --bottom-nav-height em core/layout/app-shell.scss), o aviso sobe acima dela.
+// A casca tem cabeçalho fixo no topo (4rem, --header-height em core/layout/app-shell.scss) e, abaixo
+// de 64em, barra inferior fixa (4rem, --bottom-nav-height). Com o scroll-padding, o navegador não
+// deixa o elemento focado nem o destino de uma rolagem ficar embaixo delas (WCAG 2.4.11).
+:root:has(app-shell) {
+  scroll-padding-top: calc(4rem + var(--space-4));
+}
+
+// O aviso (Toast) fica no overlay, fora da casca: enquanto há barra inferior, ele sobe acima dela.
 @media (max-width: 63.999em) {
   :root:has(app-bottom-nav) {
     --toast-offset: 4rem;
+    scroll-padding-bottom: calc(4rem + var(--space-4));
   }
 }
 

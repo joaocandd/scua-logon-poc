@@ -3,7 +3,7 @@ import { CurrentUser } from '../../../core/auth/current-user';
 import { apiErrorStatus } from '../../../shared/api-error';
 import { toLocal } from '../../../shared/date';
 import { Employee, ExtensionRequest, Group, WorkSchedule } from '../../../shared/models';
-import { appliesTo } from '../../../shared/schedule-engine';
+import { appliesTo, isShift, PlannedShift, plannedShift } from '../../../shared/schedule-engine';
 import { People } from '../../people/data/people';
 import { WorkSchedules } from '../../schedules/data/work-schedules';
 import { ExtensionRequests } from './extension-requests';
@@ -15,7 +15,9 @@ export interface InboxItem {
   employee: Employee;
   group: Group | undefined;
   schedule: WorkSchedule | undefined;
-  /** Alertas e horas do mês. Nulo se o colaborador não tem regra de jornada. */
+  /** Jornada prevista no dia do pedido. Nula sem regra de jornada ou em dia sem jornada. */
+  shift: PlannedShift | null;
+  /** Alertas e horas extras recentes. Nulo se o colaborador não tem regra de jornada. */
   context: RequestContext | null;
 }
 
@@ -85,12 +87,14 @@ export class ApprovalInbox {
       const employee = employees.get(request.employeeId);
       if (!employee) return [];
       const schedule = schedules.find((s) => appliesTo(s, employee));
+      const ownExceptions = exceptions.filter((e) => e.employeeId === employee.id);
+      const day = schedule && plannedShift(schedule, ownExceptions, holidays, request.date);
       const context =
         schedule &&
         requestContext({
           request,
           schedule,
-          exceptions: exceptions.filter((e) => e.employeeId === employee.id),
+          exceptions: ownExceptions,
           holidays,
           history: requests.filter((r) => r.employeeId === employee.id),
         });
@@ -100,6 +104,7 @@ export class ApprovalInbox {
           employee,
           group: groups.get(employee.groupId),
           schedule,
+          shift: day && isShift(day) ? day : null,
           context: context ?? null,
         },
       ];

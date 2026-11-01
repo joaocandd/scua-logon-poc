@@ -38,6 +38,7 @@ function item(
     employee,
     group: undefined,
     schedule: undefined,
+    shift: null,
     context: null,
   };
 }

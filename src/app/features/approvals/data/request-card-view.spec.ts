@@ -57,6 +57,7 @@ function item(overrides: Partial<ExtensionRequest> = {}): InboxItem {
     employee: LUCAS,
     group: { id: 'grp-comercial', name: 'Comercial', approverIds: [MARINA.id, RENATA.id] },
     schedule: undefined,
+    shift: null,
     context: {
       extraMinutes: 150,
       unlockedUntil: 19 * 60,

@@ -286,6 +286,66 @@ test.describe('ao vivo', () => {
   });
 });
 
+test.describe('detalhe do pedido', () => {
+  test('linha do tempo, histórico e as mesmas ações; ao fechar, o foco volta ao cartão', async ({
+    page,
+    isMobile,
+  }) => {
+    await openWithRequests(page);
+    const detailsLink = page.getByRole('link', {
+      name: 'Ver detalhes do pedido de Lucas Bittencourt',
+    });
+    await detailsLink.click();
+
+    await expect(page).toHaveURL(/\/aprovacoes\/ped-02$/);
+    await expect(page).toHaveTitle('Pedido de extensão · Scua Logon');
+    const detail = page.getByRole('region', { name: 'Detalhe do pedido' });
+    await expect(
+      detail.getByRole('heading', { level: 2, name: 'Lucas Bittencourt' }),
+    ).toBeFocused();
+    // Celular: o detalhe ocupa a página. Desktop: painel ao lado da lista.
+    if (isMobile) await expect(detailsLink).toBeHidden();
+    else await expect(detailsLink).toBeVisible();
+
+    await expect(
+      detail.getByRole('group', { name: /^Jornada de Lucas Bittencourt, / }),
+    ).toBeVisible();
+    await expect(detail).toContainText(
+      'Se aprovar, a estação bloqueia às 19h, no limite de 2 h extras.',
+    );
+    await expect(detail).toContainText('Se recusar, bloqueia às 17h, no fim da jornada.');
+    const history = detail.getByRole('region', { name: 'Histórico' });
+    await expect(history).toContainText(
+      'Lucas Bittencourt pediu extensão até 19h30 (Entrega de proposta comercial).',
+    );
+    await expectNoA11yViolations(page);
+
+    await detail.getByRole('button', { name: 'Aprovar o pedido de Lucas Bittencourt' }).click();
+
+    await expect(detail).toContainText(/Aprovado às/);
+    await expect(
+      detail.getByRole('button', { name: 'Desfazer a decisão sobre Lucas Bittencourt' }),
+    ).toBeFocused();
+    await expect(history).toContainText(
+      'Renata Albuquerque aprovou o pedido de Lucas Bittencourt. Falta a validação do RH.',
+    );
+    await expect(detail).toContainText('Se o RH validar, a estação bloqueia às 19h');
+
+    await detail
+      .getByRole('link', { name: isMobile ? 'Voltar para a lista' : 'Fechar o detalhe' })
+      .click();
+    await expect(page).toHaveURL(/\/aprovacoes$/);
+    await expect(detailsLink).toBeFocused();
+  });
+
+  test('pedido que não existe', async ({ page }) => {
+    await open(page, '/aprovacoes/ped-99');
+
+    await expect(page.getByRole('heading', { name: 'Não encontramos este pedido' })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});
+
 test.describe('estados da tela', () => {
   test('?simular=vazio: nenhum pedido aguardando', async ({ page }) => {
     await open(page, '/aprovacoes?simular=vazio');

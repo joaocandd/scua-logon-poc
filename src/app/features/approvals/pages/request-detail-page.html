@@ -1,0 +1,110 @@
+<!-- "Voltar" no celular (o detalhe ocupa a página); "Fechar" no desktop (painel ao lado da lista). -->
+<div class="nav">
+  <a class="back" routerLink="/aprovacoes" queryParamsHandling="preserve">
+    <app-icon name="arrow_back" />
+    Voltar para a lista
+  </a>
+  <a class="close" routerLink="/aprovacoes" queryParamsHandling="preserve">
+    <app-icon name="close" />
+    Fechar<span class="cdk-visually-hidden"> o detalhe</span>
+  </a>
+</div>
+
+@if (inbox.state() === 'loading') {
+  <div class="loading" aria-busy="true">
+    <app-skeleton variant="heading" width="60%" />
+    <app-skeleton width="40%" />
+    <app-skeleton variant="heading" width="45%" />
+    <app-skeleton variant="block" />
+    <app-skeleton variant="block" />
+  </div>
+} @else if (view(); as card) {
+  <article class="detail" aria-labelledby="detalhe-titulo">
+    <header class="head">
+      <div class="who">
+        <!-- tabindex="-1": recebe o foco ao abrir o detalhe. -->
+        <h2 #heading id="detalhe-titulo" class="name" tabindex="-1">{{ card.employeeName }}</h2>
+        <p class="meta">{{ item()?.employee?.jobTitle }} · {{ card.groupName }}</p>
+      </div>
+      @if (card.showStatus) {
+        <app-status-badge [status]="card.status" />
+      }
+    </header>
+
+    <p class="until">
+      <strong>{{ card.until }}</strong
+      ><span class="extra">&nbsp;({{ card.extra }}) · {{ card.day }}</span>
+    </p>
+    <p class="reason"><span class="label">Motivo:</span> {{ card.reason }}</p>
+    @if (card.expires; as expires) {
+      <p class="expires" [class.soon]="expires.soon">
+        <app-icon name="schedule" />
+        <span>{{ expires.text }}</span>
+      </p>
+    }
+
+    <app-request-context-list [view]="card" />
+
+    <app-request-decision
+      [view]="card"
+      idPrefix="detalhe-"
+      (approve)="actions.approve(card.id, 'detalhe')"
+      (reject)="actions.reject(card.id, summaryOf(card), 'detalhe')"
+      (undo)="actions.undo(card.id, 'detalhe')"
+    />
+
+    <section class="section" aria-labelledby="detalhe-linha-do-tempo">
+      <h3 id="detalhe-linha-do-tempo" class="section-title">Linha do tempo do dia</h3>
+      @if (timeline(); as day) {
+        @if (day.segments.length) {
+          <app-workday-timeline [segments]="day.segments" [label]="day.label" [now]="nowMarker()" />
+        }
+        <ul class="notes">
+          @for (note of day.notes; track $index) {
+            <li>{{ note }}</li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="section" aria-labelledby="detalhe-historico">
+      <h3 id="detalhe-historico" class="section-title">Histórico</h3>
+      @if (history.error()) {
+        <p class="muted">Não foi possível carregar o histórico.</p>
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          size="sm"
+          [loading]="history.isLoading()"
+          (click)="history.reload()"
+        >
+          Tentar de novo
+        </button>
+      } @else if (history.isLoading() && entries().length === 0) {
+        <div aria-busy="true">
+          <app-skeleton width="80%" />
+          <app-skeleton width="65%" />
+        </div>
+      } @else if (entries().length === 0) {
+        <p class="muted">Sem registros ainda.</p>
+      } @else {
+        <ol class="history">
+          @for (entry of entries(); track entry.id) {
+            <li>
+              <time [attr.datetime]="entry.at">{{ entry.when }}</time>
+              <span>{{ entry.summary }}</span>
+            </li>
+          }
+        </ol>
+      }
+    </section>
+  </article>
+} @else {
+  <section class="not-found" aria-labelledby="detalhe-titulo">
+    <h2 #heading id="detalhe-titulo" class="name" tabindex="-1">Não encontramos este pedido</h2>
+    <p class="muted">
+      O link pode estar incompleto. Os pedidos que você pode decidir estão na lista.
+    </p>
+  </section>
+}

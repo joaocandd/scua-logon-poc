@@ -1,4 +1,11 @@
-import { formatClock, formatDuration, formatRange, MINUTES_PER_DAY, toMinutes } from './time';
+import {
+  formatClock,
+  formatDuration,
+  formatRange,
+  MINUTES_PER_DAY,
+  toMinutes,
+  toTime,
+} from './time';
 
 describe('toMinutes', () => {
   it('converte HH:mm em minutos desde a meia-noite', () => {
@@ -26,6 +33,16 @@ describe('formatClock', () => {
   it('mostra os minutos com dois dígitos', () => {
     expect(formatClock(1170)).toBe('19h30');
     expect(formatClock(545)).toBe('9h05');
+  });
+});
+
+describe('toTime', () => {
+  it('volta ao formato HH:mm, inclusive depois da meia-noite', () => {
+    expect(toTime(0)).toBe('00:00');
+    expect(toTime(1170)).toBe('19:30');
+    expect(toTime(MINUTES_PER_DAY)).toBe('00:00');
+    expect(toTime(MINUTES_PER_DAY + 360)).toBe('06:00');
+    expect(toMinutes(toTime(545))).toBe(545);
   });
 });
 
