@@ -85,6 +85,33 @@ describe('ExtensionRequests', () => {
     expect(service.pending().map((r) => r.id)).toEqual(['ped-c', 'ped-a']);
   });
 
+  it('a primeira carga marca a hora da atualização', () => {
+    expect(service.refreshedAt()).not.toBeNull();
+  });
+
+  it('consulta de novo e devolve só os pedidos que chegaram', async () => {
+    const poll = service.poll();
+    http
+      .expectOne('/api/pedidos')
+      .flush([
+        request('ped-a', 'aguardando_gestor', '2026-11-12T22:00:00.000Z'),
+        request('ped-b', 'aprovado', '2026-11-12T20:00:00.000Z'),
+        request('ped-c', 'aguardando_gestor', '2026-11-12T21:00:00.000Z'),
+        request('ped-d', 'aguardando_gestor', '2026-11-12T20:30:00.000Z'),
+      ]);
+    expect((await poll).map((r) => r.id)).toEqual(['ped-d']);
+    expect(service.pending().map((r) => r.id)).toEqual(['ped-d', 'ped-c', 'ped-a']);
+  });
+
+  it('se a consulta falhar, a lista continua na tela', async () => {
+    const poll = service.poll();
+    http
+      .expectOne('/api/pedidos')
+      .flush({ message: 'Fora do ar' }, { status: 503, statusText: '' });
+    await expect(poll).rejects.toMatchObject({ status: 503 });
+    expect(service.pending().map((r) => r.id)).toEqual(['ped-c', 'ped-a']);
+  });
+
   it('busca de novo um pedido e troca na lista', async () => {
     const refresh = service.refresh('ped-a');
     http

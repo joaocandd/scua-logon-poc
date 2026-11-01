@@ -52,6 +52,33 @@
       </app-field>
     </div>
 
+    @if (inbox.state() === 'ready') {
+      <div class="list-header">
+        @if (selectableCount() > 1) {
+          <label class="select-all">
+            <input
+              #all
+              id="selecionar-todos"
+              type="checkbox"
+              [checked]="allSelected()"
+              [indeterminate]="selectedCards().length > 0 && !allSelected()"
+              (change)="selectAll(all.checked)"
+            />
+            <span>Selecionar todos ({{ selectableCount() }})</span>
+          </label>
+        }
+        <!-- Fora da região de status: mudar a cada segundo não pode virar anúncio. -->
+        @if (updated(); as label) {
+          <p class="updated" [class.failed]="refreshFailed()">
+            {{ label }}
+            @if (refreshFailed()) {
+              · Sem resposta do servidor. Tentando de novo.
+            }
+          </p>
+        }
+      </div>
+    }
+
     @if (inbox.state() === 'loading') {
       <ul class="list" aria-busy="true">
         @for (placeholder of [1, 2, 3]; track placeholder) {
@@ -73,27 +100,12 @@
         }
       </app-empty-state>
     } @else {
-      @if (selectableCount() > 1) {
-        <div class="bulk">
-          <label class="select-all">
-            <input
-              #all
-              id="selecionar-todos"
-              type="checkbox"
-              [checked]="allSelected()"
-              [indeterminate]="selectedCards().length > 0 && !allSelected()"
-              (change)="selectAll(all.checked)"
-            />
-            <span>Selecionar todos ({{ selectableCount() }})</span>
-          </label>
-        </div>
-      }
-
       <ul class="list">
         @for (card of cards(); track card.id) {
           <li>
             <app-request-card
               [view]="card"
+              [isNew]="newIds().has(card.id)"
               [selectable]="card.canDecide && selectableCount() > 1"
               [selected]="actions.selected().has(card.id)"
               (selectedChange)="actions.select(card.id, $event)"

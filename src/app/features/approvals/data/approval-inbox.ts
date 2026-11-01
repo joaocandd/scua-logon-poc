@@ -63,6 +63,9 @@ export class ApprovalInbox {
    */
   readonly retrying = computed(() => this.resources.some((r) => r.status() === 'reloading'));
 
+  /** Quando os pedidos chegaram do servidor pela última vez, em milissegundos. */
+  readonly refreshedAt = this.requests.refreshedAt.asReadonly();
+
   /** Quem está usando o app: as decisões dele aparecem como "por você". */
   readonly meId = computed(() => this.currentUser.profile()?.id ?? null);
 
@@ -117,6 +120,15 @@ export class ApprovalInbox {
 
   refresh(id: string): Promise<ExtensionRequest> {
     return this.requests.refresh(id);
+  }
+
+  /**
+   * Consulta os pedidos de novo, sem tirar a lista da tela. Devolve os que chegaram, já com o
+   * colaborador, para o anúncio "Novo pedido de...". Se falhar, o erro sobe e a lista continua.
+   */
+  async poll(): Promise<InboxItem[]> {
+    const added = new Set((await this.requests.poll()).map((r) => r.id));
+    return this.items().filter((item) => added.has(item.request.id));
   }
 
   /** "Tentar de novo": recarrega o que falhou. */

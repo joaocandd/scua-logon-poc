@@ -46,6 +46,18 @@
   }
 }
 
+// Pedido que chegou com a página aberta. É texto ("Novo"), não só cor.
+.new-tag {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-highlight-bg);
+  color: var(--color-text-on-highlight);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+
 .name {
   margin: 0;
   font-size: var(--text-lg);

@@ -18,6 +18,9 @@
       <h2 class="name" [id]="'pedido-' + card.id">{{ card.employeeName }}</h2>
       <p class="meta">{{ card.groupName }} · {{ card.day }}</p>
     </div>
+    @if (isNew()) {
+      <span class="new-tag">Novo</span>
+    }
     @if (card.showStatus) {
       <app-status-badge [status]="card.status" />
     }

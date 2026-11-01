@@ -130,6 +130,15 @@ export class ApprovalActions {
     }
   }
 
+  /**
+   * Mantém os cartões na tela mesmo que eles não combinem mais com o filtro. Serve para o pedido
+   * que outra pessoa decidiu enquanto a lista estava aberta: em vez de sumir, o cartão mostra
+   * "Aprovado por Marina às 18h03".
+   */
+  keep(ids: readonly string[]): void {
+    ids.forEach((id) => this.patch(id, {}));
+  }
+
   /** Marca ou desmarca um pedido para aprovar em lote. */
   select(id: string, selected: boolean): void {
     this.selected.update((ids) => {

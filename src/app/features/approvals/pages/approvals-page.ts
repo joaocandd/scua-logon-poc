@@ -1,4 +1,13 @@
-import { afterNextRender, Component, computed, inject, Injector } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  DestroyRef,
+  DOCUMENT,
+  inject,
+  Injector,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -14,6 +23,7 @@ import { toLocal } from '../../../shared/date';
 import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox, INBOX_FILTERS, InboxFilter, visibleItems } from '../data/approval-inbox';
+import { arrivalMessage, POLL_INTERVAL_MS, updatedLabel } from '../data/inbox-updates';
 import { toCardView } from '../data/request-card-view';
 import { RequestCard } from '../ui/request-card';
 import { ApprovalActions, summaryOf } from './approval-actions';
@@ -27,6 +37,11 @@ import { ApprovalActions, summaryOf } from './approval-actions';
  * ficam no ApprovalActions, fornecido aqui.
  *
  * Filtros na URL (?filtro=decididos-hoje&grupo=grp-comercial): dá para compartilhar e voltar.
+ *
+ * Ao vivo: enquanto a página está aberta e visível, consulta os pedidos a cada 15 s e mostra
+ * "Atualizado há X s". Pedido novo ganha a marca "Novo" e é anunciado numa região de status
+ * (educada: o leitor de tela fala quando terminar o que está lendo). No modo demo
+ * (?demo=ao-vivo), a API simulada cria um pedido a cada 30 s.
  */
 @Component({
   selector: 'app-approvals-page',
@@ -42,11 +57,22 @@ export class ApprovalsPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly filters = INBOX_FILTERS;
   protected readonly summaryOf = summaryOf;
   /** Para os textos com hora ("Expira em 20 min"). */
   private readonly now = injectNow(30_000);
+  /** Para o "Atualizado há X s", que muda a cada segundo sem redesenhar os cartões. */
+  private readonly tick = injectNow(1000);
+
+  /** Pedidos que chegaram enquanto a página estava aberta: ganham a marca "Novo". */
+  protected readonly newIds = signal<ReadonlySet<string>>(new Set());
+  /** A última consulta falhou; a lista na tela é a da consulta anterior. */
+  protected readonly refreshFailed = signal(false);
+  /** Último anúncio de pedido novo, lido pela região de status. */
+  private readonly announcement = signal('');
+  private refreshing = false;
 
   private readonly query = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
@@ -116,8 +142,18 @@ export class ApprovalsPage {
 
   /** Texto da região de status (leitor de tela). */
   protected readonly status = computed(() =>
-    this.inbox.state() === 'loading' ? 'Carregando pedidos' : '',
+    this.inbox.state() === 'loading' ? 'Carregando pedidos' : this.announcement(),
   );
+
+  protected readonly updated = computed(() => {
+    const refreshedAt = this.inbox.refreshedAt();
+    return refreshedAt === null ? null : updatedLabel(refreshedAt, this.tick());
+  });
+
+  constructor() {
+    const timer = setInterval(() => void this.refresh(), POLL_INTERVAL_MS);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
 
   protected setFilter(filter: InboxFilter): void {
     this.navigate({ filtro: filter === 'aguardando' ? null : filter });
@@ -140,6 +176,46 @@ export class ApprovalsPage {
     afterNextRender(() => document.getElementById('selecionar-todos')?.focus(), {
       injector: this.injector,
     });
+  }
+
+  /**
+   * Consulta os pedidos de novo. Pula se a aba está escondida, se a tela não está pronta ou se a
+   * consulta anterior ainda não voltou.
+   */
+  private async refresh(): Promise<void> {
+    if (this.refreshing || this.document.hidden || this.inbox.state() !== 'ready') return;
+    this.refreshing = true;
+    // Pedidos aguardando na tela agora: se outra pessoa decidir, eles ficam e mostram quem decidiu.
+    const onScreen = this.cards()
+      .filter((card) => card.canDecide)
+      .map((card) => card.id);
+    try {
+      const added = await this.inbox.poll();
+      this.refreshFailed.set(false);
+      const stillPending = new Set(
+        this.inbox
+          .items()
+          .filter((item) => item.request.status === 'aguardando_gestor')
+          .map((item) => item.request.id),
+      );
+      this.actions.keep(onScreen.filter((id) => !stillPending.has(id)));
+      const arrived = added.filter((item) => item.request.status === 'aguardando_gestor');
+      if (arrived.length > 0) {
+        this.newIds.update((ids) => new Set([...ids, ...arrived.map((i) => i.request.id)]));
+        this.announcement.set(
+          arrivalMessage(
+            arrived.map((i) => ({
+              employeeName: i.employee.name,
+              requestedEnd: i.request.requestedEnd,
+            })),
+          ),
+        );
+      }
+    } catch {
+      this.refreshFailed.set(true);
+    } finally {
+      this.refreshing = false;
+    }
   }
 
   private navigate(queryParams: Record<string, string | null>): void {

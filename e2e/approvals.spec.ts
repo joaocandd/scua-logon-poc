@@ -252,6 +252,40 @@ test('no celular, o aviso fica acima da barra inferior', async ({ page, isMobile
   expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(navBox!.y);
 });
 
+test.describe('ao vivo', () => {
+  test('?demo=ao-vivo: pedido novo a cada 30 s, marcado e anunciado com discrição', async ({
+    page,
+  }) => {
+    // Relógio falso: o tempo corre normalmente, e o teste pode pular 30 s de uma vez.
+    await page.clock.install();
+    await openWithRequests(page, '/aprovacoes?demo=ao-vivo');
+    await expect(page.getByText(/Atualizado (agora|há \d+ s)/)).toBeVisible();
+    await expect(card(page, 'Felipe Guimarães')).toHaveCount(0);
+
+    await page.clock.fastForward('00:31');
+
+    const felipe = card(page, 'Felipe Guimarães');
+    await expect(felipe).toBeVisible();
+    await expect(felipe).toContainText('Novo');
+    await expect(page.getByRole('status').filter({ hasText: 'Novo pedido' })).toHaveText(
+      'Novo pedido de Felipe Guimarães, até 18h.',
+    );
+    await expect(page.getByText('Atualizado agora')).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Aprovações 9 pendentes$/ })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test('sem ?demo=ao-vivo, nenhum pedido novo chega', async ({ page }) => {
+    await page.clock.install();
+    await openWithRequests(page);
+
+    await page.clock.fastForward('01:01');
+
+    await expect(page.getByText(/Atualizado (agora|há \d+ s)/)).toBeVisible();
+    await expect(card(page, 'Felipe Guimarães')).toHaveCount(0);
+  });
+});
+
 test.describe('estados da tela', () => {
   test('?simular=vazio: nenhum pedido aguardando', async ({ page }) => {
     await open(page, '/aprovacoes?simular=vazio');

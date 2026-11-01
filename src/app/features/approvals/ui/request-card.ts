@@ -20,6 +20,8 @@ export class RequestCard {
   /** Mostra a caixa de seleção para aprovar em lote. */
   readonly selectable = input(false, { transform: booleanAttribute });
   readonly selected = input(false, { transform: booleanAttribute });
+  /** Chegou enquanto a página estava aberta: mostra a marca "Novo". */
+  readonly isNew = input(false, { transform: booleanAttribute });
 
   readonly selectedChange = output<boolean>();
   readonly approve = output();
