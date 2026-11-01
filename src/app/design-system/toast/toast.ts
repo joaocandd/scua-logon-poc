@@ -19,6 +19,9 @@ type Hold = 'hover' | 'focus';
  * novo substitui o anterior. O tempo para enquanto o mouse ou o foco estão no aviso, para dar
  * tempo de ler e de usar o "Desfazer" (WCAG 2.2.1).
  *
+ * Fica 16 px acima do rodapé. Se houver uma barra fixa lá (a navegação do celular, por exemplo),
+ * defina `--toast-offset` no `:root` com a altura dela, e o aviso sobe.
+ *
  * ```ts
  * this.toast.show({ message: 'Pedido aprovado', undo: () => this.requests.undo(id) });
  * ```
@@ -90,7 +93,8 @@ export class Toast {
     this.overlayRef = createOverlayRef(this.injector, {
       positionStrategy: createGlobalPositionStrategy(this.injector)
         .centerHorizontally()
-        .bottom('var(--space-4)'),
+        // --toast-offset: espaço de uma barra fixa no rodapé que o aviso não pode cobrir.
+        .bottom('calc(var(--space-4) + var(--toast-offset, 0px))'),
       maxWidth: 'calc(100vw - 2 * var(--space-4))',
     });
     this.overlayRef.attach(new ComponentPortal(ToastPanel));

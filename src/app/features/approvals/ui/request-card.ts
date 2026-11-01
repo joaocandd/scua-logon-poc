@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { booleanAttribute, Component, input, output } from '@angular/core';
 import { Button, Icon, IconName, StatusBadge } from '../../../design-system';
 import { CardOutcome, RequestCardView } from '../data/request-card-view';
 
@@ -17,7 +17,11 @@ import { CardOutcome, RequestCardView } from '../data/request-card-view';
 })
 export class RequestCard {
   readonly view = input.required<RequestCardView>();
+  /** Mostra a caixa de seleção para aprovar em lote. */
+  readonly selectable = input(false, { transform: booleanAttribute });
+  readonly selected = input(false, { transform: booleanAttribute });
 
+  readonly selectedChange = output<boolean>();
   readonly approve = output();
   readonly reject = output();
   readonly undo = output();

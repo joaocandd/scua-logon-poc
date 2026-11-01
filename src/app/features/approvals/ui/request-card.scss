@@ -22,7 +22,28 @@
 }
 
 .who {
+  flex: 1;
   min-width: 0;
+}
+
+// Alvo de 44 px em volta da caixa de seleção nativa, que encosta no canto do cartão.
+.select {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin: calc(var(--space-3) * -1) 0 0 calc(var(--space-3) * -1);
+  cursor: pointer;
+
+  input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+    cursor: inherit;
+  }
 }
 
 .name {

@@ -19,6 +19,19 @@
   color: var(--color-text-muted);
 }
 
+// Lista longa rola dentro do diálogo; o título e os botões continuam na tela.
+.items {
+  max-height: 40vh;
+  margin: var(--space-3) 0 0;
+  padding-inline-start: var(--space-6);
+  overflow-y: auto;
+  font-size: var(--text-sm);
+
+  li + li {
+    margin-top: var(--space-1);
+  }
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

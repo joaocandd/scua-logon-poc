@@ -1,6 +1,19 @@
 @let card = view();
 <article class="card" [attr.aria-labelledby]="'pedido-' + card.id">
   <header class="head">
+    @if (selectable()) {
+      <!-- O rótulo inteiro é o alvo de toque (44 px); o texto fica só para o leitor de tela. -->
+      <label class="select">
+        <input
+          #checkbox
+          type="checkbox"
+          [checked]="selected()"
+          [disabled]="card.busy !== null"
+          (change)="selectedChange.emit(checkbox.checked)"
+        />
+        <span class="cdk-visually-hidden">Selecionar o pedido de {{ card.employeeName }}</span>
+      </label>
+    }
     <div class="who">
       <h2 class="name" [id]="'pedido-' + card.id">{{ card.employeeName }}</h2>
       <p class="meta">{{ card.groupName }} · {{ card.day }}</p>

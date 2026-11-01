@@ -36,7 +36,8 @@ const meta: Meta<ConfirmDialogDemo> = {
       description: {
         component: [
           'Serviço que abre um diálogo de confirmação acessível, no lugar do `confirm()` nativo:',
-          '`await confirmDialog.open({ title, message, confirmLabel, variant })` devolve `true` ou `false`.',
+          '`await confirmDialog.open({ title, message, items, confirmLabel, variant })` devolve `true` ou `false`.',
+          '`items` lista o que a ação afeta, como os pedidos de uma aprovação em lote.',
           'Foco preso no diálogo e começando em "Cancelar"; Esc fecha; o foco volta ao botão que abriu.',
         ].join(' '),
       },
@@ -59,6 +60,24 @@ export const Confirmacao: Story = {
     options: {
       title: 'Aprovar 3 pedidos?',
       message: 'Ana Ribeiro, Bruno Lima e Carla Souza vão poder trabalhar até o horário pedido.',
+      confirmLabel: 'Aprovar 3 pedidos',
+    },
+  },
+};
+
+export const ComLista: Story = {
+  name: 'Com lista',
+  args: {
+    trigger: 'Aprovar selecionados',
+    options: {
+      title: 'Aprovar 3 pedidos?',
+      message:
+        'Cada pessoa vai poder trabalhar até o horário pedido. Confira os alertas antes de aprovar.',
+      items: [
+        'Lucas Bittencourt: até 19h30 (+2h30) · Passa de 2 h extras no dia',
+        'Larissa Fontes: até 18h30 (+1h30)',
+        'Jéssica Moura: até 23h (+1h)',
+      ],
       confirmLabel: 'Aprovar 3 pedidos',
     },
   },

@@ -73,18 +73,58 @@
         }
       </app-empty-state>
     } @else {
+      @if (selectableCount() > 1) {
+        <div class="bulk">
+          <label class="select-all">
+            <input
+              #all
+              id="selecionar-todos"
+              type="checkbox"
+              [checked]="allSelected()"
+              [indeterminate]="selectedCards().length > 0 && !allSelected()"
+              (change)="selectAll(all.checked)"
+            />
+            <span>Selecionar todos ({{ selectableCount() }})</span>
+          </label>
+        </div>
+      }
+
       <ul class="list">
         @for (card of cards(); track card.id) {
           <li>
             <app-request-card
               [view]="card"
-              (approve)="approve(card.id)"
-              (reject)="reject(card.id)"
-              (undo)="undo(card.id)"
+              [selectable]="card.canDecide && selectableCount() > 1"
+              [selected]="actions.selected().has(card.id)"
+              (selectedChange)="actions.select(card.id, $event)"
+              (approve)="actions.approve(card.id)"
+              (reject)="actions.reject(card.id, summaryOf(card))"
+              (undo)="actions.undo(card.id)"
             />
           </li>
         }
       </ul>
+
+      @if (selectedCards().length; as count) {
+        <!-- Fica presa ao rodapé (acima da barra inferior no celular) enquanto há seleção. -->
+        <section class="batch-bar" aria-label="Pedidos selecionados">
+          <p class="batch-count">
+            <strong>{{ count }}</strong>
+            {{ count === 1 ? 'pedido selecionado' : 'pedidos selecionados' }}
+          </p>
+          <button app-button type="button" variant="ghost" (click)="clearSelection()">
+            Limpar
+          </button>
+          <button
+            app-button
+            type="button"
+            icon="check"
+            (click)="actions.approveMany(selectedCards())"
+          >
+            Aprovar selecionados
+          </button>
+        </section>
+      }
     }
   }
 }

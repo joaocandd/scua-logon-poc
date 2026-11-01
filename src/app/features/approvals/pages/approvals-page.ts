@@ -1,5 +1,4 @@
-import { Dialog } from '@angular/cdk/dialog';
-import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { afterNextRender, Component, computed, inject, Injector } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -10,53 +9,44 @@ import {
   FieldControl,
   PageHeader,
   Skeleton,
-  Toast,
 } from '../../../design-system';
-import { apiErrorMessage, apiErrorStatus } from '../../../shared/api-error';
 import { toLocal } from '../../../shared/date';
 import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
-import {
-  ApprovalInbox,
-  INBOX_FILTERS,
-  InboxFilter,
-  InboxItem,
-  visibleItems,
-} from '../data/approval-inbox';
-import { CardSession, toCardView } from '../data/request-card-view';
-import { RejectDialog, REJECT_DIALOG_TITLE_ID, RejectDialogData } from '../ui/reject-dialog';
+import { ApprovalInbox, INBOX_FILTERS, InboxFilter, visibleItems } from '../data/approval-inbox';
+import { toCardView } from '../data/request-card-view';
 import { RequestCard } from '../ui/request-card';
+import { ApprovalActions, summaryOf } from './approval-actions';
 
 /**
- * Caixa de aprovações (fluxo A, /aprovacoes): o gestor aprova com um toque ou recusa com motivo.
- * Celular primeiro: uma coluna de cartões.
+ * Caixa de aprovações (fluxo A, /aprovacoes): o gestor aprova com um toque, recusa com motivo ou
+ * aprova vários de uma vez. Celular primeiro: uma coluna de cartões.
  *
  * Depois de decidir, o próprio cartão mostra o resultado e o "Desfazer", e o foco vai para esse
- * botão; o aviso (toast) também oferece "Desfazer" por 10 s. O cartão decidido continua na tela
- * enquanto a pessoa estiver na página, mesmo que não combine mais com o filtro.
+ * botão; o aviso (toast) também oferece "Desfazer" por 10 s. As ações e o estado de cada cartão
+ * ficam no ApprovalActions, fornecido aqui.
  *
  * Filtros na URL (?filtro=decididos-hoje&grupo=grp-comercial): dá para compartilhar e voltar.
  */
 @Component({
   selector: 'app-approvals-page',
   imports: [Button, EmptyState, ErrorState, Field, FieldControl, PageHeader, RequestCard, Skeleton],
+  providers: [ApprovalActions],
   templateUrl: './approvals-page.html',
   styleUrl: './approvals-page.scss',
 })
 export class ApprovalsPage {
   protected readonly inbox = inject(ApprovalInbox);
+  protected readonly actions = inject(ApprovalActions);
   private readonly people = inject(People);
-  private readonly toast = inject(Toast);
-  private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
 
   protected readonly filters = INBOX_FILTERS;
+  protected readonly summaryOf = summaryOf;
   /** Para os textos com hora ("Expira em 20 min"). */
   private readonly now = injectNow(30_000);
-  /** Cartões com ação em andamento ou decididos nesta visita. */
-  private readonly session = signal<ReadonlyMap<string, CardSession>>(new Map());
 
   private readonly query = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
@@ -72,7 +62,7 @@ export class ApprovalsPage {
 
   protected readonly cards = computed(() => {
     const now = this.now();
-    const session = this.session();
+    const session = this.actions.session();
     const items = visibleItems(this.inbox.items(), {
       filter: this.filter(),
       groupId: this.groupId(),
@@ -84,6 +74,19 @@ export class ApprovalsPage {
       toCardView(item, { ...options, session: session.get(item.request.id) }),
     );
   });
+
+  /** Cartões que dá para marcar para aprovar em lote: os que aguardam o gestor, sem ação em curso. */
+  private readonly selectable = computed(() =>
+    this.cards().filter((card) => card.canDecide && card.busy === null),
+  );
+  /** Selecionados entre os que estão na tela. Trocar o filtro não aprova nada escondido. */
+  protected readonly selectedCards = computed(() =>
+    this.selectable().filter((card) => this.actions.selected().has(card.id)),
+  );
+  protected readonly selectableCount = computed(() => this.selectable().length);
+  protected readonly allSelected = computed(
+    () => this.selectableCount() > 0 && this.selectedCards().length === this.selectableCount(),
+  );
 
   /** Quantos aguardam o gestor no grupo escolhido, ao lado do filtro "Aguardando". */
   protected readonly pendingCount = computed(
@@ -124,124 +127,17 @@ export class ApprovalsPage {
     this.navigate({ grupo: groupId || null });
   }
 
-  protected async approve(id: string): Promise<void> {
-    const item = this.itemOf(id);
-    if (!item) return;
-    this.patch(id, { busy: 'approve' });
-    try {
-      const updated = await this.inbox.approve(id);
-      this.patch(id, { busy: null, decidedHere: true, undoError: undefined });
-      this.focus(`desfazer-${id}`);
-      const next = updated.status === 'aguardando_rh' ? ' Agora vai para a validação do RH.' : '';
-      this.toast.show({
-        message: `Pedido de ${item.employee.name} aprovado.${next}`,
-        undo: () => void this.undo(id),
-      });
-    } catch (error) {
-      await this.decisionFailed(id, error, 'Não conseguimos aprovar o pedido. Tente de novo.');
-    }
+  protected selectAll(selected: boolean): void {
+    this.actions.selectAll(
+      this.selectable().map((card) => card.id),
+      selected,
+    );
   }
 
-  protected reject(id: string): void {
-    const item = this.itemOf(id);
-    if (!item) return;
-    const card = this.cards().find((c) => c.id === id);
-    let focusAfterClose: string | null = null;
-    const data: RejectDialogData = {
-      employeeName: item.employee.name,
-      summary: `${card?.until} (${card?.extra}) · ${item.request.reason}`,
-      submit: async (reason) => {
-        try {
-          await this.inbox.reject(id, reason);
-          this.patch(id, { busy: null, decidedHere: true, undoError: undefined });
-          focusAfterClose = `desfazer-${id}`;
-          this.toast.show({
-            message: `Pedido de ${item.employee.name} recusado.`,
-            undo: () => void this.undo(id),
-          });
-          return null;
-        } catch (error) {
-          if (apiErrorStatus(error) !== 409) {
-            return apiErrorMessage(error, 'Não conseguimos recusar o pedido. Tente de novo.');
-          }
-          // Outra pessoa decidiu antes: o diálogo fecha e o cartão mostra quem decidiu.
-          await this.decidedElsewhere(id, error);
-          focusAfterClose = `resultado-${id}`;
-          return null;
-        }
-      },
-    };
-    const ref = this.dialog.open<boolean, RejectDialogData>(RejectDialog, {
-      data,
-      ariaLabelledBy: REJECT_DIALOG_TITLE_ID,
-      maxWidth: 'calc(100vw - 2 * var(--space-4))',
-      restoreFocus: true,
-    });
-    // O diálogo devolve o foco ao "Recusar", que some quando o cartão mostra o resultado.
-    ref.closed.subscribe(() => {
-      if (focusAfterClose) this.focus(focusAfterClose);
-    });
-  }
-
-  protected async undo(id: string): Promise<void> {
-    const item = this.itemOf(id);
-    if (!item) return;
-    this.patch(id, { busy: 'undo' });
-    try {
-      await this.inbox.undo(id);
-      this.patch(id, { busy: null, decidedHere: false, undoError: undefined });
-      this.focus(`aprovar-${id}`);
-      this.toast.show({
-        message: `Decisão desfeita. O pedido de ${item.employee.name} voltou a aguardar.`,
-      });
-    } catch (error) {
-      const blocked = apiErrorStatus(error) === 409;
-      const message = apiErrorMessage(error, 'Não conseguimos desfazer. Tente de novo.');
-      // Se a API disse que não dá mais (o RH decidiu ou o pedido venceu), o botão some e o cartão
-      // explica por quê; o foco vai para o resultado.
-      this.patch(id, { busy: null, ...(blocked && { undoError: message }) });
-      if (blocked) {
-        this.focus(`resultado-${id}`);
-        await this.inbox.refresh(id).catch(() => undefined);
-      }
-      this.toast.show({ message });
-    }
-  }
-
-  private async decisionFailed(id: string, error: unknown, fallback: string): Promise<void> {
-    if (apiErrorStatus(error) === 409) {
-      await this.decidedElsewhere(id, error);
-      this.focus(`resultado-${id}`);
-      return;
-    }
-    this.patch(id, { busy: null });
-    this.toast.show({ message: apiErrorMessage(error, fallback) });
-  }
-
-  /**
-   * Outra pessoa decidiu antes (409): busca o pedido de novo e o cartão fica na tela mostrando
-   * "Aprovado por Marina às 18h03", sem os botões.
-   */
-  private async decidedElsewhere(id: string, error: unknown): Promise<void> {
-    this.patch(id, { busy: null, decidedHere: false });
-    this.toast.show({ message: apiErrorMessage(error) });
-    await this.inbox.refresh(id).catch(() => undefined);
-  }
-
-  private itemOf(id: string): InboxItem | undefined {
-    return this.inbox.items().find((item) => item.request.id === id);
-  }
-
-  private patch(id: string, changes: Partial<CardSession>): void {
-    this.session.update((sessions) => {
-      const current = sessions.get(id) ?? { decidedHere: false, busy: null };
-      return new Map(sessions).set(id, { ...current, ...changes });
-    });
-  }
-
-  /** Move o foco depois que a tela mostrar o elemento novo. */
-  private focus(elementId: string): void {
-    afterNextRender(() => document.getElementById(elementId)?.focus(), {
+  /** "Limpar" some com a barra: o foco volta para "Selecionar todos". */
+  protected clearSelection(): void {
+    this.actions.selectAll([], false);
+    afterNextRender(() => document.getElementById('selecionar-todos')?.focus(), {
       injector: this.injector,
     });
   }

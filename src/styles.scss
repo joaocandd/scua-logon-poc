@@ -137,6 +137,14 @@ a {
   outline: none;
 }
 
+// O aviso (Toast) fica no overlay, fora da casca. Abaixo de 64em, enquanto a casca mostra a barra
+// inferior (4rem, --bottom-nav-height em core/layout/app-shell.scss), o aviso sobe acima dela.
+@media (max-width: 63.999em) {
+  :root:has(app-bottom-nav) {
+    --toast-offset: 4rem;
+  }
+}
+
 // Menos movimento para quem pediu isso no sistema operacional.
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -6,6 +6,8 @@ import { ConfirmDialogPanel } from './confirm-dialog-panel';
 export interface ConfirmOptions {
   title: string;
   message?: string;
+  /** Lista do que a ação vai afetar, como os pedidos de "Aprovar 3 pedidos". Vem depois da mensagem. */
+  items?: readonly string[];
   /** Diz a ação, como "Aprovar 3 pedidos" ou "Excluir regra". Nunca "OK" ou "Sim". */
   confirmLabel: string;
   cancelLabel?: string;
@@ -45,7 +47,7 @@ export class ConfirmDialog {
       data,
       role: 'alertdialog',
       ariaLabelledBy: data.titleId,
-      ariaDescribedBy: options.message ? data.messageId : null,
+      ariaDescribedBy: options.message || options.items?.length ? data.messageId : null,
       // O foco começa em "Cancelar", a opção menos destrutiva (padrão ARIA de alertdialog).
       autoFocus: '[data-autofocus]',
       restoreFocus: true,

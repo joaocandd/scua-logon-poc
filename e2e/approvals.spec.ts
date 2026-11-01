@@ -168,6 +168,90 @@ test('filtro por grupo fica na URL', async ({ page }) => {
   await expect(card(page, 'Lucas Bittencourt')).toHaveCount(0);
 });
 
+test.describe('aprovar em lote', () => {
+  const checkbox = (page: Page, name: string) =>
+    page.getByRole('checkbox', { name: `Selecionar o pedido de ${name}` });
+
+  test('confirma quantos e quais, aprova e desfaz pelo aviso', async ({ page }) => {
+    await openWithRequests(page);
+    await checkbox(page, 'Jéssica Moura').check();
+    await checkbox(page, 'Mateus Farias').check();
+
+    const bar = page.getByRole('region', { name: 'Pedidos selecionados' });
+    await expect(bar).toContainText('2 pedidos selecionados');
+    await bar.getByRole('button', { name: 'Aprovar selecionados' }).click();
+
+    const dialog = page.getByRole('alertdialog', { name: 'Aprovar 2 pedidos?' });
+    await expect(dialog.getByRole('listitem')).toHaveText([
+      'Jéssica Moura: até 23h (+1h)',
+      'Mateus Farias: até 23h30 (+1h30) · Quebra o descanso de 11 h entre jornadas',
+    ]);
+    await expect(dialog).toContainText('Confira os alertas antes de aprovar.');
+    await expectNoA11yViolations(page);
+    await dialog.getByRole('button', { name: 'Aprovar 2 pedidos' }).click();
+
+    await expect(card(page, 'Jéssica Moura')).toContainText(/Aprovado às/);
+    await expect(card(page, 'Mateus Farias')).toContainText(/Aprovado às/);
+    await expect(bar).toBeHidden();
+    await expect(toast(page)).toContainText('2 pedidos aprovados.');
+    await expect(
+      page.getByRole('button', { name: 'Desfazer a decisão sobre Jéssica Moura' }),
+    ).toBeFocused();
+
+    await toast(page).getByRole('button', { name: 'Desfazer' }).click();
+
+    await expect(toast(page)).toContainText(
+      'Decisões desfeitas. Os 2 pedidos voltaram a aguardar.',
+    );
+    await expect(card(page, 'Jéssica Moura')).not.toContainText('Aprovado às');
+    await expect(card(page, 'Mateus Farias')).not.toContainText('Aprovado às');
+  });
+
+  test('cancelar a confirmação não aprova nada', async ({ page }) => {
+    await openWithRequests(page);
+    await checkbox(page, 'Jéssica Moura').check();
+    await checkbox(page, 'Lucas Bittencourt').check();
+    await page.getByRole('button', { name: 'Aprovar selecionados' }).click();
+
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Cancelar' }).click();
+
+    await expect(card(page, 'Jéssica Moura')).not.toContainText('Aprovado');
+    await expect(page.getByRole('region', { name: 'Pedidos selecionados' })).toContainText(
+      '2 pedidos selecionados',
+    );
+  });
+
+  test('"Selecionar todos" e "Limpar"', async ({ page }) => {
+    await openWithRequests(page);
+    const all = page.getByRole('checkbox', { name: /^Selecionar todos \(\d+\)$/ });
+
+    await all.check();
+    await expect(checkbox(page, 'Lucas Bittencourt')).toBeChecked();
+    const bar = page.getByRole('region', { name: 'Pedidos selecionados' });
+    await expect(bar).toContainText(/\d+ pedidos selecionados/);
+    await expectNoA11yViolations(page);
+
+    await bar.getByRole('button', { name: 'Limpar' }).click();
+
+    await expect(bar).toBeHidden();
+    await expect(all).not.toBeChecked();
+    await expect(all).toBeFocused();
+  });
+});
+
+test('no celular, o aviso fica acima da barra inferior', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'A barra inferior só aparece abaixo de 1024 px');
+  await openWithRequests(page);
+  await card(page, 'Jéssica Moura')
+    .getByRole('button', { name: 'Aprovar o pedido de Jéssica Moura' })
+    .click();
+  await expect(toast(page)).toBeVisible();
+
+  const toastBox = await toast(page).locator('section').boundingBox();
+  const navBox = await page.getByRole('navigation', { name: 'Principal' }).boundingBox();
+  expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(navBox!.y);
+});
+
 test.describe('estados da tela', () => {
   test('?simular=vazio: nenhum pedido aguardando', async ({ page }) => {
     await open(page, '/aprovacoes?simular=vazio');
