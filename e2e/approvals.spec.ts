@@ -131,6 +131,31 @@ test('recusar pede o motivo e o cartão mostra a recusa', async ({ page }) => {
   await expect(toast(page)).toContainText('Pedido de Lucas Bittencourt recusado.');
 });
 
+test('recusar e desfazer só com o teclado', async ({ page }) => {
+  await openWithRequests(page);
+  const jessica = card(page, 'Jéssica Moura');
+  const reject = jessica.getByRole('button', { name: 'Recusar o pedido de Jéssica Moura' });
+  await reject.focus();
+
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog', { name: 'Recusar o pedido de Jéssica Moura?' });
+  await expect(dialog.getByLabel('Motivo da recusa')).toBeFocused();
+  await page.keyboard.type('Fila coberta pelo turno da noite');
+  await page.keyboard.press('Tab'); // Cancelar
+  await page.keyboard.press('Tab'); // Recusar pedido
+  await expect(dialog.getByRole('button', { name: 'Recusar pedido' })).toBeFocused();
+  await page.keyboard.press('Enter');
+
+  const undo = jessica.getByRole('button', { name: 'Desfazer a decisão sobre Jéssica Moura' });
+  await expect(undo).toBeFocused();
+  await expect(jessica).toContainText('Motivo: Fila coberta pelo turno da noite');
+  await page.keyboard.press('Enter');
+
+  await expect(
+    jessica.getByRole('button', { name: 'Aprovar o pedido de Jéssica Moura' }),
+  ).toBeFocused();
+});
+
 test('Esc fecha o diálogo de recusa sem recusar', async ({ page }) => {
   await openWithRequests(page);
   const lucas = card(page, 'Lucas Bittencourt');
