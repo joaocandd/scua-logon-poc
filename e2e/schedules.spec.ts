@@ -193,6 +193,28 @@ test('intervalo sem horário só vira erro depois de "Salvar regra"', async ({ p
   await expectNoA11yViolations(page);
 });
 
+test('avisos: a prévia mostra o aviso que o colaborador vê', async ({ page }) => {
+  await page.goto('/regras/nova');
+  const warnings = page.getByRole('region', { name: 'Avisos antes do bloqueio' });
+  const option = (name: string) => warnings.getByRole('checkbox', { name, exact: true });
+  await expect(option('15 min')).toBeChecked();
+  await expect(option('5 min')).toBeChecked();
+  await expect(warnings).toContainText('Sua estação bloqueia às 17h');
+  await expect(warnings).toContainText('Faltam 15 min para o fim da sua jornada.');
+  await expect(warnings).toContainText('Antes do intervalo Almoço (12h): às 11h45 e às 11h55.');
+
+  await page.getByRole('textbox', { name: 'Nome da regra' }).fill('Plantão');
+  await option('30 min').check();
+  await expect(warnings).toContainText('Faltam 30 min para o fim da jornada Plantão.');
+  await expect(warnings).toContainText(
+    'Antes do fim da jornada (17h): às 16h30, às 16h45 e às 16h55.',
+  );
+  await expectNoA11yViolations(page);
+
+  for (const name of ['30 min', '15 min', '5 min']) await option(name).uncheck();
+  await expect(warnings).toContainText('Sem aviso: a estação bloqueia sem avisar o colaborador.');
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();

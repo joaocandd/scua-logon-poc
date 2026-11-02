@@ -9,9 +9,7 @@
 }
 
 .hint {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  @include section.hint;
 }
 
 // Início e fim lado a lado, também no celular (cabem em 390 px).
@@ -27,21 +25,8 @@
 }
 
 .checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  align-self: flex-start;
-  min-height: var(--control-height);
+  @include section.checkbox;
   font-weight: 600;
-  cursor: pointer;
-
-  input {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0;
-    accent-color: var(--color-primary);
-    cursor: inherit;
-  }
 }
 
 .breaks {
@@ -105,26 +90,7 @@
 }
 
 .problems {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--status-rejected);
-  font-size: var(--text-sm);
-  font-weight: 500;
-
-  li {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-2);
-  }
-
-  app-icon {
-    flex: none;
-    margin-top: 0.15em;
-  }
+  @include section.problems;
 }
 
 // Desktop: nome, início, fim e "Remover" na mesma linha.

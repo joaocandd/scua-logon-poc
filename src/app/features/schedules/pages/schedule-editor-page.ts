@@ -29,9 +29,11 @@ import { newScheduleDraft, ScheduleDraft, toDraft, toSchedule } from '../data/sc
 import { scheduleSchema } from '../data/schedule-form';
 import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
+import { warningPreview } from '../data/schedule-warnings';
 import { WorkSchedules } from '../data/work-schedules';
 import { ScheduleHours } from '../ui/schedule-hours';
 import { ScheduleNameDays } from '../ui/schedule-name-days';
+import { ScheduleWarnings } from '../ui/schedule-warnings';
 
 /** Estado da tela: o de carregamento, ou a regra da URL que não existe. */
 type EditorState = LoadState | 'not-found';
@@ -57,6 +59,7 @@ type EditorState = LoadState | 'not-found';
     RouterLink,
     ScheduleHours,
     ScheduleNameDays,
+    ScheduleWarnings,
     Skeleton,
   ],
   templateUrl: './schedule-editor-page.html',
@@ -151,6 +154,7 @@ export class ScheduleEditorPage {
   private readonly hours = computed(() => checkHours(this.editor().value()));
   protected readonly timeline = computed(() => draftTimeline(this.hours()));
   protected readonly problems = computed(() => this.hours().problems.map((p) => p.message));
+  protected readonly warnings = computed(() => warningPreview(this.editor().value(), this.hours()));
 
   constructor() {
     // Outra regra na mesma tela (pela busca, por exemplo): começa sem erros e sem alterações.

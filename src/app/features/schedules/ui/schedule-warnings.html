@@ -1,0 +1,56 @@
+<section class="section" aria-labelledby="secao-avisos">
+  <h2 id="secao-avisos">Avisos antes do bloqueio</h2>
+
+  <fieldset class="options" aria-describedby="avisos-ajuda">
+    <legend class="legend">Avisar quantos minutos antes</legend>
+    <p id="avisos-ajuda" class="hint">
+      O colaborador recebe um aviso na tela antes de cada intervalo e do fim da jornada. O padrão é
+      15 e 5 minutos.
+    </p>
+    <div class="chips">
+      @for (minutes of options; track minutes) {
+        <label class="chip">
+          <input
+            #box
+            type="checkbox"
+            [checked]="chosen().has(minutes)"
+            (change)="toggle(minutes, box.checked)"
+          />
+          <app-icon class="check" name="check" />
+          <span>{{ minutes }} min</span>
+        </label>
+      }
+    </div>
+  </fieldset>
+
+  <div class="preview">
+    <h3 class="preview-title">O que o colaborador vê</h3>
+    @if (preview(); as preview) {
+      @if (preview.notice; as notice) {
+        <!-- Desenho do aviso do Scua Logon no Windows. É só ilustração: o botão não funciona aqui. -->
+        <figure class="notice">
+          <figcaption class="cdk-visually-hidden">Prévia do aviso</figcaption>
+          <p class="notice-app">
+            <app-icon name="lock_clock" />
+            Scua Logon
+          </p>
+          <p class="notice-title">{{ notice.title }}</p>
+          <p class="notice-body">{{ notice.body }}</p>
+          <span class="notice-action">Pedir extensão</span>
+        </figure>
+        <ul class="times">
+          @for (time of preview.times; track $index) {
+            <li>{{ time }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="hint">
+          Sem aviso: a estação bloqueia sem avisar o colaborador. Marque ao menos um tempo para ele
+          poder salvar o trabalho e pedir extensão.
+        </p>
+      }
+    } @else {
+      <p class="hint">A prévia aparece quando o início e o fim da jornada estiverem certos.</p>
+    }
+  </div>
+</section>

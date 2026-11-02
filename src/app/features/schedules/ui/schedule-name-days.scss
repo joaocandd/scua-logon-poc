@@ -9,20 +9,11 @@
 }
 
 .days {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
+  @include section.fieldset;
 }
 
 .legend {
-  padding: 0;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: var(--leading-tight);
+  @include section.legend;
 }
 
 .required {
@@ -30,70 +21,8 @@
   font-weight: 400;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-// Caixa de seleção nativa, invisível por cima do rótulo: o clique e o teclado continuam dela.
-.chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  min-width: 4rem;
-  min-height: var(--control-height);
-  box-sizing: border-box;
-  padding: 0 var(--space-3);
-  border: var(--border-width) solid var(--color-border-strong);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-weight: 600;
-
-  input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  &:hover {
-    border-color: var(--color-text);
-  }
-
-  &:has(input:focus-visible) {
-    outline: var(--focus-ring-width) solid var(--color-focus-ring);
-    outline-offset: var(--focus-ring-width);
-  }
-
-  // Marcado: fundo primário e ícone de check (nunca só a cor).
-  &:has(input:checked) {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-}
-
-.check {
-  display: none;
-}
-
-.chip:has(input:checked) .check {
-  display: inline-flex;
-}
+@include section.chips;
 
 .error {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin: 0;
-  color: var(--status-rejected);
-  font-size: var(--text-sm);
-  font-weight: 500;
+  @include section.group-error;
 }

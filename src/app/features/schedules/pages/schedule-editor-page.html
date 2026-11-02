@@ -73,6 +73,8 @@
         [problems]="problems()"
       />
 
+      <app-schedule-warnings [warnings]="editor.warningMinutes" [preview]="warnings()" />
+
       <div class="actions">
         <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
       </div>
