@@ -2,6 +2,20 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.5.
 
+## Aprovação pelo link do e-mail (`/aprovacao/:token`)
+
+Página pública que o gestor abre pelo e-mail, sem o menu do app (ADR 0010). Tokens de exemplo da API simulada, em `src/app/mocks/fixtures/approval-tokens.ts`:
+
+| Link | O que mostra |
+|---|---|
+| `/aprovacao/valido-ped-02` | Pedido de Lucas Bittencourt, que passa de 2 h extras no dia |
+| `/aprovacao/valido-ped-04` | Pedido de Mateus Farias, que quebra a interjornada de 11 h |
+| `/aprovacao/expirado-ped-22` | "Este link expirou. O pedido de Ana Ribeiro venceu às 18h30." |
+| `/aprovacao/usado-ped-13` | "Este pedido já foi aprovado por Bianca às …" (a hora depende de quando o app abre) |
+| `/aprovacao/qualquer-outro` | Link inválido |
+
+Também valem `?simular=erro` (o servidor não responde) e `?simular=decidido` (outra pessoa decide antes). Os dados ficam na memória do navegador: recarregar a página volta ao começo.
+
 ## Development server
 
 To start a local development server, run:
