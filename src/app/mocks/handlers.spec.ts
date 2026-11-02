@@ -1,6 +1,6 @@
 import { ActivityEvent, ExtensionRequest, Workstation, WorkSchedule } from '../shared/models';
 import { MockDb } from './db';
-import { handleApiRequest, MockRequest } from './handlers';
+import { decideElsewhereFirst, handleApiRequest, MockRequest } from './handlers';
 
 const NOW = new Date('2026-11-12T10:00:00-03:00'); // quinta-feira de manhã
 
@@ -27,6 +27,29 @@ describe('API simulada', () => {
 
   it('diz quem está usando o app (usuária simulada)', () => {
     expect(get('/api/eu')).toMatchObject({ id: 'col-25', name: 'Renata Albuquerque' });
+  });
+
+  describe('login', () => {
+    it('qualquer usuário e senha, e a conta corporativa, entram como a usuária da demonstração', () => {
+      const renata = { status: 200, body: { id: 'col-25', name: 'Renata Albuquerque' } };
+      expect(
+        call('POST', '/api/sessao', { username: 'marina.alves', password: 'qualquer' }),
+      ).toMatchObject(renata);
+      expect(call('POST', '/api/sessao/corporativa', {})).toMatchObject(renata);
+    });
+
+    it('a senha "erro" simula credencial inválida', () => {
+      expect(call('POST', '/api/sessao', { username: 'marina.alves', password: 'erro' })).toEqual({
+        status: 401,
+        body: { message: 'Usuário ou senha incorretos.' },
+      });
+    });
+
+    it('usuário ou senha vazios não entram', () => {
+      for (const body of [{ username: ' ', password: 'x' }, { username: 'ana' }, null]) {
+        expect(call('POST', '/api/sessao', body).status).toBe(422);
+      }
+    });
   });
 
   it('busca por id e responde 404 com mensagem humana', () => {
@@ -121,6 +144,150 @@ describe('API simulada', () => {
       expect(get<ActivityEvent[]>('/api/historico?pedido=ped-05')[0].summary).toBe(
         'Renata Albuquerque recusou o pedido de Jéssica Moura. Motivo: Fila normalizada.',
       );
+    });
+  });
+
+  describe('decisão de uma etapa', () => {
+    it('o gestor decide quem ainda aguarda o gestor; se outra pessoa passou na frente, 409', () => {
+      // ped-09: Marina já aprovou como gestora; o pedido aguarda o RH.
+      expect(call('POST', '/api/pedidos/ped-09/aprovar', { step: 'gestor' })).toEqual({
+        status: 409,
+        body: { message: 'Este pedido já foi aprovado por Marina às 8h10.' },
+      });
+      expect(call('POST', '/api/pedidos/ped-04/aprovar', { step: 'gestor' }).status).toBe(200);
+    });
+
+    it('?simular=decidido: o gestor da área aprova antes, e a tela recebe 409', () => {
+      const approve = { method: 'POST', url: '/api/pedidos/ped-01/aprovar' };
+      decideElsewhereFirst(db, approve, NOW);
+      expect(call('POST', '/api/pedidos/ped-01/aprovar', { step: 'gestor' })).toEqual({
+        status: 409,
+        body: { message: 'Este pedido já foi aprovado por Marina às 9h58.' },
+      });
+      expect(get<ActivityEvent[]>('/api/historico?pedido=ped-01')[0].summary).toBe(
+        'Marina Couto aprovou o pedido de João Pedro Antunes. Falta a validação do RH.',
+      );
+    });
+
+    it('?simular=decidido não mexe em pedido que já fechou nem em leituras', () => {
+      decideElsewhereFirst(db, { method: 'POST', url: '/api/pedidos/ped-13/aprovar' }, NOW);
+      decideElsewhereFirst(db, { method: 'GET', url: '/api/pedidos/ped-02' }, NOW);
+      expect(get<ExtensionRequest>('/api/pedidos/ped-13').decisions).toHaveLength(1);
+      expect(get<ExtensionRequest>('/api/pedidos/ped-02').status).toBe('aguardando_gestor');
+    });
+  });
+
+  describe('desfazer', () => {
+    it('desfaz a aprovação: o pedido volta a aguardar o gestor e o histórico registra', () => {
+      call('POST', '/api/pedidos/ped-04/aprovar', { step: 'gestor' });
+      const response = call('POST', '/api/pedidos/ped-04/desfazer');
+      expect(response).toMatchObject({
+        status: 200,
+        body: { status: 'aguardando_gestor', decisions: [] },
+      });
+      expect(get<ActivityEvent[]>('/api/historico?pedido=ped-04')[0]).toMatchObject({
+        type: 'decisao_desfeita',
+        actorId: 'col-25',
+        summary: 'Renata Albuquerque desfez a aprovação do pedido de Mateus Farias.',
+      });
+    });
+
+    it('desfaz a recusa, e também a aprovação que foi para o RH', () => {
+      call('POST', '/api/pedidos/ped-05/recusar', { reason: 'Fila normalizada', step: 'gestor' });
+      expect(call('POST', '/api/pedidos/ped-05/desfazer').body).toMatchObject({
+        status: 'aguardando_gestor',
+      });
+      expect(get<ActivityEvent[]>('/api/historico?pedido=ped-05')[0].summary).toBe(
+        'Renata Albuquerque desfez a recusa do pedido de Jéssica Moura.',
+      );
+
+      call('POST', '/api/pedidos/ped-01/aprovar', { step: 'gestor' });
+      expect(call('POST', '/api/pedidos/ped-01/desfazer').body).toMatchObject({
+        status: 'aguardando_gestor',
+        decisions: [],
+      });
+    });
+
+    it('depois que o RH decide, não dá mais', () => {
+      call('POST', '/api/pedidos/ped-01/aprovar', { step: 'gestor' });
+      call('POST', '/api/pedidos/ped-01/aprovar', { step: 'rh' });
+      expect(call('POST', '/api/pedidos/ped-01/desfazer')).toEqual({
+        status: 409,
+        body: { message: 'Não dá mais para desfazer: o RH já validou o pedido.' },
+      });
+    });
+
+    it('depois que o pedido vence, não dá mais', () => {
+      call('POST', '/api/pedidos/ped-04/aprovar', { step: 'gestor' });
+      const expiresAt = get<ExtensionRequest>('/api/pedidos/ped-04').expiresAt;
+      const later = new Date(Date.parse(expiresAt) + 60_000);
+      expect(call('POST', '/api/pedidos/ped-04/desfazer', undefined, later)).toEqual({
+        status: 409,
+        body: { message: 'Não dá mais para desfazer: o pedido venceu às 23h30.' },
+      });
+    });
+
+    it('só desfaz a própria decisão', () => {
+      expect(call('POST', '/api/pedidos/ped-13/desfazer')).toEqual({
+        status: 409,
+        body: { message: 'Não há decisão sua para desfazer neste pedido.' },
+      });
+      expect(call('POST', '/api/pedidos/ped-02/desfazer').status).toBe(409);
+    });
+  });
+
+  describe('modo demo ao vivo', () => {
+    const SECOND = 1000;
+    const at = (seconds: number) => new Date(NOW.getTime() + seconds * SECOND);
+    const requests = (seconds: number) => get<ExtensionRequest[]>('/api/pedidos', at(seconds));
+
+    it('fica desligado por padrão', () => {
+      expect(requests(10 * 60)).toHaveLength(25);
+    });
+
+    it('ligado, um pedido novo chega a cada 30 s, aguardando o gestor', () => {
+      db.startLiveDemo(NOW);
+      expect(requests(29)).toHaveLength(25);
+      const [first] = requests(30).slice(25);
+      expect(first).toMatchObject({
+        id: 'ped-26',
+        employeeId: 'col-10',
+        requestedEnd: '18:00',
+        status: 'aguardando_gestor',
+        createdAt: at(30).toISOString(),
+      });
+      expect(get<ActivityEvent[]>('/api/historico?pedido=ped-26', at(30))[0].summary).toBe(
+        'Felipe Guimarães pediu extensão até 18h (Visita a cliente no fim do dia).',
+      );
+      expect(requests(95)).toHaveLength(28);
+    });
+
+    it('ligar de novo não reinicia a conta; a fila acaba em 10 pedidos', () => {
+      db.startLiveDemo(NOW);
+      db.startLiveDemo(at(20));
+      expect(requests(30)).toHaveLength(26);
+      expect(requests(60 * 60)).toHaveLength(35);
+    });
+
+    it('os pedidos novos são de quem não tem pedido em aberto nem exceção de jornada', () => {
+      const before = get<ExtensionRequest[]>('/api/pedidos');
+      const open = new Set(
+        before.filter((r) => r.status.startsWith('aguardando')).map((r) => r.employeeId),
+      );
+      const withException = new Set(db.data.exceptions.map((e) => e.employeeId));
+      db.startLiveDemo(NOW);
+      const live = requests(60 * 60).slice(25);
+      expect(new Set(live.map((r) => r.employeeId)).size).toBe(live.length);
+      for (const request of live) {
+        expect(open.has(request.employeeId), request.employeeId).toBe(false);
+        expect(withException.has(request.employeeId), request.employeeId).toBe(false);
+      }
+    });
+
+    it('reset desliga o modo ao vivo', () => {
+      db.startLiveDemo(NOW);
+      db.reset(NOW);
+      expect(requests(60)).toHaveLength(25);
     });
   });
 

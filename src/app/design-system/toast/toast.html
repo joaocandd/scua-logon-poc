@@ -1,6 +1,7 @@
-<!-- O anúncio para leitor de tela é feito pelo LiveAnnouncer no serviço; aqui não há região viva. -->
+<!-- O anúncio para leitor de tela é feito pelo LiveAnnouncer no serviço; aqui não há região viva.
+     O aviso fica fora do <main> (no overlay): a região com nome é o landmark dele. -->
 @if (toast.current(); as current) {
-  <div class="toast">
+  <section class="toast" aria-label="Aviso">
     <p class="message">{{ current.message }}</p>
     @if (current.undo) {
       <button app-button type="button" variant="ghost" size="sm" (click)="undo()">Desfazer</button>
@@ -14,5 +15,5 @@
       aria-label="Fechar aviso"
       (click)="close()"
     ></button>
-  </div>
+  </section>
 }

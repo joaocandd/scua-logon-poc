@@ -47,6 +47,21 @@ describe('ConfirmDialog', () => {
     );
   });
 
+  it('mostra a lista do que a ação afeta, dentro da descrição', async () => {
+    const { dialog } = await open({
+      message: 'Cada pessoa vai poder trabalhar até o horário pedido.',
+      items: ['Ana Ribeiro: até 19h', 'Bruno Lima: até 20h'],
+    });
+    const description = document.getElementById(dialog.getAttribute('aria-describedby')!);
+    expect(description?.querySelector('p')?.textContent).toBe(
+      'Cada pessoa vai poder trabalhar até o horário pedido.',
+    );
+    expect(Array.from(description?.querySelectorAll('li') ?? [], (li) => li.textContent)).toEqual([
+      'Ana Ribeiro: até 19h',
+      'Bruno Lima: até 20h',
+    ]);
+  });
+
   it('começa com o foco em "Cancelar"', async () => {
     const { cancel, confirm } = await open();
     expect(cancel.textContent?.trim()).toBe('Cancelar');

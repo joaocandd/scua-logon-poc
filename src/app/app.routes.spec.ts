@@ -32,4 +32,11 @@ describe('Rotas do app', () => {
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe(pageTitle);
     expect(TestBed.inject(Title).getTitle()).toBe(`${pageTitle} · Scua Logon`);
   });
+
+  it('/aprovacoes/:id abre o detalhe dentro da caixa de aprovações', async () => {
+    await harness.navigateByUrl('/aprovacoes/ped-02');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Aprovações');
+    expect(harness.routeNativeElement?.querySelector('app-request-detail-page')).not.toBeNull();
+    expect(TestBed.inject(Title).getTitle()).toBe('Pedido de extensão · Scua Logon');
+  });
 });

@@ -1,0 +1,62 @@
+@let card = view();
+<article class="card" [attr.aria-labelledby]="'pedido-' + card.id">
+  <header class="head">
+    @if (selectable()) {
+      <!-- O rótulo inteiro é o alvo de toque (44 px); o texto fica só para o leitor de tela. -->
+      <label class="select">
+        <input
+          #checkbox
+          type="checkbox"
+          [checked]="selected()"
+          [disabled]="card.busy !== null"
+          (change)="selectedChange.emit(checkbox.checked)"
+        />
+        <span class="cdk-visually-hidden">Selecionar o pedido de {{ card.employeeName }}</span>
+      </label>
+    }
+    <div class="who">
+      <h2 class="name" [id]="'pedido-' + card.id">{{ card.employeeName }}</h2>
+      <p class="meta">{{ card.groupName }} · {{ card.day }}</p>
+    </div>
+    @if (isNew()) {
+      <span class="new-tag">Novo</span>
+    }
+    @if (card.showStatus) {
+      <app-status-badge [status]="card.status" />
+    }
+  </header>
+
+  <p class="until">
+    <strong>{{ card.until }}</strong
+    ><span class="extra">&nbsp;({{ card.extra }})</span>
+  </p>
+  <p class="reason"><span class="cdk-visually-hidden">Motivo: </span>{{ card.reason }}</p>
+
+  @if (card.expires; as expires) {
+    <p class="expires" [class.soon]="expires.soon">
+      <app-icon name="schedule" />
+      <span>{{ expires.text }}</span>
+    </p>
+  }
+
+  <app-request-context-list [view]="card" />
+
+  <app-request-decision
+    [view]="card"
+    (approve)="approve.emit()"
+    (reject)="reject.emit()"
+    (undo)="undo.emit()"
+  />
+
+  <a
+    class="details"
+    [id]="'detalhes-' + card.id"
+    [routerLink]="['/aprovacoes', card.id]"
+    queryParamsHandling="preserve"
+    routerLinkActive="active"
+    [ariaCurrentWhenActive]="true"
+  >
+    Ver detalhes<span class="cdk-visually-hidden"> do pedido de {{ card.employeeName }}</span>
+    <app-icon name="chevron_right" />
+  </a>
+</article>

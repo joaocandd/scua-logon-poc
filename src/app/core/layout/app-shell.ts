@@ -33,7 +33,8 @@ import { UserMenu } from './user-menu';
  * - Ctrl+K ou Cmd+K abre a busca (paleta de comandos) em qualquer página. O código da busca só
  *   é baixado na primeira vez que alguém abre: fica fora do pacote inicial.
  * - Ao trocar de página, o foco vai para o <main>, para quem usa teclado ou leitor de tela
- *   começar pelo conteúdo novo.
+ *   começar pelo conteúdo novo. Se a página nova já pôs o foco dentro do <main> (o título do
+ *   painel de detalhe, por exemplo), a casca não mexe.
  */
 @Component({
   selector: 'app-shell',
@@ -48,6 +49,7 @@ export class AppShell {
   private readonly router = inject(Router);
   private readonly requests = inject(ExtensionRequests);
   private readonly main = viewChild.required<ElementRef<HTMLElement>>('main');
+  private readonly document = inject(DOCUMENT);
 
   protected readonly pendingCount = computed(() => this.requests.pending().length);
   protected readonly paletteOpen = signal(false);
@@ -136,6 +138,14 @@ export class AppShell {
     return ref;
   }
 
+  /** Foco no <main>, a menos que a página já tenha posto o foco em algo dentro dele. */
+  private focusMain(): void {
+    const main = this.main().nativeElement;
+    const active = this.document.activeElement;
+    if (active !== main && main.contains(active)) return;
+    main.focus();
+  }
+
   private focusMainOnPageChange(): void {
     // No primeiro carregamento o foco fica no começo da página, como em qualquer site. Mudar só
     // a query (um filtro, a busca levando a /pessoas?grupo=...) também não move o foco.
@@ -143,7 +153,7 @@ export class AppShell {
     this.router.events.pipe(filter(isNavigationEnd), takeUntilDestroyed()).subscribe((event) => {
       const next = pathOf(event.urlAfterRedirects);
       if (path !== null && next !== path) {
-        afterNextRender(() => this.main().nativeElement.focus(), { injector: this.injector });
+        afterNextRender(() => this.focusMain(), { injector: this.injector });
       }
       path = next;
     });

@@ -1,7 +1,7 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { Component } from '@angular/core';
+import { afterNextRender, Component, ElementRef, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -10,6 +10,16 @@ import { AppShell } from './app-shell';
 
 @Component({ template: '<h1>Página</h1>' })
 class StubPage {}
+
+/** Página que põe o foco no próprio título, como o painel de detalhe do pedido. */
+@Component({ template: '<h1 tabindex="-1">Detalhe</h1>' })
+class FocusingPage {
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+
+  constructor() {
+    afterNextRender(() => this.host.querySelector('h1')?.focus());
+  }
+}
 
 function request(id: string, status: ExtensionRequest['status']): Partial<ExtensionRequest> {
   return { id, status, expiresAt: '2026-11-12T21:00:00.000Z' };
@@ -45,6 +55,7 @@ describe('AppShell', () => {
             children: [
               { path: 'hoje', component: StubPage },
               { path: 'pessoas', component: StubPage },
+              { path: 'detalhe', component: FocusingPage },
             ],
           },
         ]),
@@ -116,6 +127,16 @@ describe('AppShell', () => {
     await harness.navigateByUrl('/pessoas?grupo=grp-ti');
     await harness.fixture.whenStable();
     expect(document.activeElement).toBe(skip);
+  });
+
+  it('se a página nova pôs o foco dentro do <main>, a casca não mexe', async () => {
+    flushOpenRequests();
+    await harness.fixture.whenStable();
+
+    await harness.navigateByUrl('/detalhe');
+    await harness.fixture.whenStable();
+
+    expect(document.activeElement).toBe(main().querySelector('h1'));
   });
 
   it('Ctrl+K abre e fecha a busca', async () => {

@@ -1,0 +1,27 @@
+// Altura de uma linha do texto que o esqueleto substitui, menos o respiro entre linhas.
+:host {
+  display: block;
+  max-width: 100%;
+  height: calc(var(--text-md) * var(--leading-tight));
+  margin-block: calc(var(--text-md) * (var(--leading-body) - var(--leading-tight)) / 2);
+  border-radius: calc(var(--radius-sm) / 2);
+  background: var(--color-border);
+  // Pulsa devagar. Com prefers-reduced-motion, os estilos globais param a animação.
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+:host([data-variant='heading']) {
+  height: calc(var(--text-lg) * var(--leading-tight));
+}
+
+:host([data-variant='block']) {
+  height: var(--control-height);
+  margin-block: 0;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,132 @@
+// Celular primeiro: uma coluna, botões dividindo a largura. Mesmo ponto de quebra da casca (64em).
+:host {
+  display: block;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+}
+
+// Alvo de 44 px em volta da caixa de seleção nativa, que encosta no canto do cartão.
+.select {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  margin: calc(var(--space-3) * -1) 0 0 calc(var(--space-3) * -1);
+  cursor: pointer;
+
+  input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+    cursor: inherit;
+  }
+}
+
+// Pedido que chegou com a página aberta. É texto ("Novo"), não só cor.
+.new-tag {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-highlight-bg);
+  color: var(--color-text-on-highlight);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+}
+
+.meta,
+.reason,
+.until,
+.expires {
+  margin: 0;
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.until {
+  font-size: var(--text-lg);
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.extra {
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+}
+
+.expires {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+
+  // Falta menos de 1 h: cor e peso de atenção, além do texto.
+  &.soon {
+    color: var(--status-pending);
+    font-weight: 600;
+  }
+}
+
+.details {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: var(--space-1);
+  min-height: var(--space-8);
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Alvo de 44 px na tela de toque.
+@media (pointer: coarse) {
+  .details {
+    min-height: var(--control-height);
+  }
+}
+
+// O pedido aberto no painel de detalhe (desktop) fica marcado na lista.
+.card:has(.details.active) {
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-primary);
+}

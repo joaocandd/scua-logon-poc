@@ -6,6 +6,9 @@ const usernameField = (page: Page) => page.getByLabel('Usuário', { exact: true 
 const passwordField = (page: Page) => page.getByLabel('Senha', { exact: true });
 const submitButton = (page: Page) => page.getByRole('button', { name: 'Entrar', exact: true });
 
+/** Todo login da demonstração entra como a aprovadora simulada. */
+const DEMO_USER = 'Renata Albuquerque';
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/entrar');
   // A rota carrega sob demanda: o Tab só faz sentido depois que a tela aparece.
@@ -62,6 +65,8 @@ test('entra só com o teclado', async ({ page }) => {
   await expect(submitButton(page)).toHaveAttribute('aria-busy', 'true');
   await expect(page).toHaveURL(/\/hoje$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Hoje' })).toBeVisible();
+  // Quem entra vira o usuário atual: na demonstração, todo login é a aprovadora simulada.
+  await expect(page.getByRole('button', { name: DEMO_USER })).toBeVisible();
 });
 
 test('credencial inválida: alerta acima do formulário e foco na senha', async ({ page }) => {
@@ -93,6 +98,19 @@ test('entra com a conta corporativa simulada', async ({ page }) => {
 
   await expect(corporate).toHaveAttribute('aria-busy', 'true');
   await expect(page).toHaveURL(/\/hoje$/);
+  await expect(page.getByRole('button', { name: DEMO_USER })).toBeVisible();
+});
+
+test('servidor fora do ar: mensagem humana acima do formulário', async ({ page }) => {
+  await page.goto('/entrar?simular=erro');
+  await usernameField(page).fill('marina.alves');
+  await passwordField(page).fill('qualquer-senha');
+  await submitButton(page).click();
+
+  await expect(page.getByRole('alert')).toHaveText(
+    'Não conseguimos falar com o servidor. Tente de novo em instantes.',
+  );
+  await expect(page).toHaveURL(/\/entrar\?simular=erro$/);
 });
 
 test('"Esqueci minha senha" abre a página de ajuda e volta', async ({ page }) => {

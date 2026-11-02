@@ -1,6 +1,18 @@
 <h2 class="title" [id]="data.titleId">{{ data.title }}</h2>
-@if (data.message) {
-  <p class="message" [id]="data.messageId">{{ data.message }}</p>
+@if (data.message || data.items?.length) {
+  <!-- Mensagem e lista juntas descrevem o diálogo (aria-describedby). -->
+  <div class="description" [id]="data.messageId">
+    @if (data.message) {
+      <p class="message">{{ data.message }}</p>
+    }
+    @if (data.items?.length) {
+      <ul class="items">
+        @for (item of data.items; track $index) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    }
+  </div>
 }
 <div class="actions">
   <button app-button type="button" variant="secondary" data-autofocus (click)="ref.close(false)">

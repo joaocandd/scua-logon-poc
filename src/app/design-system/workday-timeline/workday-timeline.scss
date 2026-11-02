@@ -27,7 +27,15 @@ $hatch: repeating-linear-gradient(
   background: var(--color-accent);
 }
 
-// Divisória entre dois trechos liberados seguidos, como a jornada e a hora extra.
+// Hora extra pedida: pêssego com contorno tracejado. O contorno em --color-primary tem 3:1 ou mais
+// sobre o pêssego e sobre a hachura, nos dois temas.
+.segment.requested {
+  border: calc(var(--border-width) * 2) dashed var(--color-primary);
+  border-radius: calc(var(--radius-sm) / 2);
+  background: var(--color-highlight-bg);
+}
+
+// Divisória entre dois trechos desenhados seguidos, como a jornada e a hora extra.
 .segment.joined {
   border-inline-start: calc(var(--border-width) * 2) solid var(--color-surface);
 }
@@ -100,6 +108,12 @@ $hatch: repeating-linear-gradient(
   &.locked {
     background: $hatch;
     box-shadow: var(--shadow-ring);
+  }
+
+  &.requested {
+    box-sizing: border-box;
+    border: calc(var(--border-width) * 2) dashed var(--color-primary);
+    background: var(--color-highlight-bg);
   }
 
   &.now {

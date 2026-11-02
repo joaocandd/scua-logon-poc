@@ -1,19 +1,28 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { Auth, InvalidCredentialsError, type SessionUser } from './auth';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Employee } from '../../shared/models';
+import { Auth, InvalidCredentialsError } from './auth';
 import { SignInPage } from './sign-in-page';
 
-const MARINA: SessionUser = { username: 'marina.alves', name: 'marina.alves' };
+// Na demonstração, todo login entra como a aprovadora simulada.
+const RENATA: Employee = {
+  id: 'col-25',
+  name: 'Renata Albuquerque',
+  email: 'renata.albuquerque@empresa.example',
+  jobTitle: 'Diretora de operações',
+  groupId: 'grp-operacoes',
+};
 
 describe('SignInPage', () => {
   async function render() {
     // O teste decide quando o "servidor" responde.
-    let response!: { resolve: (user: SessionUser) => void; reject: (error: unknown) => void };
+    let response!: { resolve: (user: Employee) => void; reject: (error: unknown) => void };
     const auth = {
       signIn: vi.fn(
-        () => new Promise<SessionUser>((resolve, reject) => (response = { resolve, reject })),
+        () => new Promise<Employee>((resolve, reject) => (response = { resolve, reject })),
       ),
-      signInWithCorporateAccount: vi.fn(async () => MARINA),
+      signInWithCorporateAccount: vi.fn(async (): Promise<Employee> => RENATA),
     };
     TestBed.configureTestingModule({
       providers: [provideRouter([]), { provide: Auth, useValue: auth }],
@@ -102,7 +111,7 @@ describe('SignInPage', () => {
     expect(auth.signIn).toHaveBeenCalledWith('marina.alves', 'qualquer-senha');
     expect(submit.getAttribute('aria-busy')).toBe('true');
 
-    respond().resolve(MARINA);
+    respond().resolve(RENATA);
     await settle();
 
     expect(navigate).toHaveBeenCalledWith('/hoje');
@@ -122,6 +131,21 @@ describe('SignInPage', () => {
     expect(alert.textContent?.trim()).toBe('Usuário ou senha incorretos. Confira e tente de novo.');
     expect(document.activeElement).toBe(password);
     expect([password.selectionStart, password.selectionEnd]).toEqual([0, 'erro'.length]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('servidor fora do ar: mostra a mensagem da API no alerta e não sai da tela', async () => {
+    const { navigate, alert, username, password, submit, respond, settle } = await render();
+    type(username, 'marina.alves');
+    type(password, 'qualquer-senha');
+
+    submit.click();
+    await settle();
+    const message = 'Não conseguimos falar com o servidor. Tente de novo em instantes.';
+    respond().reject(new HttpErrorResponse({ status: 503, error: { message } }));
+    await settle();
+
+    expect(alert.textContent?.trim()).toBe(message);
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -148,5 +172,19 @@ describe('SignInPage', () => {
 
     expect(auth.signInWithCorporateAccount).toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith('/hoje');
+  });
+
+  it('conta corporativa com o servidor fora do ar: mostra a mensagem e libera o botão', async () => {
+    const { auth, navigate, alert, corporate, settle } = await render();
+    auth.signInWithCorporateAccount.mockRejectedValueOnce(new HttpErrorResponse({ status: 0 }));
+
+    corporate.click();
+    await settle();
+
+    expect(alert.textContent?.trim()).toBe(
+      'Não conseguimos falar com o servidor. Tente de novo em instantes.',
+    );
+    expect(corporate.hasAttribute('aria-busy')).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
   });
 });

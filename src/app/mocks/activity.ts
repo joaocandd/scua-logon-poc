@@ -44,6 +44,25 @@ export function requestDecided(
   };
 }
 
+/** O gestor desfez a própria decisão: o pedido volta a aguardar o gestor. */
+export function decisionUndone(
+  request: ExtensionRequest,
+  decision: ExtensionDecision,
+  employee: Employee,
+  approver: Employee,
+  at: string,
+): NewActivityEvent {
+  const what = decision.outcome === 'aprovado' ? 'a aprovação' : 'a recusa';
+  return {
+    type: 'decisao_desfeita',
+    at,
+    actorId: approver.id,
+    employeeId: employee.id,
+    requestId: request.id,
+    summary: `${approver.name} desfez ${what} do pedido de ${employee.name}.`,
+  };
+}
+
 export function requestExpired(request: ExtensionRequest, employee: Employee): NewActivityEvent {
   return {
     type: 'pedido_expirado',

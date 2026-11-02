@@ -46,6 +46,9 @@ const UI_PAIRS = [
   ...BACKGROUNDS.map((bg) => ['--color-focus-ring', bg]),
   ['--color-focus-ring', '--color-highlight-bg'],
   ...BACKGROUNDS.map((bg) => ['--color-primary', bg]), // contorno do botão primário
+  // Contorno tracejado da hora extra pedida na WorkdayTimeline: sobre o pêssego e a hachura.
+  ['--color-primary', '--color-highlight-bg'],
+  ['--color-primary', '--color-hatch'],
   // Regra do CLAUDE.md: o accent não vai sobre --color-bg-subtle.
   ['--color-accent', '--color-bg'],
   ['--color-accent', '--color-surface'],

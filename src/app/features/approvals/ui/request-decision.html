@@ -1,0 +1,55 @@
+@let card = view();
+@if (card.outcome; as outcome) {
+  <div class="outcome" [attr.data-tone]="outcome.tone">
+    <!-- tabindex="-1": recebe o foco quando o botão clicado some (pedido decidido por outra pessoa). -->
+    <p class="outcome-text" [id]="idPrefix() + 'resultado-' + card.id" tabindex="-1">
+      <app-icon [name]="outcomeIcons[outcome.tone]" />
+      <span>
+        <strong>{{ outcome.text }}</strong>
+        @if (outcome.note) {
+          <span class="note">{{ outcome.note }}</span>
+        }
+      </span>
+    </p>
+    @if (card.undo; as undoState) {
+      @if (undoState.available) {
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          icon="undo"
+          [id]="idPrefix() + 'desfazer-' + card.id"
+          [loading]="card.busy === 'undo'"
+          (click)="undo.emit()"
+        >
+          Desfazer<span class="cdk-visually-hidden"> a decisão sobre {{ card.employeeName }}</span>
+        </button>
+      } @else {
+        <p class="undo-blocked">{{ undoState.reason }}</p>
+      }
+    }
+  </div>
+} @else if (card.canDecide) {
+  <div class="actions">
+    <button
+      app-button
+      type="button"
+      icon="check"
+      [id]="idPrefix() + 'aprovar-' + card.id"
+      [loading]="card.busy === 'approve'"
+      (click)="approve.emit()"
+    >
+      Aprovar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
+    </button>
+    <button
+      app-button
+      type="button"
+      variant="secondary"
+      icon="close"
+      [disabled]="card.busy === 'approve'"
+      (click)="reject.emit()"
+    >
+      Recusar<span class="cdk-visually-hidden"> o pedido de {{ card.employeeName }}</span>
+    </button>
+  </div>
+}

@@ -178,10 +178,12 @@ const REQUESTS: RequestSpec[] = [
     approverId: 'col-25',
   },
   {
+    // Lucas (ped-02) e Larissa (ped-03) já têm hora extra aprovada: a caixa de aprovações mostra
+    // as horas dos últimos 30 dias ao lado do pedido novo.
     id: 'ped-16',
-    employeeId: 'col-10',
+    employeeId: 'col-14',
     requestedEnd: '18:30',
-    reason: 'Fechamento do mês',
+    reason: 'Apresentação para cliente',
     status: 'aprovado',
     shiftsAgo: 1,
   },
@@ -195,7 +197,7 @@ const REQUESTS: RequestSpec[] = [
   },
   {
     id: 'ped-18',
-    employeeId: 'col-13',
+    employeeId: 'col-02',
     requestedEnd: '19:00',
     reason: 'Fechamento do mês',
     status: 'aprovado',
@@ -269,6 +271,23 @@ const REQUESTS: RequestSpec[] = [
   },
 ];
 
+/**
+ * Pedidos do modo demo ao vivo (?demo=ao-vivo), na ordem em que chegam. São de pessoas sem pedido
+ * em aberto e sem exceção de jornada; o da Priscila passa de 2 h extras.
+ */
+const LIVE_REQUESTS: Pick<RequestSpec, 'employeeId' | 'requestedEnd' | 'reason'>[] = [
+  { employeeId: 'col-10', requestedEnd: '18:00', reason: 'Visita a cliente no fim do dia' },
+  { employeeId: 'col-21', requestedEnd: '23:30', reason: 'Atendimento a cliente' },
+  { employeeId: 'col-36', requestedEnd: '20:00', reason: 'Implantação agendada' },
+  { employeeId: 'col-09', requestedEnd: '17:30', reason: 'Reunião com cliente no fim do dia' },
+  { employeeId: 'col-29', requestedEnd: '07:00', reason: 'Passagem de turno' },
+  { employeeId: 'col-22', requestedEnd: '00:30', reason: 'Fila de chamados acima do normal' },
+  { employeeId: 'col-39', requestedEnd: '20:00', reason: 'Folha de pagamento' },
+  { employeeId: 'col-15', requestedEnd: '18:30', reason: 'Retorno a clientes do pós-venda' },
+  { employeeId: 'col-24', requestedEnd: '23:00', reason: 'Auditoria de qualidade' },
+  { employeeId: 'col-05', requestedEnd: '18:00', reason: 'Conciliação bancária' },
+];
+
 const MINUTE = 60_000;
 
 export interface ScenarioContext {
@@ -290,6 +309,21 @@ export function createScenario(context: ScenarioContext): Scenario {
   const requests = REQUESTS.map((spec) => buildRequest(spec, context, calendar));
   const exceptions = buildExceptions(requests, context, calendar);
   return { exceptions, requests, events: buildHistory(requests, context) };
+}
+
+/**
+ * Pedido número `index` do modo demo ao vivo: aguardando o gestor, criado em `context.now`, para a
+ * próxima jornada da pessoa. Nulo quando a fila acaba.
+ */
+export function createLiveRequest(
+  context: ScenarioContext,
+  index: number,
+  id: string,
+): ExtensionRequest | null {
+  const spec = LIVE_REQUESTS[index];
+  if (!spec) return null;
+  const pending: RequestSpec = { ...spec, id, status: 'aguardando_gestor', minutesAgo: 0 };
+  return buildRequest(pending, context, new Calendar(context));
 }
 
 function buildRequest(

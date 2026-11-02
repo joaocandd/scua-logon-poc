@@ -11,12 +11,14 @@ import * as prettier from 'prettier';
 
 const ICONS = [
   'add',
+  'arrow_back',
   'bar_chart',
   'bedtime',
   'brightness_auto',
   'cancel',
   'check',
   'check_circle',
+  'chevron_right',
   'close',
   'coffee',
   'dark_mode',
@@ -25,8 +27,10 @@ const ICONS = [
   'domain',
   'download',
   'error',
+  'event',
   'fact_check',
   'group',
+  'history',
   'hourglass_top',
   'inbox',
   'light_mode',
@@ -42,8 +46,10 @@ const ICONS = [
   'settings',
   'timer_off',
   'today',
+  'undo',
   'visibility',
   'visibility_off',
+  'warning',
 ];
 
 const OUTPUT = new URL('../src/app/design-system/icon/icons.ts', import.meta.url);

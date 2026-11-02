@@ -33,6 +33,12 @@ describe('Toast', () => {
     expect(announce).toHaveBeenCalledWith('Regra salva', 'polite');
   });
 
+  it('fica numa região com nome, já que o overlay está fora do <main>', async () => {
+    const element = await show({ message: 'Regra salva' });
+    expect(element?.tagName).toBe('SECTION');
+    expect(element?.getAttribute('aria-label')).toBe('Aviso');
+  });
+
   it('sem undo, só tem o botão de fechar, com nome acessível', async () => {
     const element = await show({ message: 'Regra salva' });
     const [close] = buttons(element);

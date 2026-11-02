@@ -31,6 +31,16 @@ export const routes: Routes = [
         title: 'Aprovações',
         loadComponent: () =>
           import('./features/approvals/pages/approvals-page').then((m) => m.ApprovalsPage),
+        children: [
+          {
+            path: ':id',
+            title: 'Pedido de extensão',
+            loadComponent: () =>
+              import('./features/approvals/pages/request-detail-page').then(
+                (m) => m.RequestDetailPage,
+              ),
+          },
+        ],
       },
       {
         path: 'regras',

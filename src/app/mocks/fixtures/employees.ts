@@ -2,7 +2,7 @@ import { Employee } from '../../shared/models';
 
 // Nomes inventados. Os e-mails usam o domínio reservado .example, que nunca existe de verdade.
 
-/** Usuária simulada até existir o login: Renata Albuquerque, diretora que aprova todos os grupos. */
+/** Usuária da demonstração: todo login entra como Renata Albuquerque, diretora que aprova todos os grupos. */
 export const CURRENT_USER_ID = 'col-25';
 /** Quem faz a validação do RH nas fixtures: Juliana Prado. */
 export const HR_VALIDATOR_ID = 'col-37';
