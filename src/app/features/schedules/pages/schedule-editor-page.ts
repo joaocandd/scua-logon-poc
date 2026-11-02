@@ -29,6 +29,7 @@ import { isRetrying, LoadState, loadState, retryFailed } from '../data/load-stat
 import { assignmentConflicts, assignmentPreview, groupOptions } from '../data/schedule-assignment';
 import { newScheduleDraft, ScheduleDraft, toDraft, toSchedule } from '../data/schedule-draft';
 import { ScheduleFormContext, scheduleSchema } from '../data/schedule-form';
+import { scheduleSummary } from '../data/schedule-summary';
 import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
 import { warningPreview } from '../data/schedule-warnings';
@@ -37,6 +38,7 @@ import { ScheduleApproval } from '../ui/schedule-approval';
 import { ScheduleAssignmentSection } from '../ui/schedule-assignment';
 import { ScheduleHours } from '../ui/schedule-hours';
 import { ScheduleNameDays } from '../ui/schedule-name-days';
+import { ScheduleSummary } from '../ui/schedule-summary';
 import { ScheduleWarnings } from '../ui/schedule-warnings';
 
 /** Estado da tela: o de carregamento, ou a regra da URL que não existe. */
@@ -65,6 +67,7 @@ type EditorState = LoadState | 'not-found';
     ScheduleAssignmentSection,
     ScheduleHours,
     ScheduleNameDays,
+    ScheduleSummary,
     ScheduleWarnings,
     Skeleton,
   ],
@@ -177,6 +180,10 @@ export class ScheduleEditorPage {
   protected readonly assignment = computed(() =>
     assignmentPreview(this.schedule(), this.employees()),
   );
+  protected readonly summary = computed(() =>
+    scheduleSummary(this.editor().value(), this.hours(), this.assignment()),
+  );
+  protected readonly summaryRest = computed(() => this.summary().slice(1).join(' '));
   protected readonly assignmentProblems = computed(() =>
     assignmentConflicts(this.schedule(), this.employees(), this.others()).map((p) => p.message),
   );

@@ -57,34 +57,52 @@
     </div>
 
     <form class="editor" [formRoot]="editor">
-      <app-schedule-name-days
-        [name]="editor.name"
-        [days]="editor.days"
-        [showErrors]="showFieldErrors()"
-      />
+      <div class="sections">
+        <app-schedule-name-days
+          [name]="editor.name"
+          [days]="editor.days"
+          [showErrors]="showFieldErrors()"
+        />
 
-      <app-schedule-hours
-        [start]="editor.start"
-        [end]="editor.end"
-        [overnight]="editor.overnight"
-        [breaks]="editor.breaks"
-        [showErrors]="showFieldErrors()"
-        [timeline]="timeline()"
-        [problems]="problems()"
-      />
+        <app-schedule-hours
+          [start]="editor.start"
+          [end]="editor.end"
+          [overnight]="editor.overnight"
+          [breaks]="editor.breaks"
+          [showErrors]="showFieldErrors()"
+          [timeline]="timeline()"
+          [problems]="problems()"
+        />
 
-      <app-schedule-warnings [warnings]="editor.warningMinutes" [preview]="warnings()" />
+        <app-schedule-warnings [warnings]="editor.warningMinutes" [preview]="warnings()" />
 
-      <app-schedule-approval [approval]="editor.approval" />
+        <app-schedule-approval [approval]="editor.approval" />
 
-      <app-schedule-assignment
-        [assignment]="editor.assignment"
-        [groups]="groupOptions()"
-        [preview]="assignment()"
-        [problems]="assignmentProblems()"
-      />
+        <app-schedule-assignment
+          [assignment]="editor.assignment"
+          [groups]="groupOptions()"
+          [preview]="assignment()"
+          [problems]="assignmentProblems()"
+        />
+      </div>
 
-      <div class="actions">
+      <!-- Desktop largo: coluna presa ao lado das seções. Abaixo de 80em: depois das seções. -->
+      <aside class="side" aria-labelledby="resumo-titulo">
+        <app-schedule-summary [sentences]="summary()" />
+        <button app-button type="submit" class="side-save" [loading]="editor().submitting()">
+          Salvar regra
+        </button>
+      </aside>
+
+      <!-- Abaixo de 80em: o começo do resumo e "Salvar regra" presos ao rodapé, sempre à vista. -->
+      <div class="save-bar schedule-save-bar">
+        <details class="bar-summary">
+          <summary>
+            <span class="bar-first">{{ summary()[0] }}</span>
+            <span class="bar-more">Ver resumo</span>
+          </summary>
+          <p class="bar-rest">{{ summaryRest() }}</p>
+        </details>
         <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
       </div>
     </form>

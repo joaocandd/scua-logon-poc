@@ -273,6 +273,28 @@ test('a quem se aplica: prévia, conflito com outra regra e quem fica de fora', 
   await expect(row(page, 'Noturna').getByRole('cell').nth(2)).toHaveText(/7/);
 });
 
+test('o resumo em português acompanha cada mudança', async ({ page }) => {
+  await page.goto('/regras/regra-comercial');
+  const summary = page.getByRole('complementary', { name: 'Resumo' });
+  await expect(summary).toContainText(
+    'Seg a sex, das 8h às 17h. Estação bloqueada no intervalo Almoço (12h–13h). Avisos 15 e 5 min antes. Hora extra precisa do gestor e do RH. Vale para 15 colaboradores de 2 grupos.',
+  );
+
+  await page.getByLabel('Fim da jornada').fill('18:00');
+  await page.getByRole('radio', { name: 'Só o gestor' }).check();
+  await expect(summary).toContainText('Seg a sex, das 8h às 18h.');
+  await expect(summary).toContainText('Hora extra precisa só do gestor.');
+
+  // Abaixo de 80em, o começo do resumo e "Salvar regra" ficam presos ao rodapé.
+  if ((page.viewportSize()?.width ?? 0) < 1280) {
+    const bar = page.locator('.save-bar');
+    await expect(bar).toContainText('Seg a sex, das 8h às 18h.');
+    await bar.getByText('Ver resumo').click();
+    await expect(bar).toContainText('Hora extra precisa só do gestor.');
+  }
+  await expectNoA11yViolations(page);
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();
