@@ -1,0 +1,118 @@
+<!-- Fora da casca do app: a página tem o próprio cabeçalho e o próprio <main>. -->
+<header class="top">
+  <p class="wordmark"><span class="brand">Scua</span> Logon</p>
+</header>
+
+<main class="content">
+  @switch (state()) {
+    @case ('carregando') {
+      <h1 class="title">Pedido de hora extra</h1>
+      <p class="cdk-visually-hidden" role="status">Carregando o pedido</p>
+      <div class="loading" aria-hidden="true">
+        <app-skeleton width="45%" />
+        <app-skeleton variant="heading" width="60%" />
+        <app-skeleton width="80%" />
+        <app-skeleton variant="block" />
+        <app-skeleton variant="block" />
+      </div>
+    }
+    @case ('erro') {
+      <h1 class="title">Pedido de hora extra</h1>
+      <app-error-state
+        heading="Não foi possível abrir o pedido"
+        [retrying]="link.isLoading()"
+        (retry)="link.reload()"
+      />
+      <a class="pending-link" routerLink="/entrar" [queryParams]="pendingLink">
+        Ver outros pedidos pendentes
+      </a>
+    }
+    @case ('pronto') {
+      @if (view(); as card) {
+        <h1 class="title">Pedido de {{ card.employeeName }}</h1>
+        <div class="meta-row">
+          <p class="meta">{{ card.groupName }} · {{ card.day }}</p>
+          @if (card.showStatus) {
+            <app-status-badge [status]="card.status" />
+          }
+        </div>
+
+        <p class="until">
+          <strong>{{ card.until }}</strong
+          ><span class="extra">&nbsp;({{ card.extra }})</span>
+        </p>
+        <p class="reason"><span class="label">Motivo:</span> {{ card.reason }}</p>
+        @if (card.expires; as expires) {
+          <p class="expires" [class.soon]="expires.soon">
+            <app-icon name="schedule" />
+            <span>{{ expires.text }}</span>
+          </p>
+        }
+
+        <app-request-context-list [view]="card" />
+
+        <!-- Confirmação da decisão: visível e anunciada. A região existe antes do texto chegar. -->
+        <div role="status">
+          @if (notice(); as current) {
+            <p class="notice" [attr.data-tone]="current.tone">
+              <app-icon [name]="current.tone === 'success' ? 'check_circle' : 'error'" />
+              <span>{{ current.text }}</span>
+            </p>
+          }
+        </div>
+
+        <app-request-decision
+          [view]="card"
+          idPrefix="link-"
+          (approve)="approve()"
+          (reject)="reject()"
+          (undo)="undo()"
+        />
+
+        @if (timeline(); as day) {
+          <section
+            class="section"
+            aria-labelledby="link-linha-do-tempo"
+            [attr.aria-busy]="updating() || null"
+          >
+            <h2 id="link-linha-do-tempo" class="section-title">Linha do tempo do dia</h2>
+            @if (day.segments.length) {
+              <app-workday-timeline
+                [segments]="day.segments"
+                [label]="day.label"
+                [now]="nowMarker()"
+              />
+            }
+            <!-- Enquanto a decisão é salva, as frases de antes não valem mais. -->
+            @if (updating()) {
+              <p class="updating">Atualizando…</p>
+            } @else {
+              <ul class="notes">
+                @for (note of day.notes; track $index) {
+                  <li>{{ note }}</li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        <a class="pending-link" routerLink="/entrar" [queryParams]="pendingLink">
+          Ver outros pedidos pendentes
+        </a>
+      }
+    }
+    @default {
+      @if (closedInfo(); as info) {
+        <section class="closed" aria-labelledby="link-fechado">
+          <span class="closed-icon"><app-icon [name]="info.icon" /></span>
+          <!-- tabindex="-1": recebe o foco quando outra pessoa decide com a página aberta. -->
+          <h1 #closedHeading id="link-fechado" class="title" tabindex="-1">{{ info.title }}</h1>
+          <p class="closed-message">{{ closedMessage() }}</p>
+          <a class="pending-link" routerLink="/entrar" [queryParams]="pendingLink">
+            Ver outros pedidos pendentes
+          </a>
+        </section>
+      }
+    }
+  }
+</main>

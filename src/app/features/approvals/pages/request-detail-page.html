@@ -53,17 +53,26 @@
       (undo)="actions.undo(card.id, 'detalhe')"
     />
 
-    <section class="section" aria-labelledby="detalhe-linha-do-tempo">
+    <section
+      class="section"
+      aria-labelledby="detalhe-linha-do-tempo"
+      [attr.aria-busy]="updating() || null"
+    >
       <h3 id="detalhe-linha-do-tempo" class="section-title">Linha do tempo do dia</h3>
       @if (timeline(); as day) {
         @if (day.segments.length) {
           <app-workday-timeline [segments]="day.segments" [label]="day.label" [now]="nowMarker()" />
         }
-        <ul class="notes">
-          @for (note of day.notes; track $index) {
-            <li>{{ note }}</li>
-          }
-        </ul>
+        <!-- Enquanto a decisão é salva, as frases de antes não valem mais. -->
+        @if (updating()) {
+          <p class="updating">Atualizando…</p>
+        } @else {
+          <ul class="notes">
+            @for (note of day.notes; track $index) {
+              <li>{{ note }}</li>
+            }
+          </ul>
+        }
       }
     </section>
 

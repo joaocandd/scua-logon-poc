@@ -101,6 +101,21 @@ test('entra com a conta corporativa simulada', async ({ page }) => {
   await expect(page.getByRole('button', { name: DEMO_USER })).toBeVisible();
 });
 
+test('?voltar=: depois de entrar, volta para o caminho interno pedido', async ({ page }) => {
+  await page.goto('/entrar?voltar=/aprovacoes');
+  await page.getByRole('button', { name: 'Entrar com conta corporativa' }).click();
+
+  await expect(page).toHaveURL(/\/aprovacoes$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Aprovações' })).toBeVisible();
+});
+
+test('?voltar= para fora do app leva para /hoje', async ({ page }) => {
+  await page.goto('/entrar?voltar=//site.example');
+  await page.getByRole('button', { name: 'Entrar com conta corporativa' }).click();
+
+  await expect(page).toHaveURL(/\/hoje$/);
+});
+
 test('servidor fora do ar: mensagem humana acima do formulário', async ({ page }) => {
   await page.goto('/entrar?simular=erro');
   await usernameField(page).fill('marina.alves');

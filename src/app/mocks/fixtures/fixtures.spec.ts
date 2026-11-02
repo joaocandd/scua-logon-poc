@@ -52,6 +52,20 @@ describe('fixtures', () => {
     expect(data.events.every((e) => !e.actorId || employees.has(e.actorId))).toBe(true);
   });
 
+  it('os tokens do link do e-mail apontam para pedidos que existem e são da usuária simulada', () => {
+    const requests = ids(data.requests);
+    expect(data.tokens.map((t) => t.token)).toEqual([
+      'valido-ped-02',
+      'valido-ped-04',
+      'expirado-ped-22',
+      'usado-ped-13',
+    ]);
+    for (const token of data.tokens) {
+      expect(requests.has(token.requestId), token.token).toBe(true);
+      expect(token.approverId).toBe(CURRENT_USER_ID);
+    }
+  });
+
   it('cada colaborador tem uma regra só; a diretora de operações fica sem regra', () => {
     for (const employee of data.employees) {
       const rules = data.schedules.filter((s) => appliesTo(s, employee));

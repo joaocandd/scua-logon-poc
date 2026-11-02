@@ -17,12 +17,13 @@ import { Button, Icon, Skeleton, StatusBadge, WorkdayTimeline } from '../../../d
 import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox } from '../data/approval-inbox';
-import { toCardView } from '../data/request-card-view';
-import { detailTimeline, historyEntries, nowMarker } from '../data/request-detail';
+import { summaryOf, toCardView } from '../data/request-card-view';
+import { requestTimeline } from '../../../shared/request-timeline';
+import { historyEntries, nowMarker } from '../data/request-detail';
 import { requestHistory } from '../data/request-history';
 import { RequestContextList } from '../ui/request-context-list';
 import { RequestDecision } from '../ui/request-decision';
-import { ApprovalActions, summaryOf } from './approval-actions';
+import { ApprovalActions } from './approval-actions';
 
 /**
  * Detalhe do pedido (/aprovacoes/:id): a linha do tempo do dia (jornada, intervalos, hora extra
@@ -79,8 +80,13 @@ export class RequestDetailPage {
   });
   protected readonly timeline = computed(() => {
     const item = this.item();
-    return item ? detailTimeline(item) : null;
+    return item ? requestTimeline(item.request, item.employee.name, item.shift) : null;
   });
+  /**
+   * A decisão está sendo salva. As frases da linha do tempo ainda são as de antes dela: a tela
+   * mostra "Atualizando…" até a resposta chegar e a linha do tempo ser calculada de novo.
+   */
+  protected readonly updating = computed(() => (this.view()?.busy ?? null) !== null);
   protected readonly nowMarker = computed(() => {
     const item = this.item();
     return item ? nowMarker(item.request.date, this.now()) : undefined;

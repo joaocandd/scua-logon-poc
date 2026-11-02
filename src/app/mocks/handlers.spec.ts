@@ -1,4 +1,10 @@
-import { ActivityEvent, ExtensionRequest, Workstation, WorkSchedule } from '../shared/models';
+import {
+  ActivityEvent,
+  ApprovalLink,
+  ExtensionRequest,
+  Workstation,
+  WorkSchedule,
+} from '../shared/models';
 import { MockDb } from './db';
 import { decideElsewhereFirst, handleApiRequest, MockRequest } from './handlers';
 
@@ -233,6 +239,115 @@ describe('API simulada', () => {
         body: { message: 'Não há decisão sua para desfazer neste pedido.' },
       });
       expect(call('POST', '/api/pedidos/ped-02/desfazer').status).toBe(409);
+    });
+  });
+
+  describe('link do e-mail', () => {
+    const link = (token: string, now = NOW) =>
+      call('GET', `/api/aprovacao/${token}`, undefined, now);
+
+    it('link válido: só o necessário para decidir, com o contexto calculado na API', () => {
+      const response = link('valido-ped-02');
+      expect(response.status).toBe(200);
+      const body = response.body as ApprovalLink;
+      // LGPD: nada de e-mail, cargo, exceções, feriados ou outros pedidos da pessoa.
+      expect(Object.keys(body).sort()).toEqual([
+        'approverId',
+        'context',
+        'employeeName',
+        'groupName',
+        'request',
+        'timeline',
+      ]);
+      expect(body).toMatchObject({
+        employeeName: 'Lucas Bittencourt',
+        groupName: 'Comercial',
+        approverId: 'col-25',
+        request: { id: 'ped-02', status: 'aguardando_gestor' },
+        context: { extraMinutes: 150, recentOvertimeMinutes: 90, needsHrValidation: true },
+      });
+      expect(body.context.alerts.map((a) => a.kind)).toEqual(['limite_diario']);
+      expect(body.timeline.segments).toContainEqual({
+        start: '17:00',
+        end: '19:00',
+        kind: 'requested',
+        label: 'Hora extra pedida',
+      });
+      expect(body.timeline.notes[0]).toBe(
+        'Se aprovar, a estação bloqueia às 19h, no limite de 2 h extras.',
+      );
+    });
+
+    it('o link do ped-04 traz o alerta de interjornada', () => {
+      const body = link('valido-ped-04').body as ApprovalLink;
+      expect(body.context.alerts.map((a) => a.detail)).toEqual([
+        'No dia seguinte, a estação só libera às 10h30, e não às 10h.',
+      ]);
+    });
+
+    it('inválido (404), expirado (410) e já usado por outra pessoa (409), com frases humanas', () => {
+      expect(link('nao-existe')).toEqual({
+        status: 404,
+        body: { message: 'Este link não é válido. Confira se ele veio completo do e-mail.' },
+      });
+      expect(link('expirado-ped-22')).toEqual({
+        status: 410,
+        body: { message: 'Este link expirou. O pedido de Ana Ribeiro venceu às 18h30.' },
+      });
+      expect(link('usado-ped-13')).toEqual({
+        status: 409,
+        body: { message: 'Este pedido já foi aprovado por Bianca às 9h10.' },
+      });
+    });
+
+    it('decide pelas rotas da caixa de aprovações, no nome de quem recebeu o link', () => {
+      const approve = call('POST', '/api/pedidos/ped-04/aprovar', {
+        step: 'gestor',
+        token: 'valido-ped-04',
+      });
+      expect(approve).toMatchObject({
+        status: 200,
+        body: { status: 'aprovado', decisions: [{ step: 'gestor', approverId: 'col-25' }] },
+      });
+      // Quem recebeu o link continua vendo a própria decisão, enquanto dá para desfazer.
+      expect(link('valido-ped-04')).toMatchObject({
+        status: 200,
+        body: { request: { status: 'aprovado' } },
+      });
+      expect(
+        call('POST', '/api/pedidos/ped-04/desfazer', { token: 'valido-ped-04' }).body,
+      ).toMatchObject({ status: 'aguardando_gestor' });
+    });
+
+    it('depois que não dá mais para desfazer, a própria decisão vira "já usado", por você', () => {
+      call('POST', '/api/pedidos/ped-04/aprovar', { step: 'gestor', token: 'valido-ped-04' });
+      const expiresAt = get<ExtensionRequest>('/api/pedidos/ped-04').expiresAt;
+      expect(link('valido-ped-04', new Date(Date.parse(expiresAt) + 60_000))).toEqual({
+        status: 409,
+        body: { message: 'Este pedido já foi aprovado por você às 10h.' },
+      });
+    });
+
+    it('se outra pessoa decide antes, o link vira "já usado"', () => {
+      decideElsewhereFirst(db, { method: 'POST', url: '/api/pedidos/ped-02/aprovar' }, NOW);
+      expect(link('valido-ped-02')).toEqual({
+        status: 409,
+        body: { message: 'Este pedido já foi aprovado por Marina às 9h58.' },
+      });
+    });
+
+    it('o token só vale para o pedido do link', () => {
+      const forbidden = {
+        status: 403,
+        body: { message: 'Este link não vale para este pedido.' },
+      };
+      expect(
+        call('POST', '/api/pedidos/ped-01/aprovar', { step: 'gestor', token: 'valido-ped-02' }),
+      ).toEqual(forbidden);
+      expect(
+        call('POST', '/api/pedidos/ped-02/aprovar', { step: 'gestor', token: 'inventado' }),
+      ).toEqual(forbidden);
+      expect(get<ExtensionRequest>('/api/pedidos/ped-01').status).toBe('aguardando_gestor');
     });
   });
 

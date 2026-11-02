@@ -8,13 +8,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { type FieldTree, form, FormField, FormRoot, required } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 // Direto dos arquivos, não do índice do design system: ver o comentário em design-system/index.ts.
 import { Button } from '../../design-system/button/button';
 import { Field, FieldControl } from '../../design-system/field/field';
 import { Icon } from '../../design-system/icon/icon';
 import { apiErrorMessage } from '../../shared/api-error';
 import { Auth, InvalidCredentialsError } from './auth';
+import { safeReturnUrl } from './return-url';
 import { BrandPanel } from './brand-panel';
 
 interface Credentials {
@@ -22,12 +23,13 @@ interface Credentials {
   password: string;
 }
 
-/** Para onde vai quem acabou de entrar. */
-const HOME_URL = '/hoje';
-
 /**
  * Tela de entrada (/entrar). O formulário usa Signal Forms; o Field e o Button do design system
  * cuidam do rótulo, do erro anunciado e do estado de carregando.
+ *
+ * Depois de entrar, a pessoa vai para `?voltar=` (só caminhos internos do app, ver
+ * safeReturnUrl) ou para /hoje. A página do link do e-mail usa isso para "Ver outros pedidos
+ * pendentes".
  *
  * Erros só aparecem depois da primeira tentativa de envio: quem passa pelos campos com Tab até
  * "Entrar com conta corporativa" não vê erro de campo vazio.
@@ -41,6 +43,10 @@ const HOME_URL = '/hoje';
 export class SignInPage {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+  /** Para onde vai quem acabou de entrar. */
+  private readonly returnUrl = safeReturnUrl(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('voltar'),
+  );
   private readonly injector = inject(Injector);
   private readonly passwordInput = viewChild.required<ElementRef<HTMLInputElement>>('password');
 
@@ -70,7 +76,7 @@ export class SignInPage {
             });
             return;
           }
-          await this.router.navigateByUrl(HOME_URL);
+          await this.router.navigateByUrl(this.returnUrl);
         },
         onInvalid: (fields) => {
           this.formError.set(null);
@@ -97,7 +103,7 @@ export class SignInPage {
     this.corporateLoading.set(true);
     try {
       await this.auth.signInWithCorporateAccount();
-      await this.router.navigateByUrl(HOME_URL);
+      await this.router.navigateByUrl(this.returnUrl);
     } catch (error) {
       this.formError.set(apiErrorMessage(error));
     } finally {

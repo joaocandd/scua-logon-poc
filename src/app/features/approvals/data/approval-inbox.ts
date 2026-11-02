@@ -7,7 +7,8 @@ import { appliesTo, isShift, PlannedShift, plannedShift } from '../../../shared/
 import { People } from '../../people/data/people';
 import { WorkSchedules } from '../../schedules/data/work-schedules';
 import { ExtensionRequests } from './extension-requests';
-import { requestContext, RequestContext } from './request-context';
+import { requestContext, RequestContext } from '../../../shared/request-context';
+import { managerDecision } from '../../../shared/undo-decision';
 
 /** Um pedido com o que a caixa de aprovações precisa para mostrar e decidir. */
 export interface InboxItem {
@@ -190,11 +191,6 @@ export function visibleItems(items: readonly InboxItem[], options: VisibleOption
           .sort((a, b) => b.request.createdAt.localeCompare(a.request.createdAt)),
       ];
   }
-}
-
-/** Decisão do gestor no pedido, se houver. */
-export function managerDecision(request: ExtensionRequest) {
-  return request.decisions.find((d) => d.step === 'gestor');
 }
 
 /** Valor do recurso, ou lista vazia enquanto carrega ou se falhou. */

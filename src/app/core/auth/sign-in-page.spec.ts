@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Employee } from '../../shared/models';
 import { Auth, InvalidCredentialsError } from './auth';
@@ -186,5 +187,39 @@ describe('SignInPage', () => {
     );
     expect(corporate.hasAttribute('aria-busy')).toBe(false);
     expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SignInPage com ?voltar=', () => {
+  /** Abre /entrar com a query dada e entra pela conta corporativa. Devolve para onde foi. */
+  async function signInFrom(url: string): Promise<unknown> {
+    const auth = {
+      signIn: vi.fn(async (): Promise<Employee> => RENATA),
+      signInWithCorporateAccount: vi.fn(async (): Promise<Employee> => RENATA),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'entrar', component: SignInPage }]),
+        { provide: Auth, useValue: auth },
+      ],
+    });
+    const harness = await RouterTestingHarness.create(url);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const corporate = Array.from(
+      (harness.routeNativeElement as HTMLElement).querySelectorAll('button'),
+    ).find((b) => b.textContent?.trim() === 'Entrar com conta corporativa')!;
+
+    corporate.click();
+    await new Promise((resolve) => setTimeout(resolve));
+    await harness.fixture.whenStable();
+    return navigate.mock.calls[0]?.[0];
+  }
+
+  it('volta para o caminho interno pedido', async () => {
+    expect(await signInFrom('/entrar?voltar=%2Faprovacoes')).toBe('/aprovacoes');
+  });
+
+  it('caminho para fora do app vira /hoje', async () => {
+    expect(await signInFrom('/entrar?voltar=%2F%2Fsite.example')).toBe('/hoje');
   });
 });

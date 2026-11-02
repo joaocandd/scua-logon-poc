@@ -2,8 +2,13 @@
 // mesma regra: a API recusa o pedido de desfazer e a tela esconde o botão, com o mesmo motivo.
 
 import { toLocal } from './date';
-import { ExtensionRequest } from './models';
+import { ExtensionDecision, ExtensionRequest } from './models';
 import { formatClock } from './time';
+
+/** Decisão do gestor no pedido, se houver. */
+export function managerDecision(request: ExtensionRequest): ExtensionDecision | undefined {
+  return request.decisions.find((d) => d.step === 'gestor');
+}
 
 /**
  * Por que a decisão do gestor não pode mais ser desfeita, ou nulo se ainda pode. Depois que o RH
