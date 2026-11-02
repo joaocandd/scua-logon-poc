@@ -23,3 +23,11 @@ export const WORKSTATION_STATES = [
 ] as const;
 
 export type WorkstationState = (typeof WORKSTATION_STATES)[number];
+
+/**
+ * Status de uma regra de jornada (WorkSchedule). Sai do `observationMode`: em observação, a regra
+ * registra quem seria bloqueado, sem bloquear.
+ */
+export const SCHEDULE_STATUSES = ['ativa', 'em_observacao'] as const;
+
+export type ScheduleStatus = (typeof SCHEDULE_STATUSES)[number];

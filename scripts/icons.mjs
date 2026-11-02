@@ -35,6 +35,7 @@ const ICONS = [
   'inbox',
   'light_mode',
   'lock',
+  'lock_clock',
   'lock_open',
   'more_horiz',
   'more_time',

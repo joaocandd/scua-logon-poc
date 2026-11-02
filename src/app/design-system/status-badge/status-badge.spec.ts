@@ -1,7 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { EXTENSION_REQUEST_STATUSES, WORKSTATION_STATES } from '../../shared/models/status';
+import {
+  EXTENSION_REQUEST_STATUSES,
+  SCHEDULE_STATUSES,
+  WORKSTATION_STATES,
+} from '../../shared/models/status';
 import { ICONS } from '../icon/icons';
 import { Status, StatusBadge } from './status-badge';
+
+const ALL_STATUSES = [...EXTENSION_REQUEST_STATUSES, ...WORKSTATION_STATES, ...SCHEDULE_STATUSES];
 
 describe('StatusBadge', () => {
   async function render(status: Status) {
@@ -23,6 +29,8 @@ describe('StatusBadge', () => {
     ['he_aprovada', 'Hora extra aprovada', 'approved'],
     ['bloqueada', 'Bloqueada', 'blocked'],
     ['fora_expediente', 'Fora do expediente', 'neutral'],
+    ['ativa', 'Ativa', 'approved'],
+    ['em_observacao', 'Em observação', 'pending'],
   ] as const)('%s mostra "%s" com o tom %s', async (status, label, tone) => {
     const host = await render(status);
     expect(host.textContent?.trim()).toBe(label);
@@ -30,7 +38,7 @@ describe('StatusBadge', () => {
   });
 
   it('tem ícone em todos os status (nunca só a cor)', async () => {
-    for (const status of [...EXTENSION_REQUEST_STATUSES, ...WORKSTATION_STATES]) {
+    for (const status of ALL_STATUSES) {
       const host = await render(status);
       const path = host.querySelector('app-icon path')?.getAttribute('d');
       expect(Object.values(ICONS)).toContain(path);
@@ -38,12 +46,11 @@ describe('StatusBadge', () => {
   });
 
   it('não usa o mesmo ícone para status diferentes', async () => {
-    const statuses = [...EXTENSION_REQUEST_STATUSES, ...WORKSTATION_STATES];
     const paths = new Set<string | null | undefined>();
-    for (const status of statuses) {
+    for (const status of ALL_STATUSES) {
       const host = await render(status);
       paths.add(host.querySelector('app-icon path')?.getAttribute('d'));
     }
-    expect(paths.size).toBe(statuses.length);
+    expect(paths.size).toBe(ALL_STATUSES.length);
   });
 });
