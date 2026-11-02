@@ -7,7 +7,7 @@ import { appliesTo, isShift, PlannedShift, plannedShift } from '../../../shared/
 import { People } from '../../people/data/people';
 import { WorkSchedules } from '../../schedules/data/work-schedules';
 import { ExtensionRequests } from './extension-requests';
-import { requestContext, RequestContext } from './request-context';
+import { requestContext, RequestContext } from '../../../shared/request-context';
 
 /** Um pedido com o que a caixa de aprovações precisa para mostrar e decidir. */
 export interface InboxItem {

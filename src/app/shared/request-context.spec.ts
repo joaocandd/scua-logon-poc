@@ -1,6 +1,6 @@
-import { createFixtures } from '../../../mocks/fixtures';
-import { ExtensionRequest, ScheduleException, WorkSchedule } from '../../../shared/models';
-import { appliesTo } from '../../../shared/schedule-engine';
+import { createFixtures } from '../mocks/fixtures';
+import { ExtensionRequest, ScheduleException, WorkSchedule } from './models';
+import { appliesTo } from './schedule-engine';
 import { requestContext, RequestContextInput } from './request-context';
 
 describe('requestContext', () => {

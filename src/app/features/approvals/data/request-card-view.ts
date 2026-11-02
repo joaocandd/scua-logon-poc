@@ -6,7 +6,7 @@ import { Employee, ExtensionRequest, ExtensionRequestStatus } from '../../../sha
 import { formatClock, formatDuration, MINUTES_PER_DAY, toMinutes } from '../../../shared/time';
 import { undoBlocker } from '../../../shared/undo-decision';
 import { InboxItem, managerDecision } from './approval-inbox';
-import { RequestAlert } from './request-context';
+import { RequestAlert } from '../../../shared/request-context';
 
 /** Ação em andamento num cartão. */
 export type CardBusy = 'approve' | 'reject' | 'undo';

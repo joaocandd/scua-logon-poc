@@ -7,12 +7,14 @@ import {
   ScheduleException,
   WorkSchedule,
 } from '../../shared/models';
+import { APPROVAL_TOKENS, ApprovalToken } from './approval-tokens';
 import { EMPLOYEES } from './employees';
 import { GROUPS } from './groups';
 import { HOLIDAYS } from './holidays';
 import { createScenario } from './scenario';
 import { WORK_SCHEDULES } from './work-schedules';
 
+export type { ApprovalToken } from './approval-tokens';
 export { CURRENT_USER_ID, HR_VALIDATOR_ID } from './employees';
 export { createLiveRequest } from './scenario';
 
@@ -24,6 +26,8 @@ export interface Fixtures {
   exceptions: ScheduleException[];
   requests: ExtensionRequest[];
   events: ActivityEvent[];
+  /** Links de aprovação enviados por e-mail. */
+  tokens: ApprovalToken[];
 }
 
 /** Dados de demonstração, em cópias novas: a API simulada pode alterar à vontade. */
@@ -33,5 +37,6 @@ export function createFixtures(now = new Date()): Fixtures {
   const schedules = structuredClone([...WORK_SCHEDULES]);
   const holidays = structuredClone([...HOLIDAYS]);
   const scenario = createScenario({ now, employees, groups, schedules, holidays });
-  return { employees, groups, schedules, holidays, ...scenario };
+  const tokens = structuredClone([...APPROVAL_TOKENS]);
+  return { employees, groups, schedules, holidays, ...scenario, tokens };
 }

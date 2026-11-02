@@ -18,7 +18,8 @@ import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox } from '../data/approval-inbox';
 import { toCardView } from '../data/request-card-view';
-import { detailTimeline, historyEntries, nowMarker } from '../data/request-detail';
+import { requestTimeline } from '../../../shared/request-timeline';
+import { historyEntries, nowMarker } from '../data/request-detail';
 import { requestHistory } from '../data/request-history';
 import { RequestContextList } from '../ui/request-context-list';
 import { RequestDecision } from '../ui/request-decision';
@@ -79,7 +80,7 @@ export class RequestDetailPage {
   });
   protected readonly timeline = computed(() => {
     const item = this.item();
-    return item ? detailTimeline(item) : null;
+    return item ? requestTimeline(item.request, item.employee.name, item.shift) : null;
   });
   protected readonly nowMarker = computed(() => {
     const item = this.item();

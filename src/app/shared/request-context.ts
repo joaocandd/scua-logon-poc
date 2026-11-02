@@ -1,17 +1,18 @@
-// Contexto para decidir um pedido de extensão: o que a caixa de aprovações (fluxo A) mostra em
-// cada pedido. Funções puras, com as mesmas regras do schedule-engine: no máximo 2 h extras por
-// dia (CLT art. 59) e 11 h de descanso entre jornadas (CLT art. 66).
+// Contexto para decidir um pedido de extensão: alertas e horas extras recentes. Funções puras, com
+// as mesmas regras do schedule-engine: no máximo 2 h extras por dia (CLT art. 59) e 11 h de
+// descanso entre jornadas (CLT art. 66). A caixa de aprovações calcula na tela; a API calcula
+// para a página do link do e-mail, que recebe só o resultado.
 
-import { addDays } from '../../../shared/date';
-import { ExtensionRequest, Holiday, ScheduleException, WorkSchedule } from '../../../shared/models';
+import { addDays } from './date';
+import { ExtensionRequest, Holiday, ScheduleException, WorkSchedule } from './models';
 import {
   afterStart,
   isShift,
   MAX_OVERTIME_MINUTES,
   MIN_REST_MINUTES,
   plannedShift,
-} from '../../../shared/schedule-engine';
-import { formatClock, formatDuration, MINUTES_PER_DAY, toMinutes } from '../../../shared/time';
+} from './schedule-engine';
+import { formatClock, formatDuration, MINUTES_PER_DAY, toMinutes } from './time';
 
 export type RequestAlertKind = 'limite_diario' | 'interjornada';
 

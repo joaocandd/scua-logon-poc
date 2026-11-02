@@ -2,8 +2,17 @@
 // servidor faria. Erros sempre vêm como { message } em português, pronto para a tela.
 
 import { toLocal } from '../shared/date';
-import { ExtensionDecision, ExtensionRequest, Workstation, WorkSchedule } from '../shared/models';
-import { evaluateWorkstation } from '../shared/schedule-engine';
+import {
+  ApprovalLink,
+  Employee,
+  ExtensionDecision,
+  ExtensionRequest,
+  Workstation,
+  WorkSchedule,
+} from '../shared/models';
+import { requestContext } from '../shared/request-context';
+import { requestTimeline } from '../shared/request-timeline';
+import { evaluateWorkstation, isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved } from './activity';
@@ -67,6 +76,8 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
   ['POST', '/api/pedidos/:id/recusar', (context) => decide(context, 'recusado')],
   ['POST', '/api/pedidos/:id/desfazer', undo],
 
+  ['GET', '/api/aprovacao/:token', approvalLink],
+
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
 ];
@@ -112,11 +123,14 @@ function decide(
 ): MockResponse {
   const request = db.data.requests.find((r) => r.id === params['id']);
   const employee = request && db.employee(request.employeeId);
-  const approver = db.employee(db.currentUserId);
-  if (!request || !employee || !approver) return fail(404, 'Não encontramos este pedido.');
+  if (!request || !employee) return fail(404, 'Não encontramos este pedido.');
+  const approver = approverFor(db, request.id, body);
+  if ('status' in approver) return approver;
   const step = currentStep(request);
   const expected = readStep(body);
-  if (!step || (expected && expected !== step)) return fail(409, alreadyDecided(db, request));
+  if (!step || (expected && expected !== step)) {
+    return fail(409, alreadyDecided(db, request, approver.id));
+  }
 
   const reason = readReason(body);
   if (outcome === 'recusado' && !reason) return fail(422, 'Escreva o motivo da recusa.');
@@ -160,11 +174,12 @@ function applyDecision(
  * Desfaz a decisão do gestor: o pedido volta a aguardar o gestor e o histórico registra. Não dá
  * depois que o RH decidiu nem depois que o pedido venceu (mesma regra da tela, em undoBlocker).
  */
-function undo({ db, params, now }: Context): MockResponse {
+function undo({ db, params, body, now }: Context): MockResponse {
   const request = db.data.requests.find((r) => r.id === params['id']);
   const employee = request && db.employee(request.employeeId);
-  const approver = db.employee(db.currentUserId);
-  if (!request || !employee || !approver) return fail(404, 'Não encontramos este pedido.');
+  if (!request || !employee) return fail(404, 'Não encontramos este pedido.');
+  const approver = approverFor(db, request.id, body);
+  if ('status' in approver) return approver;
   const mine = request.decisions.find((d) => d.step === 'gestor' && d.approverId === approver.id);
   if (!mine) return fail(409, 'Não há decisão sua para desfazer neste pedido.');
   const blocker = undoBlocker(request, now);
@@ -200,21 +215,96 @@ export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = new
   });
 }
 
-/** "Este pedido já foi aprovado por Carlos às 17h52." */
-function alreadyDecided(db: MockDb, request: ExtensionRequest): string {
-  const firstName = (id: string) => db.employee(id)?.name.split(' ')[0] ?? 'outra pessoa';
-  const clock = (instant: string) => formatClock(toLocal(instant).minutes);
+/**
+ * "Este pedido já foi aprovado por Carlos às 17h52." Para quem decidiu (`viewerId`), "por você".
+ */
+function alreadyDecided(db: MockDb, request: ExtensionRequest, viewerId?: string): string {
+  const firstName = (id: string) =>
+    id === viewerId ? 'você' : (db.employee(id)?.name.split(' ')[0] ?? 'outra pessoa');
   const last = request.decisions.at(-1);
   switch (request.status) {
     case 'expirado':
-      return `Este pedido expirou às ${clock(request.expiresAt)}, sem decisão.`;
+      return `Este pedido expirou às ${clockOf(request.expiresAt)}, sem decisão.`;
     case 'cancelado':
       return `${firstName(request.employeeId)} cancelou este pedido.`;
     default:
       return last
-        ? `Este pedido já foi ${last.outcome} por ${firstName(last.approverId)} às ${clock(last.at)}.`
+        ? `Este pedido já foi ${last.outcome} por ${firstName(last.approverId)} às ${clockOf(last.at)}.`
         : 'Este pedido já foi decidido.';
   }
+}
+
+/** Link do e-mail que não existe, ou que veio cortado. */
+const INVALID_LINK = 'Este link não é válido. Confira se ele veio completo do e-mail.';
+
+/**
+ * Página pública do link do e-mail (/aprovacao/:token). O link pode ser encaminhado, então a
+ * resposta traz só o necessário para decidir (LGPD): o pedido, o nome e o grupo do colaborador e
+ * o contexto já calculado aqui, com as mesmas funções puras da caixa de aprovações.
+ *
+ * - 404: link inválido;
+ * - 410: o pedido venceu sem decisão;
+ * - 409: o pedido já foi decidido, com a mesma frase da caixa de aprovações.
+ *
+ * Quem recebeu o link continua vendo a própria decisão enquanto ainda dá para desfazer.
+ */
+function approvalLink({ db, params, now }: Context): MockResponse {
+  const link = db.data.tokens.find((t) => t.token === params['token']);
+  const request = link && db.data.requests.find((r) => r.id === link.requestId);
+  const employee = request && db.employee(request.employeeId);
+  const schedule = employee && db.scheduleFor(employee);
+  if (!link || !request || !employee || !schedule) return fail(404, INVALID_LINK);
+
+  const own = request.decisions.some(
+    (d) => d.step === 'gestor' && d.approverId === link.approverId,
+  );
+  const open = request.status === 'aguardando_gestor' || (own && !undoBlocker(request, now));
+  if (!open && request.status === 'expirado') {
+    return fail(
+      410,
+      `Este link expirou. O pedido de ${employee.name} venceu às ${clockOf(request.expiresAt)}.`,
+    );
+  }
+  if (!open) return fail(409, alreadyDecided(db, request, link.approverId));
+
+  const { holidays } = db.data;
+  const exceptions = db.data.exceptions.filter((e) => e.employeeId === employee.id);
+  const day = plannedShift(schedule, exceptions, holidays, request.date);
+  const body: ApprovalLink = {
+    request,
+    employeeName: employee.name,
+    groupName: db.data.groups.find((g) => g.id === employee.groupId)?.name ?? '',
+    approverId: link.approverId,
+    context: requestContext({
+      request,
+      schedule,
+      exceptions,
+      holidays,
+      history: db.data.requests.filter((r) => r.employeeId === employee.id),
+    }),
+    timeline: requestTimeline(request, employee.name, isShift(day) ? day : null),
+  };
+  return ok(body);
+}
+
+/**
+ * Quem decide: quem recebeu o link do e-mail, se o corpo traz o token dele, ou quem está usando o
+ * app. O token só vale para o pedido do link.
+ */
+function approverFor(db: MockDb, requestId: string, body: unknown): Employee | MockResponse {
+  const token = (body as { token?: unknown } | null)?.token;
+  if (token === undefined) {
+    return db.employee(db.currentUserId) ?? fail(404, 'Não encontramos o seu usuário.');
+  }
+  const link = db.data.tokens.find((t) => t.token === token && t.requestId === requestId);
+  return (
+    (link && db.employee(link.approverId)) ?? fail(403, 'Este link não vale para este pedido.')
+  );
+}
+
+/** Hora de um instante no relógio de São Paulo: "18h03". */
+function clockOf(instant: string): string {
+  return formatClock(toLocal(instant).minutes);
 }
 
 function saveSchedule({ db, body, now }: Context, id?: string): MockResponse {
