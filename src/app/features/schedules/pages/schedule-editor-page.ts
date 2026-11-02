@@ -24,11 +24,14 @@ import {
   Toast,
 } from '../../../design-system';
 import { apiErrorMessage } from '../../../shared/api-error';
+import { toLocal } from '../../../shared/date';
+import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { isRetrying, LoadState, loadState, retryFailed } from '../data/load-state';
 import { assignmentConflicts, assignmentPreview, groupOptions } from '../data/schedule-assignment';
 import { newScheduleDraft, ScheduleDraft, toDraft, toSchedule } from '../data/schedule-draft';
 import { ScheduleFormContext, scheduleSchema } from '../data/schedule-form';
+import { periodNotes } from '../data/schedule-period';
 import { scheduleSummary } from '../data/schedule-summary';
 import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
@@ -38,6 +41,7 @@ import { ScheduleApproval } from '../ui/schedule-approval';
 import { ScheduleAssignmentSection } from '../ui/schedule-assignment';
 import { ScheduleHours } from '../ui/schedule-hours';
 import { ScheduleNameDays } from '../ui/schedule-name-days';
+import { SchedulePeriod } from '../ui/schedule-period';
 import { ScheduleSummary } from '../ui/schedule-summary';
 import { ScheduleWarnings } from '../ui/schedule-warnings';
 
@@ -67,6 +71,7 @@ type EditorState = LoadState | 'not-found';
     ScheduleAssignmentSection,
     ScheduleHours,
     ScheduleNameDays,
+    SchedulePeriod,
     ScheduleSummary,
     ScheduleWarnings,
     Skeleton,
@@ -89,7 +94,15 @@ export class ScheduleEditorPage {
     initialValue: this.route.snapshot.paramMap.get('id'),
   });
 
-  private readonly resources = [this.schedules.list, this.people.employees, this.people.groups];
+  private readonly resources = [
+    this.schedules.list,
+    this.schedules.holidays,
+    this.schedules.exceptions,
+    this.people.employees,
+    this.people.groups,
+  ];
+  /** Para o período de 30 dias a partir de hoje. */
+  private readonly now = injectNow(60_000);
   private readonly list = computed(() =>
     this.schedules.list.hasValue() ? this.schedules.list.value() : [],
   );
@@ -184,6 +197,15 @@ export class ScheduleEditorPage {
     scheduleSummary(this.editor().value(), this.hours(), this.assignment()),
   );
   protected readonly summaryRest = computed(() => this.summary().slice(1).join(' '));
+  protected readonly period = computed(() =>
+    periodNotes(
+      this.schedule(),
+      this.assignment().covered,
+      this.schedules.holidays.hasValue() ? this.schedules.holidays.value() : [],
+      this.schedules.exceptions.hasValue() ? this.schedules.exceptions.value() : [],
+      toLocal(this.now()).date,
+    ),
+  );
   protected readonly assignmentProblems = computed(() =>
     assignmentConflicts(this.schedule(), this.employees(), this.others()).map((p) => p.message),
   );

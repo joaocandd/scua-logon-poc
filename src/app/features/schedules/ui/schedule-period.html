@@ -1,0 +1,29 @@
+<h3 class="title">
+  <app-icon name="event" />
+  Nos próximos {{ days }} dias
+</h3>
+
+@if (notes().holidays.length === 0 && notes().exceptions.length === 0) {
+  <p class="text">Nenhum feriado em dia de jornada e nenhuma exceção de quem está na regra.</p>
+}
+
+@if (notes().holidays.length > 0) {
+  <p class="text">
+    Feriado em dia de jornada: a estação fica bloqueada o dia todo, a não ser que uma exceção diga
+    outra coisa.
+  </p>
+  <ul class="list" aria-label="Feriados">
+    @for (holiday of notes().holidays; track $index) {
+      <li>{{ holiday }}</li>
+    }
+  </ul>
+}
+
+@if (notes().exceptions.length > 0) {
+  <p class="text">Exceções valem no lugar da regra, só naquele dia:</p>
+  <ul class="list" aria-label="Exceções">
+    @for (exception of notes().exceptions; track $index) {
+      <li>{{ exception }}</li>
+    }
+  </ul>
+}

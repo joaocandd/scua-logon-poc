@@ -295,6 +295,23 @@ test('o resumo em português acompanha cada mudança', async ({ page }) => {
   await expectNoA11yViolations(page);
 });
 
+test('nos próximos 30 dias: exceções de quem está na regra', async ({ page }) => {
+  // As exceções das fixtures caem sempre nos próximos dias; os feriados dependem da data do teste.
+  await page.goto('/regras/regra-comercial');
+  const summary = page.getByRole('complementary', { name: 'Resumo' });
+  const exceptions = summary.getByRole('list', { name: 'Exceções' });
+  await expect(exceptions).toContainText(
+    /Patrícia Lemos, \w{3}, \d{2}\/\d{2}: horário especial das 7h às 16h \(Auditoria externa\)/,
+  );
+
+  // Sem o Financeiro, a Patrícia sai da regra, e a exceção dela também.
+  await page
+    .getByRole('region', { name: 'A quem se aplica' })
+    .getByRole('checkbox', { name: 'Financeiro', exact: true })
+    .uncheck();
+  await expect(summary).not.toContainText('Patrícia Lemos');
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();
