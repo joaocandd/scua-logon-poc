@@ -26,12 +26,15 @@ import {
 import { apiErrorMessage } from '../../../shared/api-error';
 import { toLocal } from '../../../shared/date';
 import { injectNow } from '../../../shared/now';
+import { toTime } from '../../../shared/time';
+import { ExtensionRequests } from '../../approvals/data/extension-requests';
 import { People } from '../../people/data/people';
 import { isRetrying, LoadState, loadState, retryFailed } from '../data/load-state';
 import { assignmentConflicts, assignmentPreview, groupOptions } from '../data/schedule-assignment';
 import { newScheduleDraft, ScheduleDraft, toDraft, toSchedule } from '../data/schedule-draft';
 import { ScheduleFormContext, scheduleSchema } from '../data/schedule-form';
 import { periodNotes } from '../data/schedule-period';
+import { SimulationContext, simulationSchedule } from '../data/schedule-simulation';
 import { scheduleSummary } from '../data/schedule-summary';
 import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
@@ -42,6 +45,7 @@ import { ScheduleAssignmentSection } from '../ui/schedule-assignment';
 import { ScheduleHours } from '../ui/schedule-hours';
 import { ScheduleNameDays } from '../ui/schedule-name-days';
 import { SchedulePeriod } from '../ui/schedule-period';
+import { ScheduleSimulator } from '../ui/schedule-simulator';
 import { ScheduleSummary } from '../ui/schedule-summary';
 import { ScheduleWarnings } from '../ui/schedule-warnings';
 
@@ -72,6 +76,7 @@ type EditorState = LoadState | 'not-found';
     ScheduleHours,
     ScheduleNameDays,
     SchedulePeriod,
+    ScheduleSimulator,
     ScheduleSummary,
     ScheduleWarnings,
     Skeleton,
@@ -82,6 +87,8 @@ type EditorState = LoadState | 'not-found';
 export class ScheduleEditorPage {
   private readonly schedules = inject(WorkSchedules);
   private readonly people = inject(People);
+  /** Só para o simulador: as horas extras aprovadas contam. Se falhar, simula sem elas. */
+  private readonly requests = inject(ExtensionRequests);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(Toast);
@@ -101,8 +108,10 @@ export class ScheduleEditorPage {
     this.people.employees,
     this.people.groups,
   ];
-  /** Para o período de 30 dias a partir de hoje. */
+  /** Para o período de 30 dias a partir de hoje e para a data e a hora do simulador. */
   private readonly now = injectNow(60_000);
+  protected readonly today = computed(() => toLocal(this.now()).date);
+  protected readonly nowTime = computed(() => toTime(toLocal(this.now()).minutes));
   private readonly list = computed(() =>
     this.schedules.list.hasValue() ? this.schedules.list.value() : [],
   );
@@ -203,9 +212,16 @@ export class ScheduleEditorPage {
       this.assignment().covered,
       this.schedules.holidays.hasValue() ? this.schedules.holidays.value() : [],
       this.schedules.exceptions.hasValue() ? this.schedules.exceptions.value() : [],
-      toLocal(this.now()).date,
+      this.today(),
     ),
   );
+  protected readonly simulation = computed<SimulationContext>(() => ({
+    schedule: simulationSchedule(this.editor().value(), this.hours()),
+    employees: this.assignment().covered,
+    exceptions: this.schedules.exceptions.hasValue() ? this.schedules.exceptions.value() : [],
+    holidays: this.schedules.holidays.hasValue() ? this.schedules.holidays.value() : [],
+    extensions: this.requests.list.hasValue() ? this.requests.list.value() : [],
+  }));
   protected readonly assignmentProblems = computed(() =>
     assignmentConflicts(this.schedule(), this.employees(), this.others()).map((p) => p.message),
   );

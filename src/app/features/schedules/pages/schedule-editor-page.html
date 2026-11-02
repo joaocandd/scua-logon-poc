@@ -84,6 +84,8 @@
           [preview]="assignment()"
           [problems]="assignmentProblems()"
         />
+
+        <app-schedule-simulator [context]="simulation()" [today]="today()" [time]="nowTime()" />
       </div>
 
       <!-- Desktop largo: coluna presa ao lado das seções. Abaixo de 80em: depois das seções. -->

@@ -312,6 +312,33 @@ test('nos próximos 30 dias: exceções de quem está na regra', async ({ page }
   await expect(summary).not.toContainText('Patrícia Lemos');
 });
 
+test('simulador "e se?": a resposta muda com a regra, antes de salvar', async ({ page }) => {
+  await page.goto('/regras/regra-comercial');
+  const sim = page.getByRole('region', { name: 'Simulador “e se?”' });
+  // Uma quarta-feira sem feriado, exceção nem pedido de extensão nas fixtures.
+  await sim.getByLabel('Colaborador').selectOption({ label: 'João Pedro Antunes' });
+  await sim.getByLabel('Data').fill('2027-03-10');
+  await sim.getByLabel('Hora').fill('18:10');
+  await expect(sim).toContainText(
+    'Às 18h10 de qua, 10/03, a estação de João estaria bloqueada: fora da jornada Comercial (das 8h às 17h).',
+  );
+  await expectNoA11yViolations(page);
+
+  // Enter na hora não salva a regra.
+  await sim.getByLabel('Hora').press('Enter');
+  await expect(page.locator('app-toast-panel')).toBeHidden();
+
+  // Fim da jornada às 19h: às 18h10, a estação estaria liberada.
+  await page.getByLabel('Fim da jornada').fill('19:00');
+  await expect(sim).toContainText(
+    'Às 18h10 de qua, 10/03, a estação de João estaria liberada: jornada Comercial (das 8h às 19h).',
+  );
+  await sim.getByLabel('Hora').fill('12:30');
+  await expect(sim).toContainText(
+    'estaria bloqueada: intervalo da jornada Comercial (das 12h às 13h).',
+  );
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();
