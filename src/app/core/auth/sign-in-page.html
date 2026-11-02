@@ -51,7 +51,9 @@
         </div>
       </app-field>
 
-      <a class="forgot" routerLink="/entrar/esqueci-minha-senha">Esqueci minha senha</a>
+      <a class="forgot" routerLink="/entrar/esqueci-minha-senha" queryParamsHandling="preserve"
+        >Esqueci minha senha</a
+      >
 
       <button app-button type="submit" class="wide" [loading]="credentials().submitting()">
         Entrar
