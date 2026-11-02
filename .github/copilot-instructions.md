@@ -19,7 +19,8 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 
 ## Regras de negócio
 - Fluxo de extensão: colaborador pede (motivo + novo horário de fim) → gestor aprova ou recusa → RH valida (etapa opcional, configurável por regra).
-- Limite de 2 h extras por dia (CLT art. 59). Interjornada mínima de 11 h (CLT art. 66). Intervalo mínimo de 1 h em jornadas acima de 6 h (CLT art. 71).
+- Limite de 2 h extras por dia (CLT art. 59). Interjornada mínima de 11 h (CLT art. 66).
+- Intervalo mínimo (CLT art. 71), num intervalo só: 1 h quando o trabalho passa de 6 h; 15 min quando passa de 4 h e vai até 6 h (§1º). Acordo ou convenção coletiva pode reduzir o de 1 h para 30 min (art. 611-A, III); isso ainda não é configurável (ADR 0011).
 - Estação: bloqueada antes do início; libera quando o colaborador registra o início; bloqueia nos intervalos; bloqueia no fim; extensão aprovada libera até o novo fim.
 - Avisos antes do bloqueio: padrão de 15 e 5 minutos, configurável.
 - Jornadas podem atravessar a meia-noite. Datas e horas sempre no fuso America/Sao_Paulo.
@@ -150,6 +151,7 @@ Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromiu
 - Toda tela tem os estados carregando, vazio, erro, sem permissão e sucesso.
 - Todo componente do design system tem story e teste. Toda feature tem ao menos um teste de ponta a ponta com axe.
 - Ao terminar uma tarefa: rode lint, testes e build; corrija o que quebrar; resuma em português o que mudou e por quê.
+- Encerre todo ng serve que você abrir ao terminar a tarefa.
 - Decisões de arquitetura viram ADR curta em `docs/adr/` (contexto, decisão, alternativas, consequências).
 - Ao mudar este arquivo, copie para `.github/copilot-instructions.md`. O CI falha se os dois forem diferentes.
 - Não adicione dependência sem justificar no resumo.
