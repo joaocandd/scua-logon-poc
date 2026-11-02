@@ -1,7 +1,11 @@
 <app-page-header
   heading="Regras de jornada"
   description="Quando a estação de cada grupo fica liberada e quem aprova a hora extra."
-/>
+>
+  @if (state() === 'ready') {
+    <a app-button routerLink="/regras/nova" icon="add">Nova regra</a>
+  }
+</app-page-header>
 
 <!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
 <p class="cdk-visually-hidden" role="status">
@@ -54,7 +58,9 @@
         <tbody>
           @for (row of rows(); track row.id) {
             <tr>
-              <th scope="row" class="name">{{ row.name }}</th>
+              <th scope="row" class="name">
+                <a [routerLink]="['/regras', row.id]">{{ row.name }}</a>
+              </th>
               <td class="hours">
                 <span class="line">{{ row.hours }}</span>
                 <span class="line muted">{{ row.days }}</span>

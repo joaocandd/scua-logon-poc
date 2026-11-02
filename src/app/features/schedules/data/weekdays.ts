@@ -2,6 +2,7 @@
 // como "Seg a sex". Os valores são os do Weekday (0 é domingo).
 
 import { Weekday } from '../../../shared/models';
+import { capitalize } from '../../../shared/text';
 
 export interface WeekdayOption {
   value: Weekday;
@@ -41,6 +42,7 @@ export function formatWeekdays(weekdays: readonly Weekday[]): string {
   const parts = runs.flatMap((run) =>
     run.length >= 3 ? [`${run[0].short} a ${run.at(-1)!.short}`] : run.map((day) => day.short),
   );
-  const text = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} e ${parts.at(-1)}`;
-  return text.charAt(0).toUpperCase() + text.slice(1);
+  return capitalize(
+    parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} e ${parts.at(-1)}`,
+  );
 }

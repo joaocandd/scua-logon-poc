@@ -3,6 +3,7 @@
 
 import { Employee, Group, ScheduleStatus, WorkSchedule } from '../../../shared/models';
 import { appliesTo } from '../../../shared/schedule-engine';
+import { capitalize } from '../../../shared/text';
 import { formatRange, toMinutes } from '../../../shared/time';
 import { formatWeekdays } from './weekdays';
 
@@ -28,16 +29,13 @@ export function scheduleRows(
 ): ScheduleRow[] {
   return [...schedules]
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
-    .map((schedule) => {
-      const hours = formatRange(toMinutes(schedule.start), toMinutes(schedule.end));
-      return {
-        id: schedule.id,
-        name: schedule.name,
-        hours: hours.charAt(0).toUpperCase() + hours.slice(1),
-        days: formatWeekdays(schedule.weekdays),
-        groups: schedule.assignment.groupIds.flatMap((id) => groupById.get(id)?.name ?? []),
-        employeeCount: employees.filter((employee) => appliesTo(schedule, employee)).length,
-        status: schedule.observationMode ? 'em_observacao' : 'ativa',
-      };
-    });
+    .map((schedule) => ({
+      id: schedule.id,
+      name: schedule.name,
+      hours: capitalize(formatRange(toMinutes(schedule.start), toMinutes(schedule.end))),
+      days: formatWeekdays(schedule.weekdays),
+      groups: schedule.assignment.groupIds.flatMap((id) => groupById.get(id)?.name ?? []),
+      employeeCount: employees.filter((employee) => appliesTo(schedule, employee)).length,
+      status: schedule.observationMode ? 'em_observacao' : 'ativa',
+    }));
 }

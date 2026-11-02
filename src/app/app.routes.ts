@@ -56,6 +56,23 @@ export const routes: Routes = [
           import('./features/schedules/pages/schedules-page').then((m) => m.SchedulesPage),
       },
       {
+        // Antes de regras/:id, para "nova" não virar o id de uma regra.
+        path: 'regras/nova',
+        title: 'Nova regra',
+        loadComponent: () =>
+          import('./features/schedules/pages/schedule-editor-page').then(
+            (m) => m.ScheduleEditorPage,
+          ),
+      },
+      {
+        path: 'regras/:id',
+        title: 'Regra de jornada',
+        loadComponent: () =>
+          import('./features/schedules/pages/schedule-editor-page').then(
+            (m) => m.ScheduleEditorPage,
+          ),
+      },
+      {
         path: 'pessoas',
         title: 'Pessoas',
         loadComponent: () =>

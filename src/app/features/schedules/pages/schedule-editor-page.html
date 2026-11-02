@@ -1,0 +1,72 @@
+<a class="back" routerLink="/regras">
+  <app-icon name="arrow_back" />
+  Regras de jornada
+</a>
+
+<app-page-header [heading]="heading()" />
+
+<!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
+<p class="cdk-visually-hidden" role="status">
+  {{ state() === 'loading' ? 'Carregando regra' : '' }}
+</p>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="loading" aria-busy="true">
+      @for (placeholder of [1, 2]; track placeholder) {
+        <div class="skeleton-section" aria-hidden="true">
+          <app-skeleton variant="heading" width="30%" />
+          <app-skeleton variant="block" />
+          <app-skeleton variant="block" width="70%" />
+        </div>
+      }
+    </div>
+  }
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso às regras de jornada"
+      description="Esta área é de quem configura as jornadas. Se você precisa dela, peça acesso ao RH."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não foi possível carregar a regra"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @case ('not-found') {
+    <app-empty-state
+      icon="search_off"
+      heading="Esta regra não existe mais"
+      description="Ela pode ter sido apagada, ou o endereço está incompleto. Veja as regras que existem na lista."
+    >
+      <a app-button routerLink="/regras" variant="secondary">Ver regras de jornada</a>
+    </app-empty-state>
+  }
+  @default {
+    <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
+    <div role="alert">
+      @if (formError(); as message) {
+        <p class="alert">
+          <app-icon name="error" />
+          <span>{{ message }}</span>
+        </p>
+      }
+    </div>
+
+    <form class="editor" [formRoot]="editor">
+      <app-schedule-name-days
+        [name]="editor.name"
+        [days]="editor.days"
+        [nameError]="errorOf(editor.name)"
+        [daysError]="errorOf(editor.days)"
+      />
+
+      <div class="actions">
+        <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
+      </div>
+    </form>
+  }
+}

@@ -1,5 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
-import { EmptyState, ErrorState, PageHeader, Skeleton, StatusBadge } from '../../../design-system';
+import { RouterLink } from '@angular/router';
+import {
+  Button,
+  EmptyState,
+  ErrorState,
+  PageHeader,
+  Skeleton,
+  StatusBadge,
+} from '../../../design-system';
 import { People } from '../../people/data/people';
 import { isRetrying, loadState, retryFailed } from '../data/load-state';
 import { scheduleRows } from '../data/schedule-list';
@@ -7,14 +15,14 @@ import { WorkSchedules } from '../data/work-schedules';
 
 /**
  * Lista de regras de jornada (fluxo B, /regras): nome, horário, grupos, quantos colaboradores a
- * regra controla e se está ativa ou em observação.
+ * regra controla e se está ativa ou em observação. O nome leva ao editor (/regras/:id).
  *
  * Desktop primeiro: uma tabela. No celular, cada linha vira um cartão; o HTML é o mesmo e a troca
  * é só de CSS, então o leitor de tela continua lendo uma tabela.
  */
 @Component({
   selector: 'app-schedules-page',
-  imports: [EmptyState, ErrorState, PageHeader, Skeleton, StatusBadge],
+  imports: [Button, EmptyState, ErrorState, PageHeader, RouterLink, Skeleton, StatusBadge],
   templateUrl: './schedules-page.html',
   styleUrl: './schedules-page.scss',
 })

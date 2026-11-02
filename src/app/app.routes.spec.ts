@@ -23,6 +23,7 @@ describe('Rotas do app', () => {
     ['/hoje', 'Hoje'],
     ['/aprovacoes', 'Aprovações'],
     ['/regras', 'Regras de jornada'],
+    ['/regras/nova', 'Nova regra'],
     ['/pessoas', 'Pessoas'],
     ['/relatorios', 'Relatórios'],
     ['/configuracoes', 'Configurações'],
