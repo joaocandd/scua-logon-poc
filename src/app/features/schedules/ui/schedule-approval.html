@@ -1,0 +1,41 @@
+<section class="section" aria-labelledby="secao-aprovacao">
+  <h2 id="secao-aprovacao">Aprovação da hora extra</h2>
+
+  <fieldset class="options">
+    <legend class="legend">Quem aprova o pedido de extensão</legend>
+
+    <label class="option">
+      <input
+        type="radio"
+        value="gestor"
+        aria-describedby="aprovacao-gestor"
+        [formField]="approval()"
+      />
+      <span class="option-text">
+        <span class="option-title">Só o gestor</span>
+        <span id="aprovacao-gestor" class="option-hint">
+          O gestor aprova e a estação libera até o novo horário na mesma hora.
+        </span>
+      </span>
+    </label>
+
+    <label class="option">
+      <input
+        type="radio"
+        value="gestor-e-rh"
+        aria-describedby="aprovacao-rh"
+        [formField]="approval()"
+      />
+      <span class="option-text">
+        <span class="option-title">Gestor e validação do RH</span>
+        <span id="aprovacao-rh" class="option-hint">
+          Depois do gestor, o pedido vai para o RH. A estação só libera quando o RH validar.
+        </span>
+      </span>
+    </label>
+  </fieldset>
+
+  <p class="hint">
+    Em qualquer caso, a hora extra libera no máximo 2 h depois do fim da jornada (CLT art. 59).
+  </p>
+</section>

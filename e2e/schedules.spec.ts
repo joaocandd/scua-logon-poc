@@ -215,6 +215,28 @@ test('avisos: a prévia mostra o aviso que o colaborador vê', async ({ page }) 
   await expect(warnings).toContainText('Sem aviso: a estação bloqueia sem avisar o colaborador.');
 });
 
+test('aprovação: troca para gestor e RH e a escolha fica salva', async ({ page }) => {
+  await page.goto('/regras/regra-flexivel');
+  const approval = page.getByRole('group', { name: 'Quem aprova o pedido de extensão' });
+  await expect(approval.getByRole('radio', { name: 'Só o gestor' })).toBeChecked();
+
+  // Setas trocam a opção, como em todo grupo de rádios.
+  await approval.getByRole('radio', { name: 'Só o gestor' }).focus();
+  await page.keyboard.press('ArrowDown');
+  const withHr = approval.getByRole('radio', { name: 'Gestor e validação do RH' });
+  await expect(withHr).toBeChecked();
+  await expect(withHr).toHaveAccessibleDescription(
+    'Depois do gestor, o pedido vai para o RH. A estação só libera quando o RH validar.',
+  );
+  await expectNoA11yViolations(page);
+
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(page.locator('app-toast-panel')).toContainText('Regra Flexível salva.');
+  await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
+  await row(page, 'Flexível').getByRole('link', { name: 'Flexível' }).click();
+  await expect(page.getByRole('radio', { name: 'Gestor e validação do RH' })).toBeChecked();
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();

@@ -1,0 +1,62 @@
+@use 'section';
+
+:host {
+  display: block;
+}
+
+.section {
+  @include section.card;
+}
+
+.options {
+  @include section.fieldset;
+}
+
+.legend {
+  @include section.legend;
+}
+
+.hint {
+  @include section.hint;
+}
+
+// Cada opção é um cartão clicável inteiro; a borda e o fundo marcam a escolhida (não só a cor
+// do rádio).
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.1rem 0 0;
+    accent-color: var(--color-primary);
+    cursor: inherit;
+  }
+
+  &:has(input:checked) {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 var(--border-width) var(--color-primary);
+    background: var(--color-highlight-bg);
+  }
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.option-title {
+  font-weight: 700;
+}
+
+.option-hint {
+  font-size: var(--text-sm);
+}

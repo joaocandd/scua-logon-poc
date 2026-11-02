@@ -31,6 +31,7 @@ import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
 import { warningPreview } from '../data/schedule-warnings';
 import { WorkSchedules } from '../data/work-schedules';
+import { ScheduleApproval } from '../ui/schedule-approval';
 import { ScheduleHours } from '../ui/schedule-hours';
 import { ScheduleNameDays } from '../ui/schedule-name-days';
 import { ScheduleWarnings } from '../ui/schedule-warnings';
@@ -57,6 +58,7 @@ type EditorState = LoadState | 'not-found';
     Icon,
     PageHeader,
     RouterLink,
+    ScheduleApproval,
     ScheduleHours,
     ScheduleNameDays,
     ScheduleWarnings,

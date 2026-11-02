@@ -27,6 +27,12 @@ describe('toDraft e toSchedule', () => {
     expect(toSchedule(toDraft(schedule), schedule.id)).toEqual(schedule);
   });
 
+  it('quem aprova: só o gestor, ou o gestor e o RH', () => {
+    expect(toDraft(byId('regra-comercial')).approval).toBe('gestor-e-rh');
+    expect(toDraft(byId('regra-flexivel')).approval).toBe('gestor');
+    expect(newScheduleDraft().approval).toBe('gestor');
+  });
+
   it('marca "atravessa a meia-noite" quando o fim vem antes do início', () => {
     expect(toDraft(byId('regra-noturna')).overnight).toBe(true);
     expect(toDraft(byId('regra-comercial')).overnight).toBe(false);

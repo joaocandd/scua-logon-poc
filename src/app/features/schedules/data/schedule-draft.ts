@@ -9,12 +9,21 @@ import { WEEK } from './weekdays';
  * Regra no formulário. Diferenças para o WorkSchedule:
  * - `days`: uma caixa por dia, na posição do Weekday (0 é domingo), no lugar da lista de dias;
  * - `overnight`: a pessoa diz que a jornada atravessa a meia-noite. No WorkSchedule isso é só o
- *   fim antes do início; no formulário, a marcação separa a jornada noturna do erro de digitação.
+ *   fim antes do início; no formulário, a marcação separa a jornada noturna do erro de digitação;
+ * - `approval`: quem aprova a hora extra, como texto, porque os rádios do formulário têm valor de
+ *   texto. No WorkSchedule é o `requiresHrValidation`.
  */
-export interface ScheduleDraft extends Omit<WorkSchedule, 'id' | 'weekdays'> {
+export interface ScheduleDraft extends Omit<
+  WorkSchedule,
+  'id' | 'weekdays' | 'requiresHrValidation'
+> {
   days: boolean[];
   overnight: boolean;
+  approval: Approval;
 }
+
+/** Quem aprova a hora extra: só o gestor, ou o gestor e depois a validação do RH. */
+export type Approval = 'gestor' | 'gestor-e-rh';
 
 /** Nome do intervalo quando a pessoa deixa o campo vazio. */
 export const DEFAULT_BREAK_LABEL = 'Intervalo';
@@ -29,7 +38,7 @@ export function newScheduleDraft(): ScheduleDraft {
     overnight: false,
     breaks: [{ label: 'Almoço', start: '12:00', end: '13:00' }],
     warningMinutes: [15, 5],
-    requiresHrValidation: false,
+    approval: 'gestor',
     observationMode: false,
     assignment: { groupIds: [], excludedEmployeeIds: [] },
   };
@@ -45,7 +54,7 @@ export function toDraft(schedule: WorkSchedule): ScheduleDraft {
     overnight: toMinutes(schedule.end) <= toMinutes(schedule.start),
     breaks: structuredClone(schedule.breaks),
     warningMinutes: [...schedule.warningMinutes],
-    requiresHrValidation: schedule.requiresHrValidation,
+    approval: schedule.requiresHrValidation ? 'gestor-e-rh' : 'gestor',
     observationMode: schedule.observationMode,
     assignment: structuredClone(schedule.assignment),
   };
@@ -64,7 +73,7 @@ export function toSchedule(draft: ScheduleDraft, id = ''): WorkSchedule {
     end: draft.end,
     breaks: draft.breaks.map((b) => ({ ...b, label: b.label.trim() || DEFAULT_BREAK_LABEL })),
     warningMinutes: [...draft.warningMinutes],
-    requiresHrValidation: draft.requiresHrValidation,
+    requiresHrValidation: draft.approval === 'gestor-e-rh',
     observationMode: draft.observationMode,
     assignment: structuredClone(draft.assignment),
   };

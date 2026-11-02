@@ -75,6 +75,8 @@
 
       <app-schedule-warnings [warnings]="editor.warningMinutes" [preview]="warnings()" />
 
+      <app-schedule-approval [approval]="editor.approval" />
+
       <div class="actions">
         <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
       </div>
