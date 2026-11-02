@@ -117,6 +117,82 @@ test('edita o nome de uma regra', async ({ page }) => {
   await expect(name).toHaveValue('Tarde e noite');
 });
 
+test('horários: a linha do tempo e os problemas de regra aparecem enquanto a pessoa digita', async ({
+  page,
+}) => {
+  await page.goto('/regras/nova');
+  const hours = page.getByRole('region', { name: 'Horários' });
+  const timeline = page.getByRole('group', { name: 'Linha do tempo da jornada' });
+  await expect(timeline).toContainText('Liberada das 8h às 12h (Jornada)');
+  await expect(timeline).toContainText('Bloqueada das 12h às 13h (Almoço)');
+  await expect(hours).toContainText('9h de jornada, 1h de intervalo, 8h de trabalho.');
+
+  // Fim antes do início, sem marcar a meia-noite: o problema aparece sem precisar salvar.
+  await page.getByLabel('Fim da jornada').fill('06:00');
+  await expect(hours).toContainText(
+    'O fim (6h) vem antes do início (8h). Corrija o fim ou marque “Atravessa a meia-noite”.',
+  );
+  await expect(timeline).toBeHidden();
+
+  // Jornada noturna: o almoço das 12h fica fora dela.
+  await page.getByLabel('Início da jornada').fill('22:00');
+  await page.getByRole('checkbox', { name: 'Atravessa a meia-noite' }).check();
+  await expect(hours).toContainText('Almoço (12h–13h) precisa ficar dentro da jornada (22h–6h).');
+  await expect(hours).toContainText(
+    'Com 8h de trabalho, a jornada precisa de um intervalo de pelo menos 1 h (CLT art. 71). Adicione um intervalo.',
+  );
+  await expectNoA11yViolations(page);
+
+  const first = page.getByRole('group', { name: 'Intervalo 1' });
+  await first.getByLabel('Nome').fill('Pausa');
+  await first.getByLabel('Início').fill('02:00');
+  await first.getByLabel('Fim').fill('03:00');
+  await expect(hours).not.toContainText('precisa');
+  await expect(timeline).toContainText('Bloqueada das 2h às 3h (Pausa)');
+  await expect(hours).toContainText('8h de jornada, 1h de intervalo, 7h de trabalho.');
+
+  // Um intervalo novo recebe o foco; sobreposto, o problema aparece na hora.
+  await page.getByRole('button', { name: 'Adicionar intervalo' }).click();
+  const second = page.getByRole('group', { name: 'Intervalo 2' });
+  await expect(second.getByLabel('Nome')).toBeFocused();
+  await second.getByLabel('Nome').fill('Café');
+  await second.getByLabel('Início').fill('02:30');
+  await second.getByLabel('Fim').fill('02:45');
+  await expect(hours).toContainText(
+    'Café (2h30–2h45) e Pausa (2h–3h) se sobrepõem. Ajuste um dos dois.',
+  );
+
+  // Com o problema, "Salvar regra" não salva e leva o foco ao intervalo.
+  await page.getByRole('textbox', { name: 'Nome da regra' }).fill('Madrugada');
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(second.getByLabel('Início')).toBeFocused();
+
+  // Remover leva o foco para "Adicionar intervalo".
+  await second.getByRole('button', { name: 'Remover Café' }).click();
+  await expect(page.getByRole('button', { name: 'Adicionar intervalo' })).toBeFocused();
+
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(page.locator('app-toast-panel')).toContainText('Regra Madrugada criada.');
+
+  await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
+  await expect(row(page, 'Madrugada')).toContainText('Das 22h às 6h');
+  await row(page, 'Madrugada').getByRole('link', { name: 'Madrugada' }).click();
+  await expect(page.getByRole('checkbox', { name: 'Atravessa a meia-noite' })).toBeChecked();
+});
+
+test('intervalo sem horário só vira erro depois de "Salvar regra"', async ({ page }) => {
+  await page.goto('/regras/regra-comercial');
+  await page.getByRole('button', { name: 'Adicionar intervalo' }).click();
+  const second = page.getByRole('group', { name: 'Intervalo 2' });
+  await expect(second).not.toContainText('Informe o início do intervalo.');
+
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(second).toContainText('Informe o início do intervalo.');
+  await expect(second).toContainText('Informe o fim do intervalo.');
+  await expect(second.getByLabel('Início')).toBeFocused();
+  await expectNoA11yViolations(page);
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();

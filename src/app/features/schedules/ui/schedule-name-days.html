@@ -4,13 +4,13 @@
   <app-field
     label="Nome da regra"
     hint="Aparece na lista de regras, nos relatórios e no aviso que o colaborador vê."
-    [error]="nameError()"
+    [error]="errorOf(name())"
     required
   >
     <input appFieldControl type="text" autocomplete="off" [formField]="name()" />
   </app-field>
 
-  <fieldset class="days" [attr.aria-describedby]="daysError() ? 'dias-erro' : null">
+  <fieldset class="days" [attr.aria-describedby]="errorOf(days()) ? 'dias-erro' : null">
     <legend class="legend">
       Dias da semana
       <!-- Como no Field: o "(obrigatório)" é só visual. -->
@@ -27,7 +27,7 @@
     </div>
     <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
     <div aria-live="polite">
-      @if (daysError(); as message) {
+      @if (errorOf(days()); as message) {
         <p id="dias-erro" class="error">
           <app-icon name="error" />
           <span>{{ message }}</span>

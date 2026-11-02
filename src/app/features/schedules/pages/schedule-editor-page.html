@@ -60,8 +60,17 @@
       <app-schedule-name-days
         [name]="editor.name"
         [days]="editor.days"
-        [nameError]="errorOf(editor.name)"
-        [daysError]="errorOf(editor.days)"
+        [showErrors]="showFieldErrors()"
+      />
+
+      <app-schedule-hours
+        [start]="editor.start"
+        [end]="editor.end"
+        [overnight]="editor.overnight"
+        [breaks]="editor.breaks"
+        [showErrors]="showFieldErrors()"
+        [timeline]="timeline()"
+        [problems]="problems()"
       />
 
       <div class="actions">

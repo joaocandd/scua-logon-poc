@@ -1,0 +1,83 @@
+<section class="section" aria-labelledby="secao-horarios">
+  <h2 id="secao-horarios">Horários</h2>
+
+  <div class="times">
+    <app-field label="Início da jornada" [error]="errorOf(start())" required>
+      <input appFieldControl type="time" [formField]="start()" />
+    </app-field>
+    <app-field label="Fim da jornada" [error]="errorOf(end())" required>
+      <input appFieldControl type="time" [formField]="end()" />
+    </app-field>
+  </div>
+
+  <div class="overnight">
+    <label class="checkbox">
+      <input type="checkbox" aria-describedby="meia-noite-ajuda" [formField]="overnight()" />
+      <span>Atravessa a meia-noite</span>
+    </label>
+    <p id="meia-noite-ajuda" class="hint">
+      Marque quando o fim é no dia seguinte, como das 22h às 6h.
+    </p>
+  </div>
+
+  <fieldset class="breaks" aria-describedby="intervalos-ajuda">
+    <legend class="legend">Intervalos</legend>
+    <p id="intervalos-ajuda" class="hint">A estação fica bloqueada nos intervalos.</p>
+
+    @for (item of breaks(); track $index; let i = $index) {
+      <!-- O nome do grupo não muda enquanto a pessoa digita o nome do intervalo. -->
+      <fieldset class="break">
+        <legend class="cdk-visually-hidden">Intervalo {{ i + 1 }}</legend>
+        <app-field label="Nome" class="break-name">
+          <input appFieldControl type="text" autocomplete="off" [formField]="item.label" />
+        </app-field>
+        <app-field label="Início" [error]="errorOf(item.start)" required>
+          <input appFieldControl type="time" [formField]="item.start" />
+        </app-field>
+        <app-field label="Fim" [error]="errorOf(item.end)" required>
+          <input appFieldControl type="time" [formField]="item.end" />
+        </app-field>
+        <button
+          app-button
+          type="button"
+          variant="ghost"
+          icon="delete"
+          class="remove"
+          (click)="remove(i)"
+        >
+          Remover<span class="cdk-visually-hidden"> {{ breakName(item().value(), i) }}</span>
+        </button>
+      </fieldset>
+    }
+
+    <button #addBreak app-button type="button" variant="secondary" icon="add" (click)="add()">
+      Adicionar intervalo
+    </button>
+  </fieldset>
+
+  <div class="preview">
+    <h3 class="preview-title">Como fica o dia</h3>
+    @if (timeline(); as day) {
+      <app-workday-timeline [segments]="day.segments" label="Linha do tempo da jornada" />
+      <p class="duration">{{ day.duration }}.</p>
+    } @else {
+      <p class="hint">
+        A linha do tempo aparece quando o início e o fim da jornada estiverem certos.
+      </p>
+    }
+
+    <!-- A região existe antes dos problemas, para o leitor de tela anunciar quando aparecerem. -->
+    <div aria-live="polite">
+      @if (problems().length > 0) {
+        <ul class="problems">
+          @for (problem of problems(); track problem) {
+            <li>
+              <app-icon name="error" />
+              <span>{{ problem }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</section>
