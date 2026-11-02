@@ -122,6 +122,12 @@
   font-size: var(--text-sm);
 }
 
+.updating {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
 // Histórico: uma linha do tempo vertical, do mais antigo para o mais novo.
 .history {
   display: flex;

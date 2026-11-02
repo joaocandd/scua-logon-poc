@@ -67,6 +67,34 @@ test('aprovar confirma e mostra "Desfazer"; desfazer volta o pedido', async ({ p
   ).toBeFocused();
 });
 
+test('enquanto a decisão é salva, a linha do tempo mostra só "Atualizando…"', async ({ page }) => {
+  // ?simular=lento: cada resposta da API leva de 3 a 5 s, e dá para ver o meio-tempo.
+  test.slow();
+  await page.goto('/aprovacao/valido-ped-02?simular=lento');
+  const timeline = page.getByRole('region', { name: 'Linha do tempo do dia' });
+  await expect(timeline).toContainText('Se aprovar, a estação bloqueia às 19h', {
+    timeout: 15_000,
+  });
+
+  await page.getByRole('button', { name: 'Aprovar o pedido de Lucas Bittencourt' }).click();
+
+  // Salvando a decisão.
+  await expect(timeline.getByText('Atualizando…')).toBeVisible();
+  await expect(timeline).toHaveAttribute('aria-busy', 'true');
+  await expect(timeline).not.toContainText('Se aprovar');
+
+  // A decisão chegou, e o link é buscado de novo: as frases antigas continuam fora da tela.
+  await expect(page.getByRole('main')).toContainText(/Aprovado às/, { timeout: 15_000 });
+  await expect(timeline.getByText('Atualizando…')).toBeVisible();
+  await expect(timeline).not.toContainText('Se aprovar');
+
+  await expect(timeline).toContainText('Se o RH validar, a estação bloqueia às 19h', {
+    timeout: 15_000,
+  });
+  await expect(timeline.getByText('Atualizando…')).toHaveCount(0);
+  await expect(timeline).not.toHaveAttribute('aria-busy', 'true');
+});
+
 test('recusar pede o motivo e confirma', async ({ page }) => {
   await openValid(page, '/aprovacao/valido-ped-04', 'Mateus Farias');
   await page.getByRole('button', { name: 'Recusar o pedido de Mateus Farias' }).click();

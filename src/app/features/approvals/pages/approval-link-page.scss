@@ -151,6 +151,12 @@
   font-size: var(--text-sm);
 }
 
+.updating {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
 .pending-link {
   display: inline-flex;
   align-items: center;

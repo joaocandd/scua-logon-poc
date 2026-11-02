@@ -363,6 +363,30 @@ test.describe('detalhe do pedido', () => {
     await expect(detailsLink).toBeFocused();
   });
 
+  test('enquanto a decisão é salva, a linha do tempo mostra só "Atualizando…"', async ({
+    page,
+  }) => {
+    // ?simular=lento: cada resposta da API leva de 3 a 5 s, e dá para ver o meio-tempo.
+    test.slow();
+    await page.goto('/aprovacoes/ped-02?simular=lento');
+    const detail = page.getByRole('region', { name: 'Detalhe do pedido' });
+    const timeline = detail.getByRole('region', { name: 'Linha do tempo do dia' });
+    await expect(timeline).toContainText('Se aprovar, a estação bloqueia às 19h', {
+      timeout: 15_000,
+    });
+
+    await detail.getByRole('button', { name: 'Aprovar o pedido de Lucas Bittencourt' }).click();
+
+    await expect(timeline.getByText('Atualizando…')).toBeVisible();
+    await expect(timeline).toHaveAttribute('aria-busy', 'true');
+    await expect(timeline).not.toContainText('Se aprovar');
+
+    await expect(timeline).toContainText('Se o RH validar, a estação bloqueia às 19h', {
+      timeout: 15_000,
+    });
+    await expect(timeline.getByText('Atualizando…')).toHaveCount(0);
+  });
+
   test('pedido que não existe', async ({ page }) => {
     await open(page, '/aprovacoes/ped-99');
 

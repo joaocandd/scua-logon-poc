@@ -82,6 +82,11 @@ export class RequestDetailPage {
     const item = this.item();
     return item ? requestTimeline(item.request, item.employee.name, item.shift) : null;
   });
+  /**
+   * A decisão está sendo salva. As frases da linha do tempo ainda são as de antes dela: a tela
+   * mostra "Atualizando…" até a resposta chegar e a linha do tempo ser calculada de novo.
+   */
+  protected readonly updating = computed(() => (this.view()?.busy ?? null) !== null);
   protected readonly nowMarker = computed(() => {
     const item = this.item();
     return item ? nowMarker(item.request.date, this.now()) : undefined;

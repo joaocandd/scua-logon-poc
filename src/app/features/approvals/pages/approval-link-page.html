@@ -70,7 +70,11 @@
         />
 
         @if (timeline(); as day) {
-          <section class="section" aria-labelledby="link-linha-do-tempo">
+          <section
+            class="section"
+            aria-labelledby="link-linha-do-tempo"
+            [attr.aria-busy]="updating() || null"
+          >
             <h2 id="link-linha-do-tempo" class="section-title">Linha do tempo do dia</h2>
             @if (day.segments.length) {
               <app-workday-timeline
@@ -79,11 +83,16 @@
                 [now]="nowMarker()"
               />
             }
-            <ul class="notes">
-              @for (note of day.notes; track $index) {
-                <li>{{ note }}</li>
-              }
-            </ul>
+            <!-- Enquanto a decisão é salva, as frases de antes não valem mais. -->
+            @if (updating()) {
+              <p class="updating">Atualizando…</p>
+            } @else {
+              <ul class="notes">
+                @for (note of day.notes; track $index) {
+                  <li>{{ note }}</li>
+                }
+              </ul>
+            }
           </section>
         }
 

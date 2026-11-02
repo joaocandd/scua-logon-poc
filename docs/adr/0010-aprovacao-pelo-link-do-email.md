@@ -33,5 +33,5 @@ O link pode ser encaminhado. Quem tem o link vê o que a página mostra, então 
 ## Consequências
 
 - Os tokens de exemplo ficam em `src/app/mocks/fixtures/approval-tokens.ts` e estão listados no README. No produto real, o token seria aleatório, de uso limitado e com validade. A API conferiria também se quem recebeu o link ainda é aprovador do grupo.
-- Depois de decidir, a página troca o pedido na hora e busca o link de novo para atualizar a linha do tempo. Durante a espera da API (300 a 800 ms), as frases de bloqueio mostram o estado anterior.
+- Depois de decidir, a página troca o pedido na hora e busca o link de novo para atualizar a linha do tempo. Enquanto a decisão é salva e o link volta, as frases de bloqueio dão lugar a "Atualizando…", e a seção fica com `aria-busy`. O detalhe da caixa de aprovações faz o mesmo enquanto a decisão é salva.
 - A página pública não carrega a caixa de aprovações: o `summaryOf` e o `managerDecision` viraram funções puras fora dela, e o `toCardView` aceita só o nome e o grupo do colaborador.

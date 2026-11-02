@@ -131,6 +131,13 @@ export class ApprovalLinkPage {
   protected readonly timeline = computed(() =>
     this.link.hasValue() ? this.link.value().timeline : null,
   );
+  /**
+   * A decisão está sendo salva, ou o link está sendo buscado de novo depois dela. Nesse meio-tempo,
+   * as frases da linha do tempo ainda são as de antes da decisão: a tela mostra "Atualizando…".
+   */
+  protected readonly updating = computed(
+    () => this.session().busy !== null || this.link.status() === 'reloading',
+  );
   protected readonly nowMarker = computed(() =>
     this.link.hasValue() ? nowMarker(this.link.value().request.date, this.now()) : undefined,
   );
