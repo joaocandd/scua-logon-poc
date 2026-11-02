@@ -17,6 +17,13 @@ export const routes: Routes = [
       import('./core/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
   },
   {
+    // Página pública que o gestor abre pelo link do e-mail.
+    path: 'aprovacao/:token',
+    title: 'Pedido de hora extra',
+    loadComponent: () =>
+      import('./features/approvals/pages/approval-link-page').then((m) => m.ApprovalLinkPage),
+  },
+  {
     path: '',
     loadComponent: () => import('./core/layout/app-shell').then((m) => m.AppShell),
     children: [

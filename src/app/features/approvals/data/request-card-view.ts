@@ -3,10 +3,9 @@
 
 import { addDays, formatDate, toLocal } from '../../../shared/date';
 import { Employee, ExtensionRequest, ExtensionRequestStatus } from '../../../shared/models';
+import { RequestAlert, RequestContext } from '../../../shared/request-context';
 import { formatClock, formatDuration, MINUTES_PER_DAY, toMinutes } from '../../../shared/time';
-import { undoBlocker } from '../../../shared/undo-decision';
-import { InboxItem, managerDecision } from './approval-inbox';
-import { RequestAlert } from '../../../shared/request-context';
+import { managerDecision, undoBlocker } from '../../../shared/undo-decision';
 
 /** Ação em andamento num cartão. */
 export type CardBusy = 'approve' | 'reject' | 'undo';
@@ -65,7 +64,18 @@ export interface CardViewOptions {
   session?: CardSession;
 }
 
-export function toCardView(item: InboxItem, options: CardViewOptions): RequestCardView {
+/**
+ * O mínimo que o cartão precisa. O item da caixa de aprovações atende, e o link do e-mail também,
+ * com só o nome e o grupo do colaborador.
+ */
+export interface CardSource {
+  request: ExtensionRequest;
+  employee: { name: string };
+  group?: { name: string };
+  context: RequestContext | null;
+}
+
+export function toCardView(item: CardSource, options: CardViewOptions): RequestCardView {
   const { request, employee, group, context } = item;
   const { now, session } = options;
   const today = toLocal(now).date;
@@ -100,6 +110,11 @@ export function toCardView(item: InboxItem, options: CardViewOptions): RequestCa
     undo: undoState(request, options),
     busy: session?.busy ?? null,
   };
+}
+
+/** Resumo do pedido para o diálogo de recusa: "Até 19h30 (+2h30) · Entrega de proposta comercial". */
+export function summaryOf(view: RequestCardView): string {
+  return `${view.until} (${view.extra}) · ${view.reason}`;
 }
 
 /** "Hoje, 30/10", "Amanhã, 31/10", "Ontem, 29/10" ou "seg, 03/11". */

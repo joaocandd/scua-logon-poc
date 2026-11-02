@@ -22,11 +22,6 @@ export function actionElementId(
   return origin === 'lista' ? `${kind}-${id}` : `detalhe-${kind}-${id}`;
 }
 
-/** "Até 19h30 (+2h30) · Entrega de proposta comercial". */
-export function summaryOf(view: RequestCardView): string {
-  return `${view.until} (${view.extra}) · ${view.reason}`;
-}
-
 /**
  * Ações da caixa de aprovações: aprovar, recusar, desfazer e aprovar em lote, com os avisos e o
  * foco depois de cada uma. Guarda o estado de cada cartão enquanto a página está aberta.

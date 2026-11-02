@@ -17,13 +17,13 @@ import { Button, Icon, Skeleton, StatusBadge, WorkdayTimeline } from '../../../d
 import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox } from '../data/approval-inbox';
-import { toCardView } from '../data/request-card-view';
+import { summaryOf, toCardView } from '../data/request-card-view';
 import { requestTimeline } from '../../../shared/request-timeline';
 import { historyEntries, nowMarker } from '../data/request-detail';
 import { requestHistory } from '../data/request-history';
 import { RequestContextList } from '../ui/request-context-list';
 import { RequestDecision } from '../ui/request-decision';
-import { ApprovalActions, summaryOf } from './approval-actions';
+import { ApprovalActions } from './approval-actions';
 
 /**
  * Detalhe do pedido (/aprovacoes/:id): a linha do tempo do dia (jornada, intervalos, hora extra

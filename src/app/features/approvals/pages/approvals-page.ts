@@ -24,9 +24,9 @@ import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox, INBOX_FILTERS, InboxFilter, visibleItems } from '../data/approval-inbox';
 import { arrivalMessage, POLL_INTERVAL_MS, updatedLabel } from '../data/inbox-updates';
-import { toCardView } from '../data/request-card-view';
+import { summaryOf, toCardView } from '../data/request-card-view';
 import { RequestCard } from '../ui/request-card';
-import { ApprovalActions, summaryOf } from './approval-actions';
+import { ApprovalActions } from './approval-actions';
 
 /**
  * Caixa de aprovações (fluxo A, /aprovacoes): o gestor aprova com um toque, recusa com motivo ou
