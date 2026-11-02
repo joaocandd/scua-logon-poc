@@ -1,0 +1,83 @@
+@use 'section';
+
+:host {
+  display: block;
+}
+
+.section {
+  @include section.card;
+}
+
+.groups,
+.people-group {
+  @include section.fieldset;
+}
+
+.legend {
+  @include section.legend;
+}
+
+.hint {
+  @include section.hint;
+}
+
+.checkbox {
+  @include section.checkbox;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+// Duas colunas de grupos no desktop; uma no celular.
+.group-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0 var(--space-4);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+
+  // O "Hoje na regra..." fica embaixo do nome, alinhado com o texto da caixa.
+  .hint {
+    margin: calc(-1 * var(--space-2)) 0 var(--space-1) calc(1.25rem + var(--space-2));
+  }
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.headline {
+  margin: 0;
+  font-weight: 700;
+}
+
+.problems {
+  @include section.problems;
+}
+
+.people {
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--control-height);
+    color: var(--color-link);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  &[open] summary {
+    margin-bottom: var(--space-2);
+  }
+}
+
+.people-group {
+  margin-top: var(--space-3);
+}

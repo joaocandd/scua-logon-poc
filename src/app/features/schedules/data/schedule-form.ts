@@ -1,5 +1,5 @@
 // Esquema do formulário do editor de regras (Signal Forms): liga as validações puras de
-// schedule-validation.ts aos campos do rascunho.
+// schedule-validation.ts e schedule-assignment.ts aos campos do rascunho.
 
 import {
   applyEach,
@@ -10,8 +10,16 @@ import {
   validateTree,
   ValidationError,
 } from '@angular/forms/signals';
-import { ScheduleDraft } from './schedule-draft';
-import { daysError, nameError, ProblemTarget, ruleProblems } from './schedule-validation';
+import { Employee, WorkSchedule } from '../../../shared/models';
+import { assignmentConflicts } from './schedule-assignment';
+import { ScheduleDraft, toSchedule } from './schedule-draft';
+import {
+  daysError,
+  nameError,
+  ProblemTarget,
+  RuleProblem,
+  ruleProblems,
+} from './schedule-validation';
 
 /**
  * Erro de campo (nome vazio ou repetido, nenhum dia). Como o "obrigatório", aparece no campo só
@@ -20,19 +28,35 @@ import { daysError, nameError, ProblemTarget, ruleProblems } from './schedule-va
 export const FIELD_ERROR = 'campo';
 
 /**
- * Problema de regra (horários e intervalos). Aparece na hora, junto da linha do tempo (ADR 0011);
- * no formulário, só impede salvar e diz para onde vai o foco.
+ * Problema de regra (horários, intervalos e conflito com outra regra). Aparece na hora, na própria
+ * seção (ADR 0011); no formulário, só impede salvar e diz para onde vai o foco.
  */
 export const RULE_ERROR = 'regra';
 
 export interface ScheduleFormContext {
-  /** Nomes das outras regras, para não repetir. */
-  otherNames: () => readonly string[];
+  /** As outras regras: para não repetir o nome nem pôr alguém em duas regras ativas. */
+  otherSchedules: () => readonly WorkSchedule[];
+  employees: () => readonly Employee[];
+}
+
+/** Todos os problemas de regra do rascunho, na ordem da tela. */
+export function allRuleProblems(draft: ScheduleDraft, context: ScheduleFormContext): RuleProblem[] {
+  return [
+    ...ruleProblems(draft),
+    ...assignmentConflicts(toSchedule(draft), context.employees(), context.otherSchedules()),
+  ];
 }
 
 export function scheduleSchema(context: ScheduleFormContext) {
   return schema<ScheduleDraft>((path) => {
-    validate(path.name, ({ value }) => fieldError(nameError(value(), context.otherNames())));
+    validate(path.name, ({ value }) =>
+      fieldError(
+        nameError(
+          value(),
+          context.otherSchedules().map((s) => s.name),
+        ),
+      ),
+    );
     validate(path.days, ({ value }) => fieldError(daysError(value())));
 
     required(path.start, { message: 'Informe o início da jornada.' });
@@ -43,7 +67,7 @@ export function scheduleSchema(context: ScheduleFormContext) {
     });
 
     validateTree(path, ({ value, fieldTree }) =>
-      ruleProblems(value()).map((problem) => ({
+      allRuleProblems(value(), context).map((problem) => ({
         kind: RULE_ERROR,
         message: problem.message,
         fieldTree: targetOf(fieldTree, problem.target),
@@ -81,5 +105,7 @@ function targetOf(
       return root.breaks[target.index].start;
     case 'breakEnd':
       return root.breaks[target.index].end;
+    case 'assignment':
+      return root.assignment;
   }
 }

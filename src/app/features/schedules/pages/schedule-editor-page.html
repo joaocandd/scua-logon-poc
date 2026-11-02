@@ -77,6 +77,13 @@
 
       <app-schedule-approval [approval]="editor.approval" />
 
+      <app-schedule-assignment
+        [assignment]="editor.assignment"
+        [groups]="groupOptions()"
+        [preview]="assignment()"
+        [problems]="assignmentProblems()"
+      />
+
       <div class="actions">
         <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
       </div>

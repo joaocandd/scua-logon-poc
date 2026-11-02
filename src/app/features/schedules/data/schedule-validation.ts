@@ -53,7 +53,10 @@ export interface BreakSpan extends Span {
 
 /** Campo que recebe o foco quando a pessoa tenta salvar com o problema. */
 export type ProblemTarget =
-  { field: 'end' } | { field: 'breaks' } | { field: 'breakStart' | 'breakEnd'; index: number };
+  | { field: 'end' }
+  | { field: 'breaks' }
+  | { field: 'breakStart' | 'breakEnd'; index: number }
+  | { field: 'assignment' };
 
 export interface RuleProblem {
   message: string;

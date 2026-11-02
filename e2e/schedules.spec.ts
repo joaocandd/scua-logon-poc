@@ -237,6 +237,42 @@ test('aprovação: troca para gestor e RH e a escolha fica salva', async ({ page
   await expect(page.getByRole('radio', { name: 'Gestor e validação do RH' })).toBeChecked();
 });
 
+test('a quem se aplica: prévia, conflito com outra regra e quem fica de fora', async ({ page }) => {
+  await page.goto('/regras/regra-noturna');
+  const section = page.getByRole('region', { name: 'A quem se aplica' });
+  const group = (name: string) => section.getByRole('checkbox', { name, exact: true });
+  await expect(group('Operações')).toBeChecked();
+  await expect(group('TI')).toHaveAccessibleDescription('5 colaboradores · hoje na regra Flexível');
+  await expect(section).toContainText('Esta regra vai valer para 6 colaboradores de 1 grupo.');
+  await expect(section).toContainText('Fora desta regra: Renata Albuquerque.');
+
+  // TI já está na Flexível: o conflito aparece na hora, dizendo quem e qual regra.
+  await group('TI').check();
+  await expect(section).toContainText('Esta regra vai valer para 11 colaboradores de 2 grupos.');
+  await expect(section).toContainText(
+    'André Seixas, Letícia Barros, Natália Coelho e mais 2 colaboradores já estão na regra Flexível.',
+  );
+  await expectNoA11yViolations(page);
+
+  // Salvar não salva e leva o foco ao primeiro grupo marcado.
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(group('Operações')).toBeFocused();
+
+  await group('TI').uncheck();
+  await expect(section).not.toContainText('já estão na regra');
+
+  // A lista de pessoas abre e fecha; marcar a diretora põe ela na regra.
+  await section.getByText('Ver os 7 colaboradores dos grupos').click();
+  await section.getByRole('checkbox', { name: /^Renata Albuquerque/ }).check();
+  await expect(section).toContainText('Esta regra vai valer para 7 colaboradores de 1 grupo.');
+  await expect(section).not.toContainText('Fora desta regra');
+
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(page.locator('app-toast-panel')).toContainText('Regra Noturna salva.');
+  await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
+  await expect(row(page, 'Noturna').getByRole('cell').nth(2)).toHaveText(/7/);
+});
+
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
   await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();
