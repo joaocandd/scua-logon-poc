@@ -1,7 +1,8 @@
-# ADR 0013 · Montserrat variável no lugar de quatro pesos fixos
+# ADR 0015 · Montserrat variável no lugar de quatro pesos fixos
 
 - **Status:** aceita
 - **Data:** 03/11/2026
+- **Número:** escrita como 0013 no `feat/auditoria` (commit `19daf81`). Virou 0015 ao juntar com o `main`, que já tinha a ADR 0013 do painel Hoje.
 
 ## Contexto
 

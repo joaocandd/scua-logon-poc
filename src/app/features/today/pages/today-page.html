@@ -1,2 +1,148 @@
-<h1>Hoje</h1>
-<p>Esta área ainda não está pronta neste protótipo.</p>
+<app-page-header
+  heading="Hoje"
+  description="Como estão as estações agora e o que precisa da sua atenção."
+/>
+
+<!-- Região de status para leitor de tela: existe desde o início, para os anúncios serem lidos. -->
+<p class="cdk-visually-hidden" role="status">{{ status() }}</p>
+
+@switch (panel.state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso ao painel Hoje"
+      description="Esta área é de quem acompanha as estações e as aprovações. Se você precisa dela, peça acesso ao administrador do Scua Logon."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não conseguimos carregar o painel"
+      [retrying]="panel.retrying()"
+      (retry)="panel.retry()"
+    />
+  }
+  @default {
+    <div class="toolbar">
+      <app-field label="Grupo" class="group">
+        <select appFieldControl #groupSelect (change)="setGroup(groupSelect.value)">
+          <option value="" [selected]="!groupId()">Todos os grupos</option>
+          @for (group of panel.groups(); track group.id) {
+            <option [value]="group.id" [selected]="group.id === groupId()">
+              {{ group.name }}
+            </option>
+          }
+        </select>
+      </app-field>
+      <!-- Fora da região de status: mudar a cada segundo não pode virar anúncio. -->
+      @if (panel.state() === 'ready' && updated(); as label) {
+        <p class="updated" [class.failed]="refreshFailed()">
+          {{ label }}
+          @if (refreshFailed()) {
+            · Sem resposta do servidor. Tentando de novo.
+          }
+        </p>
+      }
+    </div>
+
+    @if (panel.state() === 'loading') {
+      <div class="attention" aria-busy="true">
+        @for (placeholder of [1, 2]; track placeholder) {
+          <div class="attention-skeleton" aria-hidden="true">
+            <app-skeleton variant="heading" width="50%" />
+            <app-skeleton width="70%" />
+            <app-skeleton width="60%" />
+            <app-skeleton variant="block" width="12rem" />
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="attention">
+        <app-pending-requests [summary]="pending()" [groupId]="groupId()" />
+        <app-today-alerts
+          [alerts]="alerts()"
+          [groupId]="groupId()"
+          (stationsOpened)="listOpened('sem_aprovacao')"
+        />
+      </div>
+    }
+
+    <section class="block" aria-labelledby="estacoes-titulo">
+      <h2 id="estacoes-titulo" class="block-title" tabindex="-1">Estações agora</h2>
+
+      @if (panel.state() === 'loading') {
+        <ul class="counters-skeleton" aria-busy="true">
+          @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+            <li aria-hidden="true">
+              <app-skeleton variant="heading" width="40%" />
+              <app-skeleton width="80%" />
+            </li>
+          }
+        </ul>
+      } @else if (stations().length === 0) {
+        @if (groupName(); as name) {
+          <app-empty-state
+            icon="lock_clock"
+            [headingLevel]="3"
+            [heading]="'Nenhuma estação controlada em ' + name"
+            description="Nenhuma regra de jornada vale para este grupo: a estação não é bloqueada."
+          >
+            <button app-button type="button" variant="secondary" (click)="setGroup('')">
+              Ver todos os grupos
+            </button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="lock_clock"
+            [headingLevel]="3"
+            heading="Nenhuma estação controlada"
+            description="As estações aparecem aqui quando uma regra de jornada vale para o grupo do colaborador."
+          >
+            <a app-button variant="secondary" routerLink="/regras">Ver regras de jornada</a>
+          </app-empty-state>
+        }
+      } @else {
+        <app-station-counters
+          [counts]="counts()"
+          [selected]="filter()"
+          (opened)="listOpened($event)"
+        />
+
+        @if (filter(); as current) {
+          <section class="station-list" aria-labelledby="lista-titulo">
+            <div class="list-header">
+              <h3 id="lista-titulo" class="list-title">
+                {{ labelOf(current) }}
+                <span class="list-count">· {{ listRows().length }}</span>
+              </h3>
+              <button
+                app-button
+                type="button"
+                variant="ghost"
+                size="sm"
+                icon="close"
+                (click)="closeList(current)"
+              >
+                Fechar lista
+              </button>
+            </div>
+            @if (listRows().length === 0) {
+              <p class="list-empty">{{ emptyListText(current) }}</p>
+            } @else {
+              <app-station-list [rows]="listRows()" [caption]="labelOf(current)" />
+            }
+          </section>
+        }
+      }
+    </section>
+
+    <!-- Só com o painel pronto: o custo chega antes dos pedidos, e o mês sairia incompleto. -->
+    @if (panel.state() === 'ready') {
+      <app-overtime-month
+        class="block"
+        [overtime]="overtime()"
+        [hourlyCost]="panel.hourlyCost()"
+        [groupName]="groupName()"
+      />
+    }
+  }
+}
