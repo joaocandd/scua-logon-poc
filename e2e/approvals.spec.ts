@@ -420,6 +420,7 @@ test.describe('estados da tela', () => {
     await expect(
       page.getByRole('heading', { name: 'Você não tem acesso às aprovações' }),
     ).toBeVisible();
+    await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Aprovar' })).toHaveCount(0);
     await expectNoA11yViolations(page);
   });

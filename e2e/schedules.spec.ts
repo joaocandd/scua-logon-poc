@@ -54,6 +54,7 @@ test('sem permissão, diz a quem pedir acesso', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Você não tem acesso às regras de jornada' }),
   ).toBeVisible();
+  await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
   await expectNoA11yViolations(page);
 });
 

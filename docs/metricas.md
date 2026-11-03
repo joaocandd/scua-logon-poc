@@ -157,7 +157,7 @@ O JavaScript inicial ficou com o mesmo tamanho, mas agora em dois arquivos: o An
 
 ### Sem o Angular Material e fora dos buscadores
 
-Depois das correções acima, o app deixou de carregar o tema do Angular Material, que nenhuma tela usava (ADR 0014), e saiu dos buscadores: `meta robots` com `noindex` e `robots.txt` com `Disallow: /`. Medido do mesmo jeito, no build final da auditoria.
+Depois das correções acima, o app deixou de carregar o tema do Angular Material, que nenhuma tela usava (ADR 0014), e saiu dos buscadores com `meta robots` em `noindex`. O `robots.txt` não bloqueia nada, para o buscador conseguir abrir a página e ler o `noindex`; na hospedagem, o cabeçalho `X-Robots-Tag: noindex` reforça. Medido do mesmo jeito, no build final da auditoria.
 
 | | Depois das correções | Sem o Material |
 |---|---|---|
@@ -176,7 +176,7 @@ Depois das correções acima, o app deixou de carregar o tema do Angular Materia
 
 Cada página baixa 3,2 kB a menos. As notas de desempenho ficaram dentro da variação entre execuções. Na primeira rodada, o TBT do /regras/regra-comercial deu de 87 a 144 ms; repetindo as duas versões em seguida, deu de 17 a 42 ms sem o Material e de 38 a 63 ms com ele. Era variação da máquina, não do app.
 
-O SEO caiu de propósito. A única auditoria que reprova é "a página está bloqueada para indexação", que é o que o `noindex` faz. A `meta description` e o `robots.txt` agora passam.
+O SEO caiu de propósito. A única auditoria que reprova é "a página está bloqueada para indexação", que é o que o `noindex` faz. A `meta description` e o `robots.txt` agora passam. A tabela foi medida com um `robots.txt` que bloqueava tudo (`Disallow: /`); com o atual, que libera o acesso, o SEO continua 63, com a mesma auditoria reprovando (conferido no link do e-mail).
 
 ### Como foi medido
 

@@ -299,7 +299,7 @@ Escreva a documentação em português, para a banca e para quem herdar o códig
 ```
 Prepare a demo do Demo Day.
 
-1. Publique a PoC como site estático no serviço mais simples para este repositório (Vercel, Netlify ou GitHub Pages), com todas as rotas caindo no index.html. Escreva o passo a passo no README.
+1. Publique a PoC como site estático no serviço mais simples para este repositório (Vercel ou Netlify; o GitHub Pages não deixa configurar cabeçalhos), com todas as rotas caindo no index.html e o cabeçalho X-Robots-Tag: noindex em todas as respostas (a PoC fica fora dos buscadores; o robots.txt não bloqueia nada, para o buscador conseguir ler o noindex). Escreva o passo a passo no README.
 2. Modo demo: botão "Restaurar dados de demonstração" em /configuracoes e dados que garantem os cenários da apresentação: pedido que passa de 2 h, pedido que quebra a interjornada, link de e-mail expirado e regra com conflito.
 3. Zero erros e avisos no console em todas as rotas.
 4. Escreva docs/roteiro-demo.md com o caminho exato de cliques da demo (fluxo A no celular, fluxo B no desktop, simulador), com uma frase do que dizer em cada passo.
