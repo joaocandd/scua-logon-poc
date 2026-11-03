@@ -39,7 +39,7 @@ interface CostDraft {
 
 /**
  * Configurações (/configuracoes). Nesta prova de conceito, só o custo médio da hora extra, que o
- * painel "Hoje" usa para estimar o custo do mês.
+ * painel "Hoje" usa para estimar o custo do mês. Embaixo, o que a área teria e está fora do escopo.
  *
  * O formulário usa Signal Forms com o Field do design system. Erros de campo só depois da primeira
  * tentativa de salvar (ADR 0008).
