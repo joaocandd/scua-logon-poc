@@ -92,7 +92,7 @@ export function requestContext(input: RequestContextInput): RequestContext {
  * do início da jornada daquele dia: na Noturna (22h), um fim às 7h30 é do dia seguinte.
  */
 function spanOf(
-  input: RequestContextInput,
+  input: ShiftRules,
   request: ExtensionRequest,
 ): { end: number; requestedEnd: number } {
   const day = plannedShift(input.schedule, input.exceptions, input.holidays, request.date);
@@ -132,10 +132,19 @@ function recentOvertime(input: RequestContextInput): number {
   return input.history
     .filter((r) => r.id !== input.request.id && r.status === 'aprovado')
     .filter((r) => r.date >= from && r.date <= date)
-    .reduce((total, r) => {
-      const { end, requestedEnd } = spanOf(input, r);
-      return total + Math.min(requestedEnd - end, MAX_OVERTIME_MINUTES);
-    }, 0);
+    .reduce((total, r) => total + overtimeMinutes(r, input), 0);
+}
+
+/** O que define a jornada do colaborador num dia: a regra, as exceções dele e os feriados. */
+export type ShiftRules = Pick<RequestContextInput, 'schedule' | 'exceptions' | 'holidays'>;
+
+/**
+ * Horas extras de um pedido, em minutos: do fim da jornada ao novo fim, no máximo 2 h, como na
+ * estação. O painel "Hoje" soma estas horas nos pedidos aprovados do mês.
+ */
+export function overtimeMinutes(request: ExtensionRequest, rules: ShiftRules): number {
+  const { end, requestedEnd } = spanOf(rules, request);
+  return Math.min(requestedEnd - end, MAX_OVERTIME_MINUTES);
 }
 
 /** Minutos de qualquer dia no relógio: 1800 (6h do dia seguinte) → "6h". */

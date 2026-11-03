@@ -23,7 +23,8 @@ describe('scheduleSummary', () => {
   });
 
   it('jornada noturna termina no dia seguinte', () => {
-    expect(summary(fixture('regra-noturna'))).toBe(
+    // A Noturna das fixtures está em observação; aqui importa só o horário.
+    expect(summary({ ...fixture('regra-noturna'), observationMode: false })).toBe(
       'Seg a sex, das 22h às 6h do dia seguinte. Estação bloqueada no intervalo Pausa (2h–3h). Avisos 30, 15 e 5 min antes. Hora extra precisa do gestor e do RH. Vale para 6 colaboradores de 1 grupo.',
     );
   });

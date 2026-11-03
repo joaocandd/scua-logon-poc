@@ -1,0 +1,97 @@
+// Dois por linha no celular; os cinco numa linha quando cabem.
+.counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.counter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  border: var(--focus-ring-width) solid transparent;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+  color: var(--color-text);
+  text-decoration: none;
+
+  // Faixa com a cor do estado. É só reforço: o ícone e o rótulo dizem o estado.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--space-2);
+    background: var(--tone);
+  }
+
+  &:hover {
+    background: var(--color-bg-subtle);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-width);
+  }
+
+  // O aberto se destaca pela borda grossa e pelo fundo, não só pela cor.
+  &[aria-current='true'] {
+    border-color: var(--color-text);
+    background: var(--color-bg-subtle);
+  }
+}
+
+[data-tone='approved'] {
+  --tone: var(--status-approved);
+}
+
+[data-tone='pending'] {
+  --tone: var(--status-pending);
+}
+
+[data-tone='neutral'] {
+  --tone: var(--status-neutral);
+}
+
+// Estação liberada: laranja da marca, em área grande.
+[data-tone='unlocked'] {
+  --tone: var(--color-accent);
+}
+
+// Estação bloqueada: hachura diagonal.
+[data-tone='blocked'] {
+  --tone: repeating-linear-gradient(
+    135deg,
+    var(--status-blocked) 0 2px,
+    var(--color-surface) 2px var(--space-2)
+  );
+}
+
+.count {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+
+  app-icon {
+    flex: none;
+  }
+}

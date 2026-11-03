@@ -1,0 +1,23 @@
+<ul class="counters">
+  @for (state of states; track state) {
+    <li>
+      <a
+        class="counter"
+        [id]="'contador-' + state"
+        [attr.data-tone]="info[state].tone"
+        [routerLink]="[]"
+        [queryParams]="{ estado: state }"
+        queryParamsHandling="merge"
+        [replaceUrl]="true"
+        [attr.aria-current]="selected() === state ? 'true' : null"
+        (click)="opened.emit(state)"
+      >
+        <span class="count">{{ counts()[state] }}</span>
+        <span class="label">
+          <app-icon [name]="info[state].icon" />
+          <span>{{ info[state].label }}</span>
+        </span>
+      </a>
+    </li>
+  }
+</ul>

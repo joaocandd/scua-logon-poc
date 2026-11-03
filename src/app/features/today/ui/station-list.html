@@ -1,0 +1,24 @@
+<table class="table" [attr.aria-label]="caption()">
+  <thead>
+    <tr>
+      <th scope="col">Colaborador</th>
+      <th scope="col">Grupo</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Motivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.employeeId) {
+      <tr>
+        <th scope="row" class="name">{{ row.name }}</th>
+        <!-- O rótulo dentro da célula só aparece no celular, onde o cabeçalho some. -->
+        <td class="group">
+          <span class="cell-label" aria-hidden="true">Grupo:</span>
+          {{ row.groupName }}
+        </td>
+        <td class="status"><app-status-badge [status]="row.status" /></td>
+        <td class="reason">{{ row.reason }}</td>
+      </tr>
+    }
+  </tbody>
+</table>
