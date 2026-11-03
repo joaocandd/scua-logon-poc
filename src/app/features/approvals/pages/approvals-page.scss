@@ -33,6 +33,9 @@
 .filters {
   display: flex;
   gap: var(--space-1);
+  // O navegador dá ao <fieldset> a largura mínima do conteúdo, e ele não encolhe com a barra.
+  // Com 0, ele segue a largura da barra, como os fieldsets de schedules/ui/_section.scss.
+  min-width: 0;
   margin: 0;
   padding: var(--space-1);
   border: 0;
@@ -45,8 +48,12 @@
   position: relative;
   display: flex;
   // Largura pelo conteúdo: "Todos" ocupa menos e "Decididos hoje" cabe numa linha em 390 px.
-  // Em 320 px, ou com zoom, "Decididos hoje" quebra em duas linhas em vez de sair da tela.
+  // Em 320 px, ou com zoom, "Decididos hoje" quebra em duas linhas e o número desce para baixo de
+  // "Aguardando". Sem isso, os três filtros pediam 304 px, e a barra tem 288: passavam da barra e
+  // encostavam na borda da tela, e qualquer diferença de fonte (como no Linux do CI) os fazia sair.
   flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-content: center;
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
