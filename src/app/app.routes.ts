@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { confirmLeave } from './core/unsaved-changes';
 
 // Cada página é carregada sob demanda. O `title` vira "<title> · Scua Logon" (ver PageTitleStrategy).
 // As páginas do app ficam dentro da casca (menu e cabeçalho). Páginas sem menu, como o login e a
@@ -59,6 +60,7 @@ export const routes: Routes = [
         // Antes de regras/:id, para "nova" não virar o id de uma regra.
         path: 'regras/nova',
         title: 'Nova regra',
+        canDeactivate: [confirmLeave],
         loadComponent: () =>
           import('./features/schedules/pages/schedule-editor-page').then(
             (m) => m.ScheduleEditorPage,
@@ -67,6 +69,7 @@ export const routes: Routes = [
       {
         path: 'regras/:id',
         title: 'Regra de jornada',
+        canDeactivate: [confirmLeave],
         loadComponent: () =>
           import('./features/schedules/pages/schedule-editor-page').then(
             (m) => m.ScheduleEditorPage,

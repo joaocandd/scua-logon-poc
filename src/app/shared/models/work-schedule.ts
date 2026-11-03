@@ -1,3 +1,6 @@
+/** Quantos dias o modo observação dura antes de a regra passar a bloquear. */
+export const OBSERVATION_DAYS = 7;
+
 /** Dia da semana como no `Date.getUTCDay()`: 0 é domingo e 6 é sábado. */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -36,5 +39,10 @@ export interface WorkSchedule {
   requiresHrValidation: boolean;
   /** Modo observação: registra quem seria bloqueado, sem bloquear. */
   observationMode: boolean;
+  /**
+   * Último dia da observação, "AAAA-MM-DD". A API define quando o modo é ligado
+   * (`OBSERVATION_DAYS` dias, contando o dia de hoje); no dia seguinte, a regra passa a bloquear.
+   */
+  observationEndsOn?: string;
   assignment: ScheduleAssignment;
 }

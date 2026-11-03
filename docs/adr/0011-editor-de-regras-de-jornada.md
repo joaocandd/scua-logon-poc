@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O fluxo B (`/regras` e `/regras/:id`) é a tela do RH, no desktop primeiro. O editor tem seções (nome e dias, horários, avisos, aprovação, a quem se aplica), um resumo em português, um simulador "e se?" e a confirmação de impacto ao salvar. Esta ADR cobre o que entrou primeiro: a lista, as seções 1 e 2 e o salvar. As próximas seções acrescentam decisões aqui.
+O fluxo B (`/regras` e `/regras/:id`) é a tela do RH, no desktop primeiro. O editor tem seções (nome e dias, horários, avisos, aprovação, a quem se aplica), um resumo em português, um simulador "e se?" e a confirmação de impacto ao salvar. Esta ADR cobre o que entrou primeiro: a lista, as seções 1 e 2 e o salvar. O resto do editor (aplicação, resumo, simulador, impacto ao salvar e modo observação) está na ADR 0012.
 
 O editor tem duas tensões:
 

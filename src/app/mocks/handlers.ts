@@ -1,18 +1,19 @@
 // Rotas da API simulada. Cada rota recebe o banco em memória e devolve status e corpo, como um
 // servidor faria. Erros sempre vêm como { message } em português, pronto para a tela.
 
-import { toLocal } from '../shared/date';
+import { addDays, toLocal } from '../shared/date';
 import {
   ApprovalLink,
   Employee,
   ExtensionDecision,
   ExtensionRequest,
+  OBSERVATION_DAYS,
   Workstation,
   WorkSchedule,
 } from '../shared/models';
 import { requestContext } from '../shared/request-context';
 import { requestTimeline } from '../shared/request-timeline';
-import { evaluateWorkstation, isShift, plannedShift } from '../shared/schedule-engine';
+import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved } from './activity';
@@ -87,6 +88,8 @@ export function handleApiRequest(db: MockDb, request: MockRequest, now = new Dat
   const url = new URL(request.url, 'http://localhost');
   db.expirePending(now);
   db.deliverLiveRequests(now);
+  db.endObservations(now);
+  db.recordObservations(now);
   for (const [method, path, handler] of ROUTES) {
     const params = matchPath(path, url.pathname);
     if (method === request.method && params) {
@@ -317,11 +320,22 @@ function saveSchedule({ db, body, now }: Context, id?: string): MockResponse {
     ...structuredClone(body as WorkSchedule),
     id: id ?? `regra-${crypto.randomUUID().slice(0, 8)}`,
   };
+  // A observação dura OBSERVATION_DAYS dias, contando o dia em que foi ligada. Salvar de novo uma
+  // regra que já estava em observação não muda o fim.
+  const previous = id ? db.data.schedules[index] : undefined;
+  delete saved.observationEndsOn;
+  if (saved.observationMode) {
+    saved.observationEndsOn =
+      (previous?.observationMode && previous.observationEndsOn) ||
+      addDays(toLocal(now).date, OBSERVATION_DAYS - 1);
+  }
   if (id) db.data.schedules[index] = saved;
   else db.data.schedules.push(saved);
 
   const actor = db.employee(db.currentUserId);
   if (actor) db.log(scheduleSaved(saved, actor, now.toISOString(), !id));
+  // Quem a regra em observação bloquearia já no momento em que é salva.
+  db.recordObservations(now);
   return ok(saved, id ? 200 : 201);
 }
 
@@ -359,19 +373,17 @@ function listActivity({ db, query }: Context): MockResponse {
   return ok(events);
 }
 
-/** Estação de cada colaborador agora. Quem não tem regra de jornada fica de fora (sem controle). */
+/**
+ * Estação de cada colaborador agora. Quem não tem regra de jornada fica de fora (sem controle).
+ * Quem só está numa regra em observação vem marcado: o estado é o que a regra faria, sem bloquear.
+ */
 function listWorkstations({ db, now }: Context): MockResponse {
   const workstations: Workstation[] = db.data.employees.flatMap((employee) => {
     const schedule = db.scheduleFor(employee);
     if (!schedule) return [];
-    const status = evaluateWorkstation({
-      schedule,
-      exceptions: db.data.exceptions.filter((e) => e.employeeId === employee.id),
-      holidays: db.data.holidays,
-      extensions: db.data.requests.filter((r) => r.employeeId === employee.id),
-      at: now,
-    });
-    return [{ employeeId: employee.id, ...status }];
+    const status = db.evaluate(schedule, employee, now);
+    const observed = schedule.observationMode ? { observed: true } : {};
+    return [{ employeeId: employee.id, ...status, ...observed }];
   });
   return ok(workstations);
 }

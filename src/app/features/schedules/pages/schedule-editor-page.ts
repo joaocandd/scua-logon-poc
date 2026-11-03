@@ -11,11 +11,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { type FieldTree, form, FormRoot } from '@angular/forms/signals';
+import { type FieldTree, form, FormField, FormRoot } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { LeaveConfirmation } from '../../../core/unsaved-changes';
 import {
   Button,
+  ConfirmDialog,
   EmptyState,
   ErrorState,
   Icon,
@@ -24,7 +26,8 @@ import {
   Toast,
 } from '../../../design-system';
 import { apiErrorMessage } from '../../../shared/api-error';
-import { toLocal } from '../../../shared/date';
+import { formatDate, toLocal } from '../../../shared/date';
+import { OBSERVATION_DAYS } from '../../../shared/models';
 import { injectNow } from '../../../shared/now';
 import { toTime } from '../../../shared/time';
 import { ExtensionRequests } from '../../approvals/data/extension-requests';
@@ -33,13 +36,14 @@ import { isRetrying, LoadState, loadState, retryFailed } from '../data/load-stat
 import { assignmentConflicts, assignmentPreview, groupOptions } from '../data/schedule-assignment';
 import { newScheduleDraft, ScheduleDraft, toDraft, toSchedule } from '../data/schedule-draft';
 import { ScheduleFormContext, scheduleSchema } from '../data/schedule-form';
+import { saveImpact } from '../data/schedule-impact';
 import { periodNotes } from '../data/schedule-period';
 import { SimulationContext, simulationSchedule } from '../data/schedule-simulation';
 import { scheduleSummary } from '../data/schedule-summary';
 import { draftTimeline } from '../data/schedule-timeline';
 import { checkHours } from '../data/schedule-validation';
 import { warningPreview } from '../data/schedule-warnings';
-import { WorkSchedules } from '../data/work-schedules';
+import { observationLog, WorkSchedules } from '../data/work-schedules';
 import { ScheduleApproval } from '../ui/schedule-approval';
 import { ScheduleAssignmentSection } from '../ui/schedule-assignment';
 import { ScheduleHours } from '../ui/schedule-hours';
@@ -60,6 +64,10 @@ type EditorState = LoadState | 'not-found';
  * - de campo (obrigatório, nome repetido, nenhum dia): só depois do primeiro "Salvar regra";
  * - de regra (horários, intervalos e conflito com outra regra ativa): na hora, na própria seção.
  * Os dois impedem salvar. Na tentativa, o foco vai para o primeiro campo com problema.
+ *
+ * Salvar pede confirmação, com o impacto: o que muda, para quantas pessoas e de quem a estação
+ * bloqueia agora (ConfirmDialog). A opção "Observar por 7 dias antes de bloquear" fica junto do
+ * resumo. Sair com alteração não salva também pede confirmação (guarda confirmLeave nas rotas).
  */
 @Component({
   selector: 'app-schedule-editor-page',
@@ -67,6 +75,7 @@ type EditorState = LoadState | 'not-found';
     Button,
     EmptyState,
     ErrorState,
+    FormField,
     FormRoot,
     Icon,
     PageHeader,
@@ -84,8 +93,9 @@ type EditorState = LoadState | 'not-found';
   templateUrl: './schedule-editor-page.html',
   styleUrl: './schedule-editor-page.scss',
 })
-export class ScheduleEditorPage {
+export class ScheduleEditorPage implements LeaveConfirmation {
   private readonly schedules = inject(WorkSchedules);
+  private readonly confirm = inject(ConfirmDialog);
   private readonly people = inject(People);
   /** Só para o simulador: as horas extras aprovadas contam. Se falhar, simula sem elas. */
   private readonly requests = inject(ExtensionRequests);
@@ -146,11 +156,9 @@ export class ScheduleEditorPage {
    * chegar de novo da API não apaga o que a pessoa está digitando.
    */
   private readonly source = computed(() => (this.state() === 'ready' ? (this.id() ?? '') : null));
-  private readonly draft = linkedSignal<ScheduleDraft>(() => {
-    this.source();
-    const saved = untracked(this.saved);
-    return saved ? toDraft(saved) : newScheduleDraft();
-  });
+  private readonly draft = linkedSignal<ScheduleDraft>(() => this.initialDraft());
+  /** O rascunho como abriu ou como foi salvo por último: a base de "alteração não salva". */
+  private readonly baseline = linkedSignal<ScheduleDraft>(() => this.initialDraft());
 
   private readonly formContext: ScheduleFormContext = {
     otherSchedules: () => this.others(),
@@ -162,10 +170,27 @@ export class ScheduleEditorPage {
       action: async (fields) => {
         this.formError.set(null);
         const id = this.id();
+        const schedule = toSchedule(fields().value(), id ?? '');
+        const impact = saveImpact({
+          before: this.saved(),
+          after: schedule,
+          employees: this.employees(),
+          exceptions: this.simulation().exceptions,
+          holidays: this.simulation().holidays,
+          extensions: this.simulation().extensions,
+          now: Date.now(),
+        });
+        if (!impact) {
+          this.toast.show({ message: 'Nada mudou: a regra já está salva assim.' });
+          return;
+        }
+        if (!(await this.confirm.open({ ...impact, cancelLabel: 'Continuar editando' }))) return;
         try {
-          const saved = await this.schedules.save(toSchedule(fields().value(), id ?? ''));
+          const saved = await this.schedules.save(schedule);
           // O formulário fica igual ao que foi salvo (nome sem espaços nas pontas, por exemplo).
+          this.baseline.set(toDraft(saved));
           fields().reset(toDraft(saved));
+          this.observations.reload();
           this.toast.show({ message: `Regra ${saved.name} ${id ? 'salva' : 'criada'}.` });
           if (!id) await this.router.navigate(['/regras', saved.id], { replaceUrl: true });
         } catch (error) {
@@ -226,6 +251,30 @@ export class ScheduleEditorPage {
     assignmentConflicts(this.schedule(), this.employees(), this.others()).map((p) => p.message),
   );
 
+  /** Há alteração que não foi salva? Compara a regra como seria salva, não o formulário. */
+  private readonly hasChanges = computed(
+    () =>
+      this.state() === 'ready' &&
+      JSON.stringify(this.schedule()) !==
+        JSON.stringify(toSchedule(this.baseline(), this.id() ?? '')),
+  );
+
+  protected readonly observationDays = OBSERVATION_DAYS;
+  /** Ajuda da opção de observar: até quando, se a regra salva já está em observação. */
+  protected readonly observationHint = computed(() => {
+    const endsOn = this.saved()?.observationMode && this.saved()?.observationEndsOn;
+    return endsOn
+      ? `Em observação até ${formatDate(endsOn)}. Ninguém é bloqueado: o Scua Logon registra quem seria. Desmarcar e salvar faz a regra bloquear já.`
+      : `Por ${OBSERVATION_DAYS} dias depois de salvar, ninguém é bloqueado: o Scua Logon registra quem seria. Depois, a regra passa a bloquear.`;
+  });
+  /** Registros da observação da regra salva: quem teria a estação bloqueada. */
+  protected readonly observations = observationLog(() =>
+    this.saved()?.observationMode ? this.id() : null,
+  );
+  protected readonly observedEvents = computed(() =>
+    this.observations.hasValue() ? this.observations.value() : [],
+  );
+
   constructor() {
     // Outra regra na mesma tela (pela busca, por exemplo): começa sem erros e sem alterações.
     effect(() => {
@@ -240,6 +289,27 @@ export class ScheduleEditorPage {
 
   protected retry(): void {
     retryFailed(this.resources);
+  }
+
+  /** Guarda da rota: com alteração não salva, pergunta antes de sair. */
+  async canLeave(): Promise<boolean> {
+    if (!this.hasChanges()) return true;
+    return this.confirm.open({
+      title: 'Sair sem salvar?',
+      message: this.saved()
+        ? `As mudanças na regra ${this.saved()!.name} vão se perder.`
+        : 'A regra nova ainda não foi salva e vai se perder.',
+      confirmLabel: 'Sair sem salvar',
+      cancelLabel: 'Continuar editando',
+      variant: 'danger',
+    });
+  }
+
+  /** O rascunho de quando a tela abre: a regra salva ou uma regra nova. */
+  private initialDraft(): ScheduleDraft {
+    this.source();
+    const saved = untracked(this.saved);
+    return saved ? toDraft(saved) : newScheduleDraft();
   }
 
   /**

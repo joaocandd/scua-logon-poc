@@ -10,4 +10,9 @@ export interface WorkstationStatus {
 /** Estação de um colaborador agora (resposta de /api/estacoes). */
 export interface Workstation extends WorkstationStatus {
   employeeId: string;
+  /**
+   * A regra do colaborador está em observação: o estado é o que a regra faria, mas a estação não
+   * é bloqueada de verdade.
+   */
+  observed?: boolean;
 }

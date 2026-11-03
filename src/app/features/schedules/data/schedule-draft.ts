@@ -56,6 +56,7 @@ export function toDraft(schedule: WorkSchedule): ScheduleDraft {
     warningMinutes: [...schedule.warningMinutes],
     approval: schedule.requiresHrValidation ? 'gestor-e-rh' : 'gestor',
     observationMode: schedule.observationMode,
+    ...(schedule.observationEndsOn && { observationEndsOn: schedule.observationEndsOn }),
     assignment: structuredClone(schedule.assignment),
   };
 }
@@ -75,6 +76,7 @@ export function toSchedule(draft: ScheduleDraft, id = ''): WorkSchedule {
     warningMinutes: [...draft.warningMinutes],
     requiresHrValidation: draft.approval === 'gestor-e-rh',
     observationMode: draft.observationMode,
+    ...(draft.observationEndsOn && { observationEndsOn: draft.observationEndsOn }),
     assignment: structuredClone(draft.assignment),
   };
 }

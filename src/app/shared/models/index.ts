@@ -18,5 +18,11 @@ export {
   type ScheduleStatus,
   type WorkstationState,
 } from './status';
-export type { Break, ScheduleAssignment, Weekday, WorkSchedule } from './work-schedule';
+export {
+  OBSERVATION_DAYS,
+  type Break,
+  type ScheduleAssignment,
+  type Weekday,
+  type WorkSchedule,
+} from './work-schedule';
 export type { Workstation, WorkstationStatus } from './workstation';

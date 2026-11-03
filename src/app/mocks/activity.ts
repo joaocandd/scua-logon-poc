@@ -103,6 +103,37 @@ export function scheduleSaved(
   };
 }
 
+/**
+ * Regra em observação: a estação seria bloqueada agora, mas não foi. `reason` é o motivo do
+ * schedule-engine, como "Bloqueada: fora da jornada Comercial (das 8h às 17h).".
+ */
+export function blockObserved(
+  schedule: WorkSchedule,
+  employee: Employee,
+  reason: string,
+  at: string,
+  minutes: number,
+): NewActivityEvent {
+  const why = reason.slice(reason.indexOf(': ') + 2);
+  return {
+    type: 'bloqueio_observado',
+    at,
+    employeeId: employee.id,
+    scheduleId: schedule.id,
+    summary: `Às ${formatClock(minutes)}, a estação de ${employee.name} seria bloqueada. Motivo: ${why}`,
+  };
+}
+
+/** Os dias de observação acabaram: a regra passa a bloquear. */
+export function observationEnded(schedule: WorkSchedule, at: string): NewActivityEvent {
+  return {
+    type: 'observacao_encerrada',
+    at,
+    scheduleId: schedule.id,
+    summary: `A observação da regra ${schedule.name} terminou. A partir de agora, ela bloqueia a estação.`,
+  };
+}
+
 /** Termina com ponto, se a pessoa não tiver posto. */
 function sentence(text: string): string {
   return /[.!?]$/.test(text) ? text : `${text}.`;

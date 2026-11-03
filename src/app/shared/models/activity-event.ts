@@ -6,7 +6,10 @@ export type ActivityEventType =
   | 'pedido_cancelado'
   | 'decisao_desfeita'
   | 'regra_criada'
-  | 'regra_salva';
+  | 'regra_salva'
+  /** Regra em observação: a estação de alguém seria bloqueada agora, mas não foi. */
+  | 'bloqueio_observado'
+  | 'observacao_encerrada';
 
 /** Item do histórico (auditoria). */
 export interface ActivityEvent {

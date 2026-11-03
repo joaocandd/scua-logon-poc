@@ -33,6 +33,15 @@ describe('toDraft e toSchedule', () => {
     expect(newScheduleDraft().approval).toBe('gestor');
   });
 
+  it('regra em observação volta igual, com o último dia', () => {
+    const observing = {
+      ...byId('regra-tarde'),
+      observationMode: true,
+      observationEndsOn: '2026-11-18',
+    };
+    expect(toSchedule(toDraft(observing), observing.id)).toEqual(observing);
+  });
+
   it('marca "atravessa a meia-noite" quando o fim vem antes do início', () => {
     expect(toDraft(byId('regra-noturna')).overnight).toBe(true);
     expect(toDraft(byId('regra-comercial')).overnight).toBe(false);
