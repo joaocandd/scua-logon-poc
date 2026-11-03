@@ -10,6 +10,10 @@ test.skip(
   'As larguras são fixadas aqui: um projeto basta',
 );
 
+// Terça, 14h30: a hora da execução do CI que pegou os filtros de /aprovacoes saindo da tela em
+// 320 px. A causa era o layout, não a hora; a hora fixa só deixa os dados iguais em toda execução.
+const TUESDAY_AFTERNOON = new Date('2026-11-03T14:30:00-03:00');
+
 const sizes = [
   { name: '320 px', viewport: { width: 320, height: 640 }, deviceScaleFactor: 1 },
   { name: 'zoom de 200%', viewport: { width: 640, height: 400 }, deviceScaleFactor: 2 },
@@ -40,6 +44,9 @@ for (const { name, viewport, deviceScaleFactor } of sizes) {
 
     for (const { url, ready } of screens) {
       test(`${url}: sem rolagem para o lado e nada cortado`, async ({ page }) => {
+        // Relógio falso a partir de uma hora fixa, como no today.spec.ts: o tempo corre
+        // normalmente, mas os dados simulados (pedidos, estações) não dependem da hora do teste.
+        await page.clock.install({ time: TUESDAY_AFTERNOON });
         await page.goto(url);
         await expect(ready(page)).toBeVisible();
         await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
