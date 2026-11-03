@@ -455,7 +455,7 @@ test('fluxo completo: cria a regra, resolve o conflito, simula e salva em observ
 
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {
   await page.goto('/regras/regra-que-nao-existe');
-  await expect(page.getByRole('heading', { name: 'Esta regra não existe mais' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Não encontramos esta regra' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Ver regras de jornada' })).toBeVisible();
   await expectNoA11yViolations(page);
 });
@@ -463,7 +463,7 @@ test('regra que não existe explica e leva de volta à lista', async ({ page }) 
 test('com a API fora do ar, oferece tentar de novo', async ({ page }) => {
   await openList(page, '/regras?simular=erro');
   await expect(
-    page.getByRole('heading', { name: 'Não foi possível carregar as regras' }),
+    page.getByRole('heading', { name: 'Não conseguimos carregar as regras' }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible();
   await expectNoA11yViolations(page);

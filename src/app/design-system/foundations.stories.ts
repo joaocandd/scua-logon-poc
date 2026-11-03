@@ -90,7 +90,9 @@ const meta: Meta = {
       description: {
         component:
           'Cores, tipografia, espaçamentos e raios do design system. Os valores vêm de ' +
-          '`src/styles/tokens.css`; use o botão de tema na barra para ver o tema escuro.',
+          '`src/styles/tokens.css`, a única fonte do tema: o app não usa o Angular Material ' +
+          '(ADR 0014). Para aplicar a marca em telas com Material, veja `docs/tema-material.md`. ' +
+          'Use o botão de tema na barra para ver o tema escuro.',
       },
     },
   },
@@ -126,7 +128,7 @@ export const Tipografia: Story = {
       <div style="${FRAME}">
         <table style="${TABLE}">
           <caption style="text-align: left; font-weight: 600; padding-bottom: var(--space-2);">
-            Tamanhos (fonte Montserrat, entrelinha 1,2 em títulos e 1,5 no corpo)
+            Tamanhos (Montserrat variável, entrelinha 1,2 em títulos e 1,5 no corpo)
           </caption>
           <thead>
             <tr>

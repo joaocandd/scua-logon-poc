@@ -7,7 +7,7 @@
 
 <!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
 <p class="cdk-visually-hidden" role="status">
-  {{ state() === 'loading' ? 'Carregando regra' : '' }}
+  {{ state() === 'loading' ? 'Carregando a regra' : '' }}
 </p>
 
 @switch (state()) {
@@ -31,7 +31,7 @@
   }
   @case ('error') {
     <app-error-state
-      heading="Não foi possível carregar a regra"
+      heading="Não conseguimos carregar a regra"
       [retrying]="retrying()"
       (retry)="retry()"
     />
@@ -39,8 +39,8 @@
   @case ('not-found') {
     <app-empty-state
       icon="search_off"
-      heading="Esta regra não existe mais"
-      description="Ela pode ter sido apagada, ou o endereço está incompleto. Veja as regras que existem na lista."
+      heading="Não encontramos esta regra"
+      description="Ela pode ter sido apagada, ou o endereço está incompleto. Escolha uma regra na lista."
     >
       <a app-button routerLink="/regras" variant="secondary">Ver regras de jornada</a>
     </app-empty-state>

@@ -48,7 +48,7 @@
   --status-blocked: var(--scua-ink-900);
 
   /* Tipografia */
-  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-sans: 'Montserrat Variable', system-ui, sans-serif;
   --text-xs: 12px;
   --text-sm: 14px;
   --text-md: 16px;

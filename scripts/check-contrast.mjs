@@ -30,15 +30,14 @@ const TEXT_PAIRS = [
   ['--color-link', '--color-highlight-bg'],
 ];
 
-// Hover e foco dos botões do Material: uma camada de cor com 10% de opacidade (o maior valor do
-// Material 3) por cima do fundo do botão. O texto precisa continuar legível nesse estado.
+// Hover do Button do design system: uma camada de 10% de --color-text por cima do fundo do botão
+// (button.scss). O texto precisa continuar legível nesse estado. Para telas com Angular Material,
+// veja os pares a mais em docs/tema-material.md.
 const STATE_LAYER_OPACITY = 0.1;
 const STATE_PAIRS = [
   // [texto, camada de estado, fundo do botão]
-  ['--color-on-primary', '--color-text', '--color-primary'], // botão cheio
+  ['--color-on-primary', '--color-text', '--color-primary'], // botão primário
   ['--color-on-primary', '--color-text', '--status-rejected'], // botão danger
-  ['--color-link', '--color-link', '--color-bg'], // botão de texto e com contorno
-  ['--color-link', '--color-link', '--color-surface'],
 ];
 
 const UI_PAIRS = [

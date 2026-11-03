@@ -79,7 +79,7 @@
     <section class="section" aria-labelledby="detalhe-historico">
       <h3 id="detalhe-historico" class="section-title">Histórico</h3>
       @if (history.error()) {
-        <p class="muted">Não foi possível carregar o histórico.</p>
+        <p class="muted">Não conseguimos carregar o histórico.</p>
         <button
           app-button
           type="button"
@@ -96,7 +96,7 @@
           <app-skeleton width="65%" />
         </div>
       } @else if (entries().length === 0) {
-        <p class="muted">Sem registros ainda.</p>
+        <p class="muted">Nenhum registro ainda.</p>
       } @else {
         <ol class="history">
           @for (entry of entries(); track entry.id) {

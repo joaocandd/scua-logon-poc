@@ -22,7 +22,7 @@ const meta: Meta<EmptyState> = {
   },
   args: {
     heading: 'Nenhum pedido aguardando',
-    description: 'Pedidos de extensão aparecem aqui assim que alguém solicitar.',
+    description: 'Os pedidos de extensão aparecem aqui assim que alguém pedir.',
     icon: 'inbox',
     headingLevel: 2,
   },

@@ -19,7 +19,7 @@
     @case ('erro') {
       <h1 class="title">Pedido de hora extra</h1>
       <app-error-state
-        heading="Não foi possível abrir o pedido"
+        heading="Não conseguimos abrir o pedido"
         [retrying]="link.isLoading()"
         (retry)="link.reload()"
       />
