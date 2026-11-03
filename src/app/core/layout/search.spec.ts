@@ -1,6 +1,6 @@
 import { Employee, Group, WorkSchedule } from '../../shared/models';
 import { NAV_ITEMS } from './nav-items';
-import { MAX_RESULTS_PER_SECTION, normalize, search, SearchSources } from './search';
+import { MAX_RESULTS_PER_SECTION, search, SearchSources } from './search';
 
 function employee(id: string, name: string, jobTitle: string, groupId: string): Employee {
   return { id, name, jobTitle, groupId, email: `${id}@empresa.example` };
@@ -82,9 +82,9 @@ describe('Busca da paleta de comandos', () => {
     const [scheduleResult] = search('noturna', sources)[0].results;
     expect(scheduleResult).toMatchObject({
       detail: 'Das 22h às 6h',
-      path: '/regras',
-      queryParams: { regra: 'regra-noturna' },
+      path: '/regras/regra-noturna',
     });
+    expect(scheduleResult.queryParams).toBeUndefined();
 
     const [pageResult] = search('hoje', sources)[0].results;
     expect(pageResult).toMatchObject({ id: 'page-hoje', path: '/hoje' });
@@ -102,9 +102,5 @@ describe('Busca da paleta de comandos', () => {
 
   it('nada encontrado devolve lista vazia', () => {
     expect(search('xyz', sources)).toEqual([]);
-  });
-
-  it('normalize tira acento e maiúscula', () => {
-    expect(normalize('  Configurações ')).toBe('configuracoes');
   });
 });

@@ -152,6 +152,23 @@ a {
   }
 }
 
+// Editor de regras, abaixo de 80em: o resumo e "Salvar regra" ficam numa barra presa ao rodapé
+// (cerca de 4,5rem), acima da barra inferior no celular. O aviso e o elemento focado sobem acima
+// dela. Vem depois da regra da barra inferior para valer no lugar dela.
+@media (max-width: 79.999em) {
+  :root:has(.schedule-save-bar) {
+    --toast-offset: 5.5rem;
+    scroll-padding-bottom: calc(5.5rem + var(--space-4));
+  }
+}
+
+@media (max-width: 63.999em) {
+  :root:has(.schedule-save-bar) {
+    --toast-offset: 9rem;
+    scroll-padding-bottom: calc(9rem + var(--space-4));
+  }
+}
+
 // Menos movimento para quem pediu isso no sistema operacional.
 @media (prefers-reduced-motion: reduce) {
   *,

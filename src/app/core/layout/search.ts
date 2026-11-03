@@ -2,6 +2,7 @@
 // resultados em seções. A paleta só desenha o que sai daqui.
 import { IconName } from '../../design-system';
 import { Employee, Group, WorkSchedule } from '../../shared/models';
+import { capitalize, normalize } from '../../shared/text';
 import { formatRange, toMinutes } from '../../shared/time';
 import { NavItem } from './nav-items';
 
@@ -78,8 +79,7 @@ export function search(query: string, sources: SearchSources): SearchSection[] {
     label: schedule.name,
     detail: capitalize(formatRange(toMinutes(schedule.start), toMinutes(schedule.end))),
     icon: 'schedule',
-    path: '/regras',
-    queryParams: { regra: schedule.id },
+    path: `/regras/${schedule.id}`,
   }));
 
   const sections: SearchSection[] = [
@@ -89,15 +89,6 @@ export function search(query: string, sources: SearchSources): SearchSection[] {
     { kind: 'schedule', heading: 'Regras de jornada', results: match(schedules, terms) },
   ];
   return sections.filter((section) => section.results.length > 0);
-}
-
-/** "João" → "joao". Para comparar sem acento e sem maiúscula. */
-export function normalize(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .trim();
 }
 
 /** Quem tem todas as palavras. Nome que começa com o texto digitado vem primeiro. */
@@ -118,8 +109,4 @@ function startsWith(result: SearchResult, query: string): number {
 
 function countLabel(count: number): string {
   return count === 1 ? '1 colaborador' : `${count} colaboradores`;
-}
-
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }

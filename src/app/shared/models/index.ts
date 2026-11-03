@@ -12,8 +12,10 @@ export type {
 } from './schedule-exception';
 export {
   EXTENSION_REQUEST_STATUSES,
+  SCHEDULE_STATUSES,
   WORKSTATION_STATES,
   type ExtensionRequestStatus,
+  type ScheduleStatus,
   type WorkstationState,
 } from './status';
 export type { Break, ScheduleAssignment, Weekday, WorkSchedule } from './work-schedule';

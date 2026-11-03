@@ -1,0 +1,149 @@
+// Uma coluna de seções; a partir de 80em, o resumo e "Salvar regra" numa coluna presa ao lado.
+// Abaixo disso, o resumo vem depois das seções e uma barra presa ao rodapé mostra o começo dele e
+// "Salvar regra". A barra muda o --toast-offset e o scroll-padding da página (styles.scss).
+:host {
+  display: block;
+  max-width: 48rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  margin-bottom: var(--space-2);
+  color: var(--color-link);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.editor,
+.sections,
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-ring);
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--status-rejected);
+  border-radius: var(--radius-md);
+  color: var(--status-rejected);
+  font-weight: 500;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-highlight-bg);
+  box-shadow: var(--shadow-ring);
+}
+
+// Na coluna ao lado, o "Salvar regra" fica no resumo; abaixo de 80em, fica na barra.
+.side-save {
+  display: none;
+}
+
+.save-bar {
+  position: sticky;
+  bottom: calc(var(--bottom-nav-height, 0px) + var(--space-2));
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+}
+
+.bar-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+
+  summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-2);
+    min-height: var(--control-height);
+    cursor: pointer;
+  }
+
+  &[open] .bar-more {
+    display: none;
+  }
+}
+
+.bar-first {
+  font-weight: 600;
+}
+
+.bar-more {
+  color: var(--color-link);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.bar-rest {
+  margin: 0 0 var(--space-2);
+}
+
+@media (min-width: 64em) {
+  .save-bar {
+    bottom: var(--space-4);
+  }
+}
+
+@media (min-width: 80em) {
+  :host {
+    max-width: 76rem;
+  }
+
+  .editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  // Presa abaixo do cabeçalho da casca, com rolagem própria. --header-height vem da casca.
+  .side {
+    position: sticky;
+    top: calc(var(--header-height, 4rem) + var(--space-4));
+    max-height: calc(100dvh - var(--header-height, 4rem) - var(--space-8));
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .side-save {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+
+  .save-bar {
+    display: none;
+  }
+}

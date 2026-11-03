@@ -33,6 +33,12 @@ export function formatDuration(minutes: number): string {
   return minutes < 60 ? `${minutes} min` : formatClock(minutes);
 }
 
+/** Trecho curto, com minutos de qualquer dia: (720, 780) → "12h–13h"; (1320, 1800) → "22h–6h". */
+export function formatSpan(start: number, end: number): string {
+  const clock = (minutes: number) => formatClock(toMinutes(toTime(minutes)));
+  return `${clock(start)}–${clock(end)}`;
+}
+
 /** "das 8h às 12h". 0h e 1h pedem singular: "da 0h à 1h30". */
 export function formatRange(start: number, end: number): string {
   const singular = (minutes: number) => minutes < 2 * 60;

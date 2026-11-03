@@ -1,2 +1,88 @@
-<h1>Regras de jornada</h1>
-<p>Esta área chega nas próximas entregas.</p>
+<app-page-header
+  heading="Regras de jornada"
+  description="Quando a estação de cada grupo fica liberada e quem aprova a hora extra."
+>
+  @if (state() === 'ready') {
+    <a app-button routerLink="/regras/nova" icon="add">Nova regra</a>
+  }
+</app-page-header>
+
+<!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
+<p class="cdk-visually-hidden" role="status">
+  {{ state() === 'loading' ? 'Carregando regras' : '' }}
+</p>
+
+@switch (state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso às regras de jornada"
+      description="Esta área é de quem configura as jornadas. Se você precisa dela, peça acesso ao RH."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não foi possível carregar as regras"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @case ('loading') {
+    <ul class="skeleton-list" aria-busy="true">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <li aria-hidden="true">
+          <app-skeleton variant="heading" width="30%" />
+          <app-skeleton width="60%" />
+        </li>
+      }
+    </ul>
+  }
+  @default {
+    @if (rows().length === 0) {
+      <app-empty-state
+        icon="schedule"
+        heading="Nenhuma regra de jornada"
+        description="Sem regra, a estação de trabalho não é bloqueada. Crie a primeira regra para começar."
+      />
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Regra</th>
+            <th scope="col">Horário</th>
+            <th scope="col">Grupos</th>
+            <th scope="col" class="numeric">Colaboradores</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr>
+              <th scope="row" class="name">
+                <a [routerLink]="['/regras', row.id]">{{ row.name }}</a>
+              </th>
+              <td class="hours">
+                <span class="line">{{ row.hours }}</span>
+                <span class="line muted">{{ row.days }}</span>
+              </td>
+              <!-- Os rótulos dentro das células só aparecem no celular, onde o cabeçalho some. -->
+              <td class="groups">
+                <span class="cell-label" aria-hidden="true">Grupos:</span>
+                @if (row.groups.length > 0) {
+                  {{ row.groups.join(', ') }}
+                } @else {
+                  <span class="muted">Nenhum grupo</span>
+                }
+              </td>
+              <td class="numeric count">
+                <span class="cell-label" aria-hidden="true">Colaboradores:</span>
+                {{ row.employeeCount }}
+              </td>
+              <td class="status"><app-status-badge [status]="row.status" /></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+}

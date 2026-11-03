@@ -158,7 +158,7 @@ test.describe('Casca no desktop', () => {
     // Enter abre o resultado ativo; o foco vai para o <main>.
     await page.keyboard.press('Enter');
     await expect(dialog).toBeHidden();
-    await expect(page).toHaveURL('/regras?regra=regra-noturna');
+    await expect(page).toHaveURL('/regras/regra-noturna');
     await expect(page.getByRole('main')).toBeFocused();
 
     // Nada encontrado vira texto, para todos.
@@ -188,7 +188,7 @@ test.describe('Casca no desktop', () => {
       timeout: 10_000,
     });
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL('/regras?regra=regra-noturna');
+    await expect(page).toHaveURL('/regras/regra-noturna');
   });
 
   test('busca com a API fora do ar: as páginas continuam e o erro vira texto', async ({ page }) => {

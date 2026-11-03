@@ -1,9 +1,13 @@
 import { Component, computed, input } from '@angular/core';
-import { ExtensionRequestStatus, WorkstationState } from '../../shared/models/status';
+import {
+  ExtensionRequestStatus,
+  ScheduleStatus,
+  WorkstationState,
+} from '../../shared/models/status';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
 
-export type Status = ExtensionRequestStatus | WorkstationState;
+export type Status = ExtensionRequestStatus | WorkstationState | ScheduleStatus;
 
 /** Cor do badge. `unlocked` é o laranja de estação liberada; `blocked`, a hachura. */
 type Tone = 'approved' | 'pending' | 'rejected' | 'neutral' | 'unlocked' | 'blocked';
@@ -28,9 +32,12 @@ export const STATUS_INFO: Record<Status, StatusInfo> = {
   he_aprovada: { label: 'Hora extra aprovada', icon: 'more_time', tone: 'approved' },
   bloqueada: { label: 'Bloqueada', icon: 'lock', tone: 'blocked' },
   fora_expediente: { label: 'Fora do expediente', icon: 'bedtime', tone: 'neutral' },
+  // Regra de jornada
+  ativa: { label: 'Ativa', icon: 'lock_clock', tone: 'approved' },
+  em_observacao: { label: 'Em observação', icon: 'visibility', tone: 'pending' },
 };
 
-/** Status de pedido ou de estação, sempre com ícone e rótulo (nunca só a cor). */
+/** Status de pedido, de estação ou de regra, sempre com ícone e rótulo (nunca só a cor). */
 @Component({
   selector: 'app-status-badge',
   imports: [Icon],

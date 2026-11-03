@@ -2,10 +2,19 @@ import {
   formatClock,
   formatDuration,
   formatRange,
+  formatSpan,
   MINUTES_PER_DAY,
   toMinutes,
   toTime,
 } from './time';
+
+describe('formatSpan', () => {
+  it('mostra o trecho curto, inclusive depois da meia-noite', () => {
+    expect(formatSpan(720, 780)).toBe('12h–13h');
+    expect(formatSpan(1320, MINUTES_PER_DAY + 360)).toBe('22h–6h');
+    expect(formatSpan(990, 1050)).toBe('16h30–17h30');
+  });
+});
 
 describe('toMinutes', () => {
   it('converte HH:mm em minutos desde a meia-noite', () => {

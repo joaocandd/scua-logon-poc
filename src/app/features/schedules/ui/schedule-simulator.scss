@@ -1,0 +1,51 @@
+@use 'section';
+
+:host {
+  display: block;
+}
+
+.section {
+  @include section.card;
+}
+
+.hint {
+  @include section.hint;
+}
+
+// Colaborador na largura toda; data e hora lado a lado. No desktop, os três na mesma linha.
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.who {
+  grid-column: 1 / -1;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.sentence {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+@media (min-width: 48em) {
+  .fields {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .who {
+    grid-column: auto;
+  }
+}

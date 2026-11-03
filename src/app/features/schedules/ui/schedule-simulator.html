@@ -1,0 +1,35 @@
+<section class="section" aria-labelledby="secao-simulador">
+  <h2 id="secao-simulador">Simulador “e se?”</h2>
+  <p class="hint">
+    Veja como a estação de alguém estaria num dia e numa hora com esta regra, do jeito que está
+    agora, antes de salvar. Exceções, feriados e horas extras aprovadas da pessoa contam.
+  </p>
+
+  <div class="fields">
+    <app-field label="Colaborador" class="who">
+      <select appFieldControl [formField]="query.employeeId">
+        @for (employee of context().employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        } @empty {
+          <option value="">Ninguém na regra</option>
+        }
+      </select>
+    </app-field>
+    <app-field label="Data">
+      <input appFieldControl type="date" [formField]="query.date" />
+    </app-field>
+    <app-field label="Hora">
+      <input appFieldControl type="time" [formField]="query.time" />
+    </app-field>
+  </div>
+
+  <!-- A região existe antes do resultado, para o leitor de tela anunciar cada mudança. -->
+  <div class="result" aria-live="polite">
+    @if (result(); as result) {
+      <app-status-badge [status]="result.state" />
+      <p class="sentence">{{ result.sentence }}</p>
+    } @else {
+      <p class="hint">{{ missing() }}</p>
+    }
+  </div>
+</section>

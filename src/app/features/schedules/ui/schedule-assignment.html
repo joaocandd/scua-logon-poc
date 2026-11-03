@@ -1,0 +1,77 @@
+<section class="section" aria-labelledby="secao-aplicacao">
+  <h2 id="secao-aplicacao">A quem se aplica</h2>
+
+  <fieldset class="groups">
+    <legend class="legend">Grupos</legend>
+    <div #groupList class="group-list">
+      @for (option of groups(); track option.group.id) {
+        <div class="group">
+          <label class="checkbox">
+            <input
+              #box
+              type="checkbox"
+              [attr.aria-describedby]="'grupo-' + option.group.id"
+              [checked]="selected().has(option.group.id)"
+              (change)="toggleGroup(option.group.id, box.checked)"
+            />
+            <span>{{ option.group.name }}</span>
+          </label>
+          <p class="hint" [id]="'grupo-' + option.group.id">
+            {{ option.employees.length }}
+            {{ option.employees.length === 1 ? 'colaborador' : 'colaboradores' }}
+            @if (option.otherRule; as rule) {
+              · hoje na regra {{ rule }}
+            }
+          </p>
+        </div>
+      }
+    </div>
+  </fieldset>
+
+  <div class="preview">
+    <p class="headline">{{ preview().headline }}</p>
+    @if (excludedNames()) {
+      <p class="hint">Fora desta regra: {{ excludedNames() }}.</p>
+    }
+
+    <!-- A região existe antes dos problemas, para o leitor de tela anunciar quando aparecerem. -->
+    <div aria-live="polite">
+      @if (problems().length > 0) {
+        <ul class="problems">
+          @for (problem of problems(); track $index) {
+            <li>
+              <app-icon name="error" />
+              <span>{{ problem }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (chosenGroups().length > 0) {
+      <details class="people">
+        <summary>Ver os {{ peopleCount() }} colaboradores dos grupos</summary>
+        <p class="hint">Desmarque quem fica de fora desta regra.</p>
+        @for (option of chosenGroups(); track option.group.id) {
+          <fieldset class="people-group">
+            <legend class="legend">{{ option.group.name }}</legend>
+            @for (employee of option.employees; track employee.id) {
+              <label class="checkbox">
+                <input
+                  #person
+                  type="checkbox"
+                  [checked]="!excluded().has(employee.id)"
+                  (change)="toggleEmployee(employee.id, person.checked)"
+                />
+                <span>
+                  {{ employee.name }}
+                  <span class="muted">· {{ employee.jobTitle }}</span>
+                </span>
+              </label>
+            }
+          </fieldset>
+        }
+      </details>
+    }
+  </div>
+</section>

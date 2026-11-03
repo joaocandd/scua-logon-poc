@@ -1,0 +1,160 @@
+// Peças visuais comuns às seções do editor de regras. Incluídas na raiz do SCSS de cada seção.
+
+// Cartão de cada seção, com o título (h2) em 20 px.
+@mixin card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+
+  h2 {
+    margin: 0;
+    font-size: var(--text-lg);
+  }
+
+  @media (min-width: 64em) {
+    padding: var(--space-6);
+  }
+}
+
+// Fieldset sem moldura, com a legenda no estilo do rótulo do Field.
+@mixin fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+@mixin legend {
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+@mixin hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+// Erro de um grupo de controles (o Field cuida do erro de um campo só).
+@mixin group-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--status-rejected);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+// Caixas de seleção com cara de botão (.chips > .chip > input + .check + texto). A caixa nativa
+// fica invisível por cima do rótulo: o clique e o teclado continuam dela. Marcado: fundo
+// primário e ícone de check (nunca só a cor).
+@mixin chips {
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-width: 4rem;
+    min-height: var(--control-height);
+    box-sizing: border-box;
+    padding: 0 var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+
+    input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    &:hover {
+      border-color: var(--color-text);
+    }
+
+    &:has(input:focus-visible) {
+      outline: var(--focus-ring-width) solid var(--color-focus-ring);
+      outline-offset: var(--focus-ring-width);
+    }
+
+    &:has(input:checked) {
+      border-color: var(--color-primary);
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+    }
+  }
+
+  .check {
+    display: none;
+  }
+
+  .chip:has(input:checked) .check {
+    display: inline-flex;
+  }
+}
+
+// Caixa de seleção comum, com rótulo ao lado e alvo de 44 px.
+@mixin checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  min-height: var(--control-height);
+  cursor: pointer;
+
+  input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+    cursor: inherit;
+  }
+}
+
+// Problemas de regra, que aparecem na hora (lista com ícone de erro).
+@mixin problems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--status-rejected);
+  font-size: var(--text-sm);
+  font-weight: 500;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  app-icon {
+    flex: none;
+    margin-top: 0.15em;
+  }
+}

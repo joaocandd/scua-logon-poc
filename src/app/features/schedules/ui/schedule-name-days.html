@@ -1,0 +1,38 @@
+<section class="section" aria-labelledby="secao-nome-dias">
+  <h2 id="secao-nome-dias">Nome e dias</h2>
+
+  <app-field
+    label="Nome da regra"
+    hint="Aparece na lista de regras, nos relatórios e no aviso que o colaborador vê."
+    [error]="errorOf(name())"
+    required
+  >
+    <input appFieldControl type="text" autocomplete="off" [formField]="name()" />
+  </app-field>
+
+  <fieldset class="days" [attr.aria-describedby]="errorOf(days()) ? 'dias-erro' : null">
+    <legend class="legend">
+      Dias da semana
+      <!-- Como no Field: o "(obrigatório)" é só visual. -->
+      <span class="required" aria-hidden="true">(obrigatório)</span>
+    </legend>
+    <div class="chips">
+      @for (day of week; track day.value) {
+        <label class="chip">
+          <input type="checkbox" [formField]="days()[day.value]" />
+          <app-icon class="check" name="check" />
+          <span>{{ day.label }}</span>
+        </label>
+      }
+    </div>
+    <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
+    <div aria-live="polite">
+      @if (errorOf(days()); as message) {
+        <p id="dias-erro" class="error">
+          <app-icon name="error" />
+          <span>{{ message }}</span>
+        </p>
+      }
+    </div>
+  </fieldset>
+</section>

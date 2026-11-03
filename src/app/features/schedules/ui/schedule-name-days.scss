@@ -1,0 +1,28 @@
+@use 'section';
+
+:host {
+  display: block;
+}
+
+.section {
+  @include section.card;
+}
+
+.days {
+  @include section.fieldset;
+}
+
+.legend {
+  @include section.legend;
+}
+
+.required {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+@include section.chips;
+
+.error {
+  @include section.group-error;
+}

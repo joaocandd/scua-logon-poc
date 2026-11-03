@@ -1,0 +1,113 @@
+<a class="back" routerLink="/regras">
+  <app-icon name="arrow_back" />
+  Regras de jornada
+</a>
+
+<app-page-header [heading]="heading()" />
+
+<!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
+<p class="cdk-visually-hidden" role="status">
+  {{ state() === 'loading' ? 'Carregando regra' : '' }}
+</p>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="loading" aria-busy="true">
+      @for (placeholder of [1, 2]; track placeholder) {
+        <div class="skeleton-section" aria-hidden="true">
+          <app-skeleton variant="heading" width="30%" />
+          <app-skeleton variant="block" />
+          <app-skeleton variant="block" width="70%" />
+        </div>
+      }
+    </div>
+  }
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso às regras de jornada"
+      description="Esta área é de quem configura as jornadas. Se você precisa dela, peça acesso ao RH."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não foi possível carregar a regra"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @case ('not-found') {
+    <app-empty-state
+      icon="search_off"
+      heading="Esta regra não existe mais"
+      description="Ela pode ter sido apagada, ou o endereço está incompleto. Veja as regras que existem na lista."
+    >
+      <a app-button routerLink="/regras" variant="secondary">Ver regras de jornada</a>
+    </app-empty-state>
+  }
+  @default {
+    <!-- A região existe antes do erro, para o leitor de tela anunciar quando ele aparecer. -->
+    <div role="alert">
+      @if (formError(); as message) {
+        <p class="alert">
+          <app-icon name="error" />
+          <span>{{ message }}</span>
+        </p>
+      }
+    </div>
+
+    <form class="editor" [formRoot]="editor">
+      <div class="sections">
+        <app-schedule-name-days
+          [name]="editor.name"
+          [days]="editor.days"
+          [showErrors]="showFieldErrors()"
+        />
+
+        <app-schedule-hours
+          [start]="editor.start"
+          [end]="editor.end"
+          [overnight]="editor.overnight"
+          [breaks]="editor.breaks"
+          [showErrors]="showFieldErrors()"
+          [timeline]="timeline()"
+          [problems]="problems()"
+        />
+
+        <app-schedule-warnings [warnings]="editor.warningMinutes" [preview]="warnings()" />
+
+        <app-schedule-approval [approval]="editor.approval" />
+
+        <app-schedule-assignment
+          [assignment]="editor.assignment"
+          [groups]="groupOptions()"
+          [preview]="assignment()"
+          [problems]="assignmentProblems()"
+        />
+
+        <app-schedule-simulator [context]="simulation()" [today]="today()" [time]="nowTime()" />
+      </div>
+
+      <!-- Desktop largo: coluna presa ao lado das seções. Abaixo de 80em: depois das seções. -->
+      <aside class="side" aria-labelledby="resumo-titulo">
+        <app-schedule-summary [sentences]="summary()" />
+        <app-schedule-period [notes]="period()" />
+        <button app-button type="submit" class="side-save" [loading]="editor().submitting()">
+          Salvar regra
+        </button>
+      </aside>
+
+      <!-- Abaixo de 80em: o começo do resumo e "Salvar regra" presos ao rodapé, sempre à vista. -->
+      <div class="save-bar schedule-save-bar">
+        <details class="bar-summary">
+          <summary>
+            <span class="bar-first">{{ summary()[0] }}</span>
+            <span class="bar-more">Ver resumo</span>
+          </summary>
+          <p class="bar-rest">{{ summaryRest() }}</p>
+        </details>
+        <button app-button type="submit" [loading]="editor().submitting()">Salvar regra</button>
+      </div>
+    </form>
+  }
+}
