@@ -126,6 +126,7 @@ test('servidor fora do ar: mensagem humana acima do formulário', async ({ page 
     'Não conseguimos falar com o servidor. Tente de novo em instantes.',
   );
   await expect(page).toHaveURL(/\/entrar\?simular=erro$/);
+  await expectNoA11yViolations(page);
 });
 
 test('"Esqueci minha senha" abre a página de ajuda e volta', async ({ page }) => {

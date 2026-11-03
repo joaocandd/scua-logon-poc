@@ -9,7 +9,7 @@
 
 <!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
 <p class="cdk-visually-hidden" role="status">
-  {{ state() === 'loading' ? 'Carregando regras' : '' }}
+  {{ state() === 'loading' ? 'Carregando as regras' : '' }}
 </p>
 
 @switch (state()) {
@@ -17,12 +17,12 @@
     <app-empty-state
       icon="lock"
       heading="Você não tem acesso às regras de jornada"
-      description="Esta área é de quem configura as jornadas. Se você precisa dela, peça acesso ao RH."
+      description="Esta área é de quem configura as jornadas. Se você precisa dela, peça acesso ao administrador do Scua Logon."
     />
   }
   @case ('error') {
     <app-error-state
-      heading="Não foi possível carregar as regras"
+      heading="Não conseguimos carregar as regras"
       [retrying]="retrying()"
       (retry)="retry()"
     />

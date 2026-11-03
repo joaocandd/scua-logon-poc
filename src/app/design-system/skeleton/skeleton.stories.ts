@@ -11,7 +11,7 @@ const meta: Meta<Skeleton> = {
       description: {
         component: [
           'Esqueleto de carregamento: ocupa o lugar do conteúdo que ainda não chegou, com o mesmo tamanho, para a tela não pular.',
-          'É só visual. A região que carrega leva `aria-busy="true"` e um texto como "Carregando pedidos" em `role="status"`.',
+          'É só visual. A região que carrega leva `aria-busy="true"` e um texto como "Carregando os pedidos" em `role="status"`.',
           'Com movimento reduzido, para de pulsar.',
         ].join(' '),
       },
@@ -46,7 +46,7 @@ export const CartaoCarregando: Story = {
           <app-skeleton variant="block" width="7rem" />
         </div>
       </div>
-      <p role="status" class="cdk-visually-hidden">Carregando pedidos</p>
+      <p role="status" class="cdk-visually-hidden">Carregando os pedidos</p>
     `,
   }),
 };

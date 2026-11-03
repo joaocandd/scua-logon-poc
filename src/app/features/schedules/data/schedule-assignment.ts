@@ -53,7 +53,8 @@ export function assignmentPreview(
   if (groupIds.length === 0) {
     headline = 'Esta regra ainda não vale para ninguém. Escolha ao menos um grupo.';
   } else if (covered.length === 0) {
-    headline = 'Esta regra ainda não vale para ninguém: todos os colaboradores estão de fora.';
+    headline =
+      'Esta regra ainda não vale para ninguém: todos os colaboradores estão de fora. Marque ao menos um na lista.';
   } else {
     headline = `Esta regra vai valer para ${count(covered.length, 'colaborador', 'colaboradores')} de ${count(groupIds.length, 'grupo', 'grupos')}.`;
   }

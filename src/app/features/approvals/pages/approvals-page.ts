@@ -146,7 +146,7 @@ export class ApprovalsPage {
 
   protected readonly empty = computed(() => {
     const inGroup = this.groupName() ? ` em ${this.groupName()}` : '';
-    const whenSomeoneAsks = 'Pedidos de extensão aparecem aqui assim que alguém solicitar.';
+    const whenSomeoneAsks = 'Os pedidos de extensão aparecem aqui assim que alguém pedir.';
     switch (this.filter()) {
       case 'aguardando':
         return { heading: `Nenhum pedido aguardando${inGroup}`, description: whenSomeoneAsks };
@@ -163,7 +163,7 @@ export class ApprovalsPage {
 
   /** Texto da região de status (leitor de tela). */
   protected readonly status = computed(() =>
-    this.inbox.state() === 'loading' ? 'Carregando pedidos' : this.announcement(),
+    this.inbox.state() === 'loading' ? 'Carregando os pedidos' : this.announcement(),
   );
 
   protected readonly updated = computed(() => {

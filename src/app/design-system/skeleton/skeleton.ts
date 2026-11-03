@@ -7,7 +7,7 @@ export type SkeletonVariant = 'text' | 'heading' | 'block';
  * mesmo tamanho dele, para a tela não pular quando os dados chegam.
  *
  * É só visual (aria-hidden). Quem usa avisa o leitor de tela: `aria-busy="true"` na região que
- * carrega e um texto como "Carregando pedidos" numa região `role="status"`.
+ * carrega e um texto como "Carregando os pedidos" numa região `role="status"`.
  *
  * ```html
  * <div aria-busy="true">

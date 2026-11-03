@@ -46,9 +46,9 @@ Fora do escopo: backend, autenticação real e integrações reais (Teams, Whats
 - Angular na última versão estável (22.x em out/2026): componentes standalone, control flow `@if`/`@for`, signals, padrões atuais do `ng new` (zoneless, se for o padrão).
 - Estado: signals em serviços; `httpResource`/`resource` para dados do servidor. NgRx SignalStore só se uma feature crescer muito.
 - Formulários: Signal Forms (`@angular/forms/signals`) com o Field do design system; erros de campo só depois da primeira tentativa de envio (ADR 0008).
-- UI: Angular Material 3 + CDK, tematizado com os tokens abaixo. Angular Aria para widgets sob medida.
+- UI: design system próprio em HTML nativo e Angular CDK, com os tokens abaixo (ADR 0004). Angular Aria para widgets sob medida. Sem Angular Material (ADR 0014); o tema dele a partir dos tokens, para as telas antigas da Scua, fica em `docs/tema-material.md`.
 - Estilos: SCSS + variáveis CSS. **Não usar** Tailwind, Bootstrap, jQuery nem PrimeNG (licença comercial desde a v22).
-- Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat via `@fontsource/montserrat` (woff2, sem Google Fonts).
+- Ícones: um único conjunto (Material Symbols), em SVG gerado só com os ícones usados (`npm run icons`, ADR 0004). Fonte: Montserrat variável via `@fontsource-variable/montserrat` (um woff2 para todos os pesos, sem Google Fonts; ADR 0013).
 - Testes: Vitest (unitário), Playwright + `@axe-core/playwright` (ponta a ponta e acessibilidade). Lint: angular-eslint com regras de acessibilidade de template. Storybook 10 com `@storybook/angular-vite` (Vite, sem webpack; ADR 0003) para o design system.
 - Dados: API simulada por interceptor HTTP, com fixtures em `src/app/mocks/`.
 
@@ -70,7 +70,7 @@ src/app/
 Cada feature tem `pages/` (rotas), `ui/` (apresentação, sem injetar serviços) e `data/` (serviços e signals). Rotas sob demanda. URLs em português, sem `#`.
 
 ## Tokens de design (marca atual da Scua, de scua.com.br)
-Implementados em `src/styles/tokens.css`, que vale como fonte; mantenha este resumo igual a ele. O tema do Material deriva desses tokens (ADR 0002).
+Implementados em `src/styles/tokens.css`, que vale como fonte; mantenha este resumo igual a ele.
 ```css
 :root {
   /* Primitivos */
@@ -93,7 +93,7 @@ Implementados em `src/styles/tokens.css`, que vale como fonte; mantenha este res
   --status-approved: #067647; --status-pending: #B54708; --status-rejected: #B42318;
   --status-neutral: #5B5B58;  --status-blocked: var(--scua-ink-900);
 
-  --font-sans: "Montserrat", system-ui, sans-serif;
+  --font-sans: "Montserrat Variable", system-ui, sans-serif;
   --text-xs: 12px; --text-sm: 14px; --text-md: 16px; --text-lg: 20px; --text-xl: 24px; --text-2xl: 32px;
   --leading-tight: 1.2; --leading-body: 1.5;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; --space-8: 32px;

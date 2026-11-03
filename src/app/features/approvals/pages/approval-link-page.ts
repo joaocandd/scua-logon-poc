@@ -26,7 +26,8 @@ import { injectNow } from '../../../shared/now';
 import { approvalLinkResource, ApprovalLinkDecisions } from '../data/approval-link';
 import { nowMarker } from '../data/request-detail';
 import { CardSession, summaryOf, toCardView } from '../data/request-card-view';
-import { RejectDialog, REJECT_DIALOG_TITLE_ID, RejectDialogData } from '../ui/reject-dialog';
+import type { RejectDialogData } from '../ui/reject-dialog';
+import { openRejectDialog } from './open-reject-dialog';
 import { RequestContextList } from '../ui/request-context-list';
 import { RequestDecision } from '../ui/request-decision';
 
@@ -179,13 +180,7 @@ export class ApprovalLinkPage {
         }
       },
     };
-    const ref = this.dialog.open<boolean, RejectDialogData>(RejectDialog, {
-      data,
-      ariaLabelledBy: REJECT_DIALOG_TITLE_ID,
-      maxWidth: 'calc(100vw - 2 * var(--space-4))',
-      restoreFocus: true,
-    });
-    ref.closed.subscribe(() => {
+    void openRejectDialog(this.dialog, data, () => {
       if (focusAfterClose) this.focus(focusAfterClose);
       else if (this.decidedElsewhere()) this.focusClosedHeading();
     });

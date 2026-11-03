@@ -113,7 +113,10 @@ describe('mockApiInterceptor', () => {
       const list = firstValueFrom(http.get('/api/pedidos'));
       const assertion = expect(list).rejects.toMatchObject({
         status: 403,
-        error: { message: 'Você não tem permissão para ver estas informações.' },
+        error: {
+          message:
+            'Você não tem acesso a estas informações. Se precisa delas, peça acesso ao administrador do Scua Logon.',
+        },
       });
       const me = firstValueFrom(http.get<{ name: string }>('/api/eu'));
       await vi.advanceTimersByTimeAsync(800);

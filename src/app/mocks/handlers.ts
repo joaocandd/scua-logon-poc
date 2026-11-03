@@ -100,12 +100,16 @@ export function handleApiRequest(db: MockDb, request: MockRequest, now = new Dat
       return handler({ db, params, query: url.searchParams, body: request.body, now });
     }
   }
-  return fail(404, 'Não encontramos o que você procurou.');
+  return fail(404, 'Não encontramos o que você procurou. Confira o endereço.');
 }
 
 /** Quem está usando o app (a sessão aberta). */
 function currentUser({ db }: Context): MockResponse {
-  return found(db.data.employees, db.currentUserId, 'Não encontramos o seu usuário.');
+  return found(
+    db.data.employees,
+    db.currentUserId,
+    'Não encontramos o seu usuário. Entre de novo.',
+  );
 }
 
 /**
@@ -301,11 +305,14 @@ function approvalLink({ db, params, now }: Context): MockResponse {
 function approverFor(db: MockDb, requestId: string, body: unknown): Employee | MockResponse {
   const token = (body as { token?: unknown } | null)?.token;
   if (token === undefined) {
-    return db.employee(db.currentUserId) ?? fail(404, 'Não encontramos o seu usuário.');
+    return (
+      db.employee(db.currentUserId) ?? fail(404, 'Não encontramos o seu usuário. Entre de novo.')
+    );
   }
   const link = db.data.tokens.find((t) => t.token === token && t.requestId === requestId);
   return (
-    (link && db.employee(link.approverId)) ?? fail(403, 'Este link não vale para este pedido.')
+    (link && db.employee(link.approverId)) ??
+    fail(403, 'Este link é de outro pedido. Use o link do e-mail deste pedido.')
   );
 }
 

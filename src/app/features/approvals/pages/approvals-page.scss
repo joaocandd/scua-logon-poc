@@ -45,13 +45,13 @@
   position: relative;
   display: flex;
   // Largura pelo conteúdo: "Todos" ocupa menos e "Decididos hoje" cabe numa linha em 390 px.
+  // Em 320 px, ou com zoom, "Decididos hoje" quebra em duas linhas em vez de sair da tela.
   flex: 1 1 auto;
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
   min-height: var(--control-height);
   padding: 0 var(--space-2);
-  white-space: nowrap;
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   color: var(--color-text-muted);

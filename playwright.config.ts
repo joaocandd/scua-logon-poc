@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const port = 4200;
 const baseURL = `http://localhost:${port}`;
 const isCI = !!process.env['CI'];
+const celular = { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } };
 
 export default defineConfig({
   testDir: './e2e',
@@ -17,12 +18,18 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   // Desktop para o RH; celular para o gestor que aprova pedidos fora da mesa.
-  // O tema escuro roda à parte para o axe conferir o contraste das telas nele também.
+  // O tema escuro roda à parte para o axe conferir o contraste das telas nele também. No celular,
+  // o tema escuro roda só a varredura do axe em todas as rotas.
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     // 390 px: largura de celular de referência da equipe (Pixel 7 tem 412 px).
-    { name: 'celular', use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } } },
+    { name: 'celular', use: { ...celular } },
     { name: 'desktop-escuro', use: { ...devices['Desktop Chrome'], colorScheme: 'dark' } },
+    {
+      name: 'celular-escuro',
+      testMatch: 'accessibility.spec.ts',
+      use: { ...celular, colorScheme: 'dark' },
+    },
   ],
   webServer: {
     command: `npm start -- --port ${port}`,

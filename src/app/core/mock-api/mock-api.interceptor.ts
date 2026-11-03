@@ -22,7 +22,10 @@ const SERVER_DOWN: ApiError = {
   message: 'Não conseguimos falar com o servidor. Tente de novo em instantes.',
 };
 
-const FORBIDDEN: ApiError = { message: 'Você não tem permissão para ver estas informações.' };
+const FORBIDDEN: ApiError = {
+  message:
+    'Você não tem acesso a estas informações. Se precisa delas, peça acesso ao administrador do Scua Logon.',
+};
 
 /** Quem é a pessoa e o login continuam funcionando sem permissão: ela entrou, só não pode ver. */
 const IDENTITY_URLS = ['/api/eu', '/api/sessao', '/api/sessao/corporativa'];
