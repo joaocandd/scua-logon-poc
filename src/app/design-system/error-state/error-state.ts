@@ -15,8 +15,8 @@ import { Icon } from '../icon/icon';
   styleUrl: './error-state.scss',
 })
 export class ErrorState {
-  readonly heading = input('Não foi possível carregar');
-  readonly description = input('Verifique sua conexão e tente de novo.');
+  readonly heading = input('Não conseguimos carregar');
+  readonly description = input('Tente de novo em instantes. Se continuar, avise o suporte.');
   /** Mostra o botão em loading enquanto a nova tentativa acontece. */
   readonly retrying = input(false, { transform: booleanAttribute });
   readonly headingLevel = input<2 | 3>(2);

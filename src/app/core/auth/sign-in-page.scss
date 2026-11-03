@@ -1,6 +1,8 @@
 // Celular: só o formulário. Desktop (a partir de 1024 px): painel da marca à esquerda.
+// minmax(0, 1fr): a coluna nunca fica mais larga que a tela, nem em 320 px (WCAG 1.4.10).
 :host {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 100dvh;
 }
 

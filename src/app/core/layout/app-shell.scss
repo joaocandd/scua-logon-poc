@@ -121,6 +121,15 @@ $desktop: 64em;
   z-index: 1;
 }
 
+// Tela baixa no layout de celular (celular deitado, zoom de 200% no notebook): o cabeçalho rola
+// com a página. Preso, ele se somaria à barra inferior e cobriria boa parte da tela.
+// O scroll-padding-top acompanha (styles.scss).
+@media (max-width: 63.999em) and (max-height: 32em) {
+  .header {
+    position: static;
+  }
+}
+
 @media (min-width: $desktop) {
   .header {
     padding-inline: var(--space-6);

@@ -51,7 +51,7 @@ describe('assignmentPreview', () => {
     );
     const all = EMPLOYEES.filter((e) => e.groupId === 'grp-rh').map((e) => e.id);
     expect(assignmentPreview(rule(['grp-rh'], all), EMPLOYEES).headline).toBe(
-      'Esta regra ainda não vale para ninguém: todos os colaboradores estão de fora.',
+      'Esta regra ainda não vale para ninguém: todos os colaboradores estão de fora. Marque ao menos um na lista.',
     );
   });
 });

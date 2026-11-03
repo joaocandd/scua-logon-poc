@@ -4,7 +4,8 @@ import { ConfirmDialog, Toast } from '../../../design-system';
 import { apiErrorMessage, apiErrorStatus } from '../../../shared/api-error';
 import { ApprovalInbox } from '../data/approval-inbox';
 import { CardSession, RequestCardView } from '../data/request-card-view';
-import { RejectDialog, REJECT_DIALOG_TITLE_ID, RejectDialogData } from '../ui/reject-dialog';
+import type { RejectDialogData } from '../ui/reject-dialog';
+import { openRejectDialog } from './open-reject-dialog';
 
 /** De onde veio a ação: o cartão na lista ou o painel de detalhe. Decide para onde vai o foco. */
 export type ActionOrigin = 'lista' | 'detalhe';
@@ -100,14 +101,8 @@ export class ApprovalActions {
         }
       },
     };
-    const ref = this.dialog.open<boolean, RejectDialogData>(RejectDialog, {
-      data,
-      ariaLabelledBy: REJECT_DIALOG_TITLE_ID,
-      maxWidth: 'calc(100vw - 2 * var(--space-4))',
-      restoreFocus: true,
-    });
     // O diálogo devolve o foco ao "Recusar", que some quando o cartão mostra o resultado.
-    ref.closed.subscribe(() => {
+    void openRejectDialog(this.dialog, data, () => {
       if (focusAfterClose) this.focus(focusAfterClose);
     });
   }

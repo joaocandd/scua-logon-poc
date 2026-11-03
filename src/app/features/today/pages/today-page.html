@@ -11,12 +11,12 @@
     <app-empty-state
       icon="lock"
       heading="Você não tem acesso ao painel Hoje"
-      description="Esta área é de quem acompanha as estações e as aprovações. Se você precisa dela, peça acesso ao RH."
+      description="Esta área é de quem acompanha as estações e as aprovações. Se você precisa dela, peça acesso ao administrador do Scua Logon."
     />
   }
   @case ('error') {
     <app-error-state
-      heading="Não foi possível carregar o painel"
+      heading="Não conseguimos carregar o painel"
       [retrying]="panel.retrying()"
       (retry)="panel.retry()"
     />

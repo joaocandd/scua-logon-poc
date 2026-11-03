@@ -31,7 +31,7 @@ export const Padrao: Story = { name: 'Padrão' };
 
 export const Personalizado: Story = {
   args: {
-    heading: 'Não foi possível carregar os pedidos',
+    heading: 'Não conseguimos carregar os pedidos',
     description: 'A lista não respondeu a tempo. Tente de novo em alguns segundos.',
   },
 };

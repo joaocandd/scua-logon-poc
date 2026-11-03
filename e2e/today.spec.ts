@@ -219,7 +219,7 @@ test('sem estações controladas, diz por quê e leva às regras', async ({ page
 test('com a API fora do ar, oferece tentar de novo', async ({ page }) => {
   await openPanel(page, '/hoje?simular=erro');
   await expect(
-    page.getByRole('heading', { name: 'Não foi possível carregar o painel' }),
+    page.getByRole('heading', { name: 'Não conseguimos carregar o painel' }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible();
   await expectNoA11yViolations(page);
@@ -230,5 +230,6 @@ test('sem permissão, diz a quem pedir acesso', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Você não tem acesso ao painel Hoje' }),
   ).toBeVisible();
+  await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
   await expectNoA11yViolations(page);
 });

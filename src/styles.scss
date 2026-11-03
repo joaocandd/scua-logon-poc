@@ -1,90 +1,12 @@
 // Estilos globais do app e do Storybook.
-// Ordem: fontes e tokens, tema do Material, base do HTML, foco e movimento.
+// Ordem: fontes e tokens, base do HTML, foco e movimento. O app não usa o Angular Material
+// (ADR 0014); o tema dele a partir dos tokens está em docs/tema-material.md.
 @use '@angular/cdk';
-@use '@angular/material' as mat;
-@use './styles/theme-colors' as theme;
 
 // CSS puro: o build resolve os caminhos das fontes dentro do node_modules.
-@import '@fontsource/montserrat/400.css';
-@import '@fontsource/montserrat/500.css';
-@import '@fontsource/montserrat/600.css';
-@import '@fontsource/montserrat/700.css';
+// Montserrat variável: um arquivo de 38 kB serve os pesos 400 a 700, no lugar de quatro de 19 kB.
+@import '@fontsource-variable/montserrat/wght.css';
 @import './styles/tokens.css';
-
-// Tema do Material 3. `color-scheme` (definido no tokens.css) escolhe claro ou escuro.
-html {
-  @include mat.theme(
-    (
-      color: (
-        primary: theme.$primary-palette,
-        tertiary: theme.$tertiary-palette,
-        theme-type: color-scheme,
-      ),
-      typography: var(--font-sans),
-      density: 0,
-    )
-  );
-
-  // O Material usa os nossos tokens: primário exato (#C2560A) e tema escuro vindo do tokens.css.
-  @include mat.theme-overrides(
-    (
-      primary: var(--color-primary),
-      on-primary: var(--color-on-primary),
-      background: var(--color-bg),
-      on-background: var(--color-text),
-      surface: var(--color-surface),
-      on-surface: var(--color-text),
-      on-surface-variant: var(--color-text-muted),
-      outline: var(--color-border-strong),
-      outline-variant: var(--color-border),
-      error: var(--status-rejected),
-    )
-  );
-
-  @include mat.button-overrides(
-    (
-      filled-container-shape: var(--radius-sm),
-      outlined-container-shape: var(--radius-sm),
-      protected-container-shape: var(--radius-sm),
-      text-container-shape: var(--radius-sm),
-      tonal-container-shape: var(--radius-sm),
-      // Hover e foco não podem baixar o contraste. O padrão do Material clareia o botão cheio
-      // (branco sobre #C2560A cai para 3,87:1) e usa #C2560A nos rótulos dos outros botões.
-      // Conferido em scripts/check-contrast.mjs.
-      filled-state-layer-color: var(--color-text),
-      protected-label-text-color: var(--color-link),
-      protected-state-layer-color: var(--color-link),
-      outlined-label-text-color: var(--color-link),
-      outlined-state-layer-color: var(--color-link),
-      text-label-text-color: var(--color-link),
-      text-state-layer-color: var(--color-link),
-    )
-  );
-
-  @include mat.form-field-overrides(
-    (
-      filled-container-shape: var(--radius-sm),
-      outlined-container-shape: var(--radius-sm),
-    )
-  );
-
-  @include mat.card-overrides(
-    (
-      elevated-container-shape: var(--radius-lg),
-      filled-container-shape: var(--radius-lg),
-      outlined-container-shape: var(--radius-lg),
-    )
-  );
-}
-
-// Anel de foco dos componentes do Material: 2 px na cor de foco.
-@include mat.strong-focus-indicators(
-  (
-    border-width: var(--focus-ring-width),
-    border-style: solid,
-    border-color: var(--color-focus-ring),
-  )
-);
 
 // Base do HTML
 body {
@@ -125,23 +47,32 @@ a {
   outline-offset: var(--focus-ring-width);
 }
 
+// No Chrome, o ícone do relógio ou do calendário dos campos de hora e data também recebe o Tab,
+// e nele o campo perde o :focus-visible. O ícone não aceita :focus no CSS: só dá para trocar a
+// cor do anel do navegador, que fica dentro do ícone para o campo não cortá-lo.
+::-webkit-calendar-picker-indicator {
+  padding: calc(var(--space-1) / 2);
+  border-radius: var(--space-1);
+  outline-color: var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--border-width));
+}
+
 // .cdk-visually-hidden: texto só para leitor de tela. O LiveAnnouncer do CDK (usado pelo Toast)
 // depende dela; sem ela, o texto anunciado aparece na página.
 @include cdk.a11y-visually-hidden();
-
-// Esses componentes do Material já desenham o próprio anel (strong-focus-indicators acima)
-// ou o realce do campo; o contorno global viraria um segundo anel.
-.mat-mdc-button-base:focus-visible,
-.mat-mdc-input-element:focus-visible,
-.mat-mdc-select:focus-visible {
-  outline: none;
-}
 
 // A casca tem cabeçalho fixo no topo (4rem, --header-height em core/layout/app-shell.scss) e, abaixo
 // de 64em, barra inferior fixa (4rem, --bottom-nav-height). Com o scroll-padding, o navegador não
 // deixa o elemento focado nem o destino de uma rolagem ficar embaixo delas (WCAG 2.4.11).
 :root:has(app-shell) {
   scroll-padding-top: calc(4rem + var(--space-4));
+}
+
+// Em tela baixa no layout de celular, o cabeçalho rola com a página (app-shell.scss).
+@media (max-width: 63.999em) and (max-height: 32em) {
+  :root:has(app-shell) {
+    scroll-padding-top: var(--space-4);
+  }
 }
 
 // O aviso (Toast) fica no overlay, fora da casca: enquanto há barra inferior, ele sobe acima dela.

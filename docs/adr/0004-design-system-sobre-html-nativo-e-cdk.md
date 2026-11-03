@@ -1,6 +1,6 @@
 # ADR 0004 · Design system sobre HTML nativo e o CDK, com ícones em SVG
 
-- **Status:** aceita
+- **Status:** aceita; o item 3 foi revogado pela ADR 0014 (03/11/2026)
 - **Data:** 29/10/2026
 
 ## Contexto

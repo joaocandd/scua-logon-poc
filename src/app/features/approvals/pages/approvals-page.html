@@ -11,12 +11,12 @@
     <app-empty-state
       icon="lock"
       heading="Você não tem acesso às aprovações"
-      description="Esta área é de quem aprova pedidos de extensão. Se você precisa aprovar, peça acesso ao RH."
+      description="Esta área é de quem aprova pedidos de extensão. Se você precisa aprovar, peça acesso ao administrador do Scua Logon."
     />
   }
   @case ('error') {
     <app-error-state
-      heading="Não foi possível carregar os pedidos"
+      heading="Não conseguimos carregar os pedidos"
       [retrying]="inbox.retrying()"
       (retry)="inbox.retry()"
     />
@@ -129,7 +129,7 @@
                 {{ count === 1 ? 'pedido selecionado' : 'pedidos selecionados' }}
               </p>
               <button app-button type="button" variant="ghost" (click)="clearSelection()">
-                Limpar
+                Limpar seleção
               </button>
               <button
                 app-button
@@ -149,7 +149,7 @@
         <router-outlet (activate)="detailOpened()" (deactivate)="detailClosed()" />
         @if (!detailOpen()) {
           <p class="detail-hint">
-            Escolha "Ver detalhes" em um pedido para ver a linha do tempo do dia e o histórico.
+            Escolha “Ver detalhes” em um pedido para ver a linha do tempo do dia e o histórico.
           </p>
         }
       </section>

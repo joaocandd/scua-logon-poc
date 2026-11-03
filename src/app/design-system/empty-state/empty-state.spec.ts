@@ -19,14 +19,14 @@ describe('EmptyState', () => {
     fixture.componentRef.setInput('heading', 'Nenhum pedido aguardando');
     fixture.componentRef.setInput(
       'description',
-      'Pedidos de extensão aparecem aqui assim que alguém solicitar.',
+      'Os pedidos de extensão aparecem aqui assim que alguém pedir.',
     );
     await fixture.whenStable();
     const host = fixture.nativeElement as HTMLElement;
 
     expect(host.querySelector('h2')?.textContent).toBe('Nenhum pedido aguardando');
     expect(host.querySelector('p')?.textContent).toBe(
-      'Pedidos de extensão aparecem aqui assim que alguém solicitar.',
+      'Os pedidos de extensão aparecem aqui assim que alguém pedir.',
     );
     expect(host.querySelector('path')?.getAttribute('d')).toBe(ICONS.inbox);
   });

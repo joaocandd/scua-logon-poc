@@ -13,12 +13,12 @@
     <app-empty-state
       icon="lock"
       heading="Você não tem acesso às configurações"
-      description="Esta área é de quem administra o Scua Logon. Se você precisa dela, peça acesso ao RH."
+      description="Esta área é de quem configura o Scua Logon. Se você precisa dela, peça acesso ao administrador do Scua Logon."
     />
   }
   @case ('error') {
     <app-error-state
-      heading="Não foi possível carregar as configurações"
+      heading="Não conseguimos carregar as configurações"
       [retrying]="retrying()"
       (retry)="retry()"
     />

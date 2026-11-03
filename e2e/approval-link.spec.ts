@@ -167,7 +167,7 @@ test.describe('link que não serve mais', () => {
 test('?simular=erro: mensagem humana e "Tentar de novo"', async ({ page }) => {
   await open(page, '/aprovacao/valido-ped-02?simular=erro');
 
-  await expect(page.getByRole('alert')).toContainText('Não foi possível abrir o pedido');
+  await expect(page.getByRole('alert')).toContainText('Não conseguimos abrir o pedido');
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible();
   await expect(pendingLink(page)).toBeVisible();
   await expectNoA11yViolations(page);

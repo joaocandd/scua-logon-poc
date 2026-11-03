@@ -256,7 +256,7 @@ test.describe('aprovar em lote', () => {
     await expect(bar).toContainText(/\d+ pedidos selecionados/);
     await expectNoA11yViolations(page);
 
-    await bar.getByRole('button', { name: 'Limpar' }).click();
+    await bar.getByRole('button', { name: 'Limpar seleção' }).click();
 
     await expect(bar).toBeHidden();
     await expect(all).not.toBeChecked();
@@ -401,7 +401,7 @@ test.describe('estados da tela', () => {
 
     await expect(page.getByRole('heading', { name: 'Nenhum pedido aguardando' })).toBeVisible();
     await expect(
-      page.getByText('Pedidos de extensão aparecem aqui assim que alguém solicitar.'),
+      page.getByText('Os pedidos de extensão aparecem aqui assim que alguém pedir.'),
     ).toBeVisible();
     await expectNoA11yViolations(page);
   });
@@ -409,7 +409,7 @@ test.describe('estados da tela', () => {
   test('?simular=erro: mensagem humana e "Tentar de novo"', async ({ page }) => {
     await open(page, '/aprovacoes?simular=erro');
 
-    await expect(page.getByRole('alert')).toContainText('Não foi possível carregar os pedidos');
+    await expect(page.getByRole('alert')).toContainText('Não conseguimos carregar os pedidos');
     await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible();
     await expectNoA11yViolations(page);
   });
@@ -420,6 +420,7 @@ test.describe('estados da tela', () => {
     await expect(
       page.getByRole('heading', { name: 'Você não tem acesso às aprovações' }),
     ).toBeVisible();
+    await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Aprovar' })).toHaveCount(0);
     await expectNoA11yViolations(page);
   });

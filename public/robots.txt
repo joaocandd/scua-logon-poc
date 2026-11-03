@@ -1,0 +1,5 @@
+# O app fica fora dos buscadores pelo noindex: no <meta name="robots"> do index.html e, na
+# hospedagem, no cabeçalho X-Robots-Tag. Este arquivo não bloqueia nada de propósito: com
+# Disallow, o buscador não abre a página, não lê o noindex e ainda pode listar o endereço.
+User-agent: *
+Allow: /

@@ -70,7 +70,7 @@ describe('API simulada', () => {
     });
     expect(call('GET', '/api/nada')).toEqual({
       status: 404,
-      body: { message: 'Não encontramos o que você procurou.' },
+      body: { message: 'Não encontramos o que você procurou. Confira o endereço.' },
     });
   });
 
@@ -340,7 +340,7 @@ describe('API simulada', () => {
     it('o token só vale para o pedido do link', () => {
       const forbidden = {
         status: 403,
-        body: { message: 'Este link não vale para este pedido.' },
+        body: { message: 'Este link é de outro pedido. Use o link do e-mail deste pedido.' },
       };
       expect(
         call('POST', '/api/pedidos/ped-01/aprovar', { step: 'gestor', token: 'valido-ped-02' }),

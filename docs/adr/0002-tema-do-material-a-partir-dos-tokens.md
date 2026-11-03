@@ -1,6 +1,6 @@
 # ADR 0002 · O tema do Angular Material vem dos nossos tokens
 
-- **Status:** aceita
+- **Status:** substituída pela ADR 0014 (03/11/2026). O tema está guardado em `docs/tema-material.md`.
 - **Data:** 28/10/2026
 
 ## Contexto

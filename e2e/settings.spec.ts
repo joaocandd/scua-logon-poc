@@ -47,7 +47,7 @@ test('o erro do campo só aparece depois de "Salvar custo"', async ({ page }) =>
 test('com a API fora do ar, oferece tentar de novo', async ({ page }) => {
   await openSettings(page, '/configuracoes?simular=erro');
   await expect(
-    page.getByRole('heading', { name: 'Não foi possível carregar as configurações' }),
+    page.getByRole('heading', { name: 'Não conseguimos carregar as configurações' }),
   ).toBeVisible();
   await expectNoA11yViolations(page);
 });
@@ -57,5 +57,6 @@ test('sem permissão, diz a quem pedir acesso', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Você não tem acesso às configurações' }),
   ).toBeVisible();
+  await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
   await expectNoA11yViolations(page);
 });

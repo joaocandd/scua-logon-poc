@@ -15,17 +15,19 @@ describe('ErrorState', () => {
   it('mostra uma mensagem humana padrão, anunciada como alerta', async () => {
     const { host } = await render();
     const alert = host.querySelector('[role="alert"]');
-    expect(alert?.querySelector('h2')?.textContent).toBe('Não foi possível carregar');
-    expect(alert?.querySelector('p')?.textContent).toBe('Verifique sua conexão e tente de novo.');
+    expect(alert?.querySelector('h2')?.textContent).toBe('Não conseguimos carregar');
+    expect(alert?.querySelector('p')?.textContent).toBe(
+      'Tente de novo em instantes. Se continuar, avise o suporte.',
+    );
   });
 
   it('aceita título e mensagem próprios', async () => {
     const { host } = await render({
-      heading: 'Não foi possível carregar os pedidos',
+      heading: 'Não conseguimos carregar os pedidos',
       description: 'Tente de novo em alguns segundos.',
       headingLevel: 3,
     });
-    expect(host.querySelector('h3')?.textContent).toBe('Não foi possível carregar os pedidos');
+    expect(host.querySelector('h3')?.textContent).toBe('Não conseguimos carregar os pedidos');
     expect(host.querySelector('p')?.textContent).toBe('Tente de novo em alguns segundos.');
   });
 
