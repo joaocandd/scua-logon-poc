@@ -1,6 +1,7 @@
 // Linhas da lista de regras de jornada (/regras). Função pura: recebe as regras, os
 // colaboradores e os grupos e devolve o que a tabela mostra.
 
+import { formatDate } from '../../../shared/date';
 import { Employee, Group, ScheduleStatus, WorkSchedule } from '../../../shared/models';
 import { appliesTo } from '../../../shared/schedule-engine';
 import { capitalize } from '../../../shared/text';
@@ -19,6 +20,8 @@ export interface ScheduleRow {
   /** Quantos colaboradores a regra controla: os dos grupos, menos os excluídos. */
   employeeCount: number;
   status: ScheduleStatus;
+  /** Em observação: "até dom, 08/11". */
+  statusDetail: string | null;
 }
 
 /** Uma linha por regra, em ordem alfabética. */
@@ -37,5 +40,9 @@ export function scheduleRows(
       groups: schedule.assignment.groupIds.flatMap((id) => groupById.get(id)?.name ?? []),
       employeeCount: employees.filter((employee) => appliesTo(schedule, employee)).length,
       status: schedule.observationMode ? 'em_observacao' : 'ativa',
+      statusDetail:
+        schedule.observationMode && schedule.observationEndsOn
+          ? `até ${formatDate(schedule.observationEndsOn)}`
+          : null,
     }));
 }

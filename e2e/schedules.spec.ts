@@ -11,6 +11,15 @@ const row = (page: Page, name: string) =>
 /** Caixa do dia da semana no editor ("Seg", "Ter"...). */
 const day = (page: Page, name: string) => page.getByRole('checkbox', { name, exact: true });
 
+/** O aviso no rodapé. */
+const toast = (page: Page) => page.locator('app-toast-panel');
+
+/** "Salvar regra" e confirma o impacto no diálogo, com o botão que ele mostrar. */
+async function saveRule(page: Page, confirmLabel = 'Salvar regra'): Promise<void> {
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: confirmLabel }).click();
+}
+
 async function openList(page: Page, url = '/regras'): Promise<void> {
   await page.goto(url);
   await expect(page.getByRole('heading', { level: 1, name: 'Regras de jornada' })).toBeVisible();
@@ -87,7 +96,7 @@ test('cria uma regra: os erros só aparecem depois de "Salvar regra"', async ({ 
   await name.fill('Plantão de fim de semana');
   await day(page, 'Sáb').check();
   await day(page, 'Dom').check();
-  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await saveRule(page, 'Criar regra');
 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Plantão de fim de semana' }),
@@ -109,7 +118,7 @@ test('edita o nome de uma regra', async ({ page }) => {
   await expect(name).toHaveValue('Tarde');
 
   await name.fill('  Tarde e noite ');
-  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await saveRule(page);
 
   await expect(page.locator('app-toast-panel')).toContainText('Regra Tarde e noite salva.');
   await expect(page.getByRole('heading', { level: 1, name: 'Tarde e noite' })).toBeVisible();
@@ -171,7 +180,7 @@ test('horários: a linha do tempo e os problemas de regra aparecem enquanto a pe
   await second.getByRole('button', { name: 'Remover Café' }).click();
   await expect(page.getByRole('button', { name: 'Adicionar intervalo' })).toBeFocused();
 
-  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await saveRule(page, 'Criar regra');
   await expect(page.locator('app-toast-panel')).toContainText('Regra Madrugada criada.');
 
   await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
@@ -230,7 +239,7 @@ test('aprovação: troca para gestor e RH e a escolha fica salva', async ({ page
   );
   await expectNoA11yViolations(page);
 
-  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await saveRule(page);
   await expect(page.locator('app-toast-panel')).toContainText('Regra Flexível salva.');
   await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
   await row(page, 'Flexível').getByRole('link', { name: 'Flexível' }).click();
@@ -267,7 +276,7 @@ test('a quem se aplica: prévia, conflito com outra regra e quem fica de fora', 
   await expect(section).toContainText('Esta regra vai valer para 7 colaboradores de 1 grupo.');
   await expect(section).not.toContainText('Fora desta regra');
 
-  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await saveRule(page);
   await expect(page.locator('app-toast-panel')).toContainText('Regra Noturna salva.');
   await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
   await expect(row(page, 'Noturna').getByRole('cell').nth(2)).toHaveText(/7/);
@@ -337,6 +346,111 @@ test('simulador "e se?": a resposta muda com a regra, antes de salvar', async ({
   await expect(sim).toContainText(
     'estaria bloqueada: intervalo da jornada Comercial (das 12h às 13h).',
   );
+});
+
+test('salvar mostra o impacto antes; sem mudança, não há o que salvar', async ({ page }) => {
+  await page.goto('/regras/regra-comercial');
+  await page.getByLabel('Fim da jornada').fill('18:00');
+  const save = page.getByRole('button', { name: 'Salvar regra' });
+  await save.click();
+
+  const dialog = page.getByRole('alertdialog', { name: 'Salvar a regra Comercial?' });
+  await expect(dialog).toContainText('A mudança vale para 15 colaboradores assim que você salvar.');
+  await expect(dialog).toContainText('Horário: das 8h às 17h → das 8h às 18h');
+  await expect(dialog).toContainText(/Agora mesmo, /);
+  await expectNoA11yViolations(page);
+
+  // "Continuar editando" não salva, e o foco volta para "Salvar regra".
+  await dialog.getByRole('button', { name: 'Continuar editando' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(save).toBeFocused();
+  await expect(toast(page)).toBeHidden();
+
+  await saveRule(page);
+  await expect(toast(page)).toContainText('Regra Comercial salva.');
+  await save.click();
+  await expect(toast(page)).toContainText('Nada mudou: a regra já está salva assim.');
+});
+
+test('sair com alteração não salva pede confirmação', async ({ page }) => {
+  await page.goto('/regras/regra-tarde');
+  const back = page.getByRole('link', { name: 'Regras de jornada' }).first();
+  await page.getByLabel('Fim da jornada').fill('21:00');
+  await back.click();
+
+  const dialog = page.getByRole('alertdialog', { name: 'Sair sem salvar?' });
+  await expect(dialog).toContainText('As mudanças na regra Tarde vão se perder.');
+  await expectNoA11yViolations(page);
+  await dialog.getByRole('button', { name: 'Continuar editando' }).click();
+  await expect(page).toHaveURL('/regras/regra-tarde');
+  await expect(page.getByLabel('Fim da jornada')).toHaveValue('21:00');
+
+  await back.click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Sair sem salvar' }).click();
+  await expect(page).toHaveURL('/regras');
+
+  // Sem alteração, sai direto.
+  await row(page, 'Tarde').getByRole('link', { name: 'Tarde' }).click();
+  await expect(page.getByLabel('Fim da jornada')).toHaveValue('22:00');
+  await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
+  await expect(page).toHaveURL('/regras');
+});
+
+test('fluxo completo: cria a regra, resolve o conflito, simula e salva em observação', async ({
+  page,
+}) => {
+  await openList(page);
+  await page.getByRole('link', { name: 'Nova regra' }).click();
+  await page.getByRole('textbox', { name: 'Nome da regra' }).fill('Diretoria');
+  await page.getByLabel('Início da jornada').fill('09:00');
+  await page.getByLabel('Fim da jornada').fill('18:00');
+
+  // Operações já está na regra Noturna: o conflito aparece na hora, dizendo quem e qual.
+  const section = page.getByRole('region', { name: 'A quem se aplica' });
+  await section.getByRole('checkbox', { name: 'Operações', exact: true }).check();
+  await expect(section).toContainText(
+    'Carlos Teixeira, Edson Pires, Fabiana Leal e mais 3 colaboradores já estão na regra Noturna.',
+  );
+  await expectNoA11yViolations(page);
+
+  // Só a diretora, que está fora da Noturna, fica nesta regra.
+  await section.getByText('Ver os 7 colaboradores dos grupos').click();
+  const others = ['Carlos', 'Edson', 'Fabiana', 'Márcio', 'Rogério', 'Sueli'];
+  for (const name of others) {
+    await section.getByRole('checkbox', { name: new RegExp(`^${name} `) }).uncheck();
+  }
+  await expect(section).toContainText('Esta regra vai valer para 1 colaborador de 1 grupo.');
+  await expect(section).not.toContainText('já estão na regra');
+
+  // Simulador: a diretora numa quarta-feira às 18h30.
+  const sim = page.getByRole('region', { name: 'Simulador “e se?”' });
+  await expect(sim.getByLabel('Colaborador')).toHaveValue('col-25');
+  await sim.getByLabel('Data').fill('2027-03-10');
+  await sim.getByLabel('Hora').fill('18:30');
+  await expect(sim).toContainText(
+    'Às 18h30 de qua, 10/03, a estação de Renata estaria bloqueada: fora da jornada Diretoria (das 9h às 18h).',
+  );
+
+  // Salvar em observação: o diálogo diz o impacto.
+  await page.getByRole('checkbox', { name: 'Observar por 7 dias antes de bloquear' }).check();
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  const dialog = page.getByRole('alertdialog', { name: 'Criar a regra Diretoria?' });
+  await expect(dialog).toContainText(
+    'Por 7 dias, a regra não bloqueia ninguém: o Scua Logon só registra quem seria bloqueado. Depois disso, ela passa a bloquear 1 colaborador.',
+  );
+  await expectNoA11yViolations(page);
+  await dialog.getByRole('button', { name: 'Salvar e observar' }).click();
+
+  await expect(toast(page)).toContainText('Regra Diretoria criada.');
+  await expect(page.getByRole('heading', { level: 1, name: 'Diretoria' })).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Resumo' })).toContainText(
+    /Em observação até \w{3}, \d{2}\/\d{2}: não bloqueia ninguém\./,
+  );
+  await expect(page.getByRole('heading', { name: 'Quem seria bloqueado' })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Regras de jornada' }).first().click();
+  await expect(row(page, 'Diretoria')).toContainText('Em observação');
+  await expect(row(page, 'Diretoria')).toContainText(/até \w{3}, \d{2}\/\d{2}/);
 });
 
 test('regra que não existe explica e leva de volta à lista', async ({ page }) => {

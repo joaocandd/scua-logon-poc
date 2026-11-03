@@ -78,7 +78,12 @@
                 <span class="cell-label" aria-hidden="true">Colaboradores:</span>
                 {{ row.employeeCount }}
               </td>
-              <td class="status"><app-status-badge [status]="row.status" /></td>
+              <td class="status">
+                <app-status-badge [status]="row.status" />
+                @if (row.statusDetail) {
+                  <span class="line muted">{{ row.statusDetail }}</span>
+                }
+              </td>
             </tr>
           }
         </tbody>

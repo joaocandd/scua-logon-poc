@@ -1,7 +1,24 @@
 import { HttpClient, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { Holiday, ScheduleException, WorkSchedule } from '../../../shared/models';
+import { ActivityEvent, Holiday, ScheduleException, WorkSchedule } from '../../../shared/models';
+
+/**
+ * Registros do modo observação de uma regra ("Às 17h05, a estação de Ana seria bloqueada..."), do
+ * mais novo para o mais antigo. Sem id, não busca. Chame num contexto de injeção.
+ */
+export function observationLog(scheduleId: () => string | null) {
+  return httpResource<ActivityEvent[]>(
+    () => {
+      const id = scheduleId();
+      return id ? `/api/historico?regra=${encodeURIComponent(id)}` : undefined;
+    },
+    {
+      defaultValue: [],
+      parse: (events) => (events as ActivityEvent[]).filter((e) => e.type === 'bloqueio_observado'),
+    },
+  );
+}
 
 /** Regras de jornada (fluxo B), com os feriados e as exceções que o editor e o simulador usam. */
 @Injectable({ providedIn: 'root' })

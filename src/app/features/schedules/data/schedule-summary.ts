@@ -2,6 +2,8 @@
 // bloqueada no intervalo Almoço (12h–13h). Avisos 15 e 5 min antes. Hora extra precisa do gestor
 // e do RH. Vale para 37 colaboradores de 3 grupos." Função pura: usa só o que já foi conferido.
 
+import { formatDate } from '../../../shared/date';
+import { OBSERVATION_DAYS } from '../../../shared/models';
 import { formatRange, formatSpan, MINUTES_PER_DAY } from '../../../shared/time';
 import { AssignmentPreview } from './schedule-assignment';
 import { ScheduleDraft, toSchedule } from './schedule-draft';
@@ -23,7 +25,14 @@ export function scheduleSummary(
       ? 'Hora extra precisa do gestor e do RH.'
       : 'Hora extra precisa só do gestor.',
     assignmentSentence(draft, assignment),
+    ...(draft.observationMode ? [observationSentence(draft)] : []),
   ];
+}
+
+function observationSentence({ observationEndsOn }: ScheduleDraft): string {
+  return observationEndsOn
+    ? `Em observação até ${formatDate(observationEndsOn)}: não bloqueia ninguém.`
+    : `Em observação por ${OBSERVATION_DAYS} dias depois de salvar: não bloqueia ninguém.`;
 }
 
 function hoursSentence(draft: ScheduleDraft, { shift }: HoursCheck): string {

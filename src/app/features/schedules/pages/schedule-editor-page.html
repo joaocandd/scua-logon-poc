@@ -92,6 +92,36 @@
       <aside class="side" aria-labelledby="resumo-titulo">
         <app-schedule-summary [sentences]="summary()" />
         <app-schedule-period [notes]="period()" />
+
+        <div class="observation">
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              aria-describedby="observacao-ajuda"
+              [formField]="editor.observationMode"
+            />
+            <span>Observar por {{ observationDays }} dias antes de bloquear</span>
+          </label>
+          <p id="observacao-ajuda" class="hint">{{ observationHint() }}</p>
+
+          @if (saved()?.observationMode) {
+            <h3 class="observed-title">Quem seria bloqueado</h3>
+            @if (observedEvents().length === 0) {
+              <p class="hint">Nenhum registro ainda.</p>
+            } @else {
+              <p class="hint">
+                {{ observedEvents().length }}
+                {{ observedEvents().length === 1 ? 'registro' : 'registros' }} desde o início da
+                observação. Os mais recentes:
+              </p>
+              <ul class="observed-list">
+                @for (event of observedEvents().slice(0, 5); track event.id) {
+                  <li>{{ event.summary }}</li>
+                }
+              </ul>
+            }
+          }
+        </div>
         <button app-button type="submit" class="side-save" [loading]="editor().submitting()">
           Salvar regra
         </button>

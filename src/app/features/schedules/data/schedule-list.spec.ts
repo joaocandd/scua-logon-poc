@@ -24,6 +24,7 @@ describe('scheduleRows', () => {
       groups: ['Comercial', 'Financeiro'],
       employeeCount: 15,
       status: 'ativa',
+      statusDetail: null,
     });
   });
 
@@ -38,9 +39,16 @@ describe('scheduleRows', () => {
     expect(rows().find((r) => r.id === 'regra-tarde')?.employeeCount).toBe(9);
   });
 
-  it('regra em modo observação aparece "em observação"', () => {
-    const observed = { ...WORK_SCHEDULES[0], observationMode: true };
-    expect(rows([observed])[0].status).toBe('em_observacao');
+  it('regra em modo observação aparece "em observação", com o último dia', () => {
+    const observed = {
+      ...WORK_SCHEDULES[0],
+      observationMode: true,
+      observationEndsOn: '2026-11-08',
+    };
+    expect(rows([observed])[0]).toMatchObject({
+      status: 'em_observacao',
+      statusDetail: 'até dom, 08/11',
+    });
   });
 
   it('regra sem grupo não controla ninguém', () => {

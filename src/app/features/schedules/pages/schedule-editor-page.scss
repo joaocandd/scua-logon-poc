@@ -1,3 +1,5 @@
+@use '../ui/section';
+
 // Uma coluna de seções; a partir de 80em, o resumo e "Salvar regra" numa coluna presa ao lado.
 // Abaixo disso, o resumo vem depois das seções e uma barra presa ao rodapé mostra o começo dele e
 // "Salvar regra". A barra muda o --toast-offset e o scroll-padding da página (styles.scss).
@@ -58,6 +60,38 @@
   border-radius: var(--radius-lg);
   background: var(--color-highlight-bg);
   box-shadow: var(--shadow-ring);
+}
+
+.observation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border-strong);
+}
+
+.checkbox {
+  @include section.checkbox;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.observed-title {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-md);
+}
+
+.observed-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--text-sm);
 }
 
 // Na coluna ao lado, o "Salvar regra" fica no resumo; abaixo de 80em, fica na barra.

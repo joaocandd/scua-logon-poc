@@ -459,6 +459,63 @@ describe('API simulada', () => {
       });
       expect(call('PUT', '/api/regras/regra-x', tarde()).status).toBe(404);
     });
+
+    describe('modo observação', () => {
+      const observed = (events: ActivityEvent[]) =>
+        events.filter((e) => e.type === 'bloqueio_observado');
+      const history = (now = NOW) => get<ActivityEvent[]>('/api/historico?regra=regra-tarde', now);
+
+      it('dura 7 dias contando hoje; salvar de novo não muda o fim; desligar apaga', () => {
+        const on = call('PUT', '/api/regras/regra-tarde', { ...tarde(), observationMode: true });
+        expect((on.body as WorkSchedule).observationEndsOn).toBe('2026-11-18');
+
+        const later = new Date('2026-11-14T10:00:00-03:00');
+        call('PUT', '/api/regras/regra-tarde', { ...tarde(), end: '21:00' }, later);
+        expect(tarde().observationEndsOn).toBe('2026-11-18');
+
+        call('PUT', '/api/regras/regra-tarde', { ...tarde(), observationMode: false });
+        expect(tarde().observationEndsOn).toBeUndefined();
+      });
+
+      it('registra quem seria bloqueado, uma vez por passagem, sem bloquear a estação', () => {
+        // Quinta às 10h: a regra Tarde (14h às 22h) bloquearia o Atendimento, que fica sem regra
+        // ativa enquanto ela é observada.
+        call('PUT', '/api/regras/regra-tarde', { ...tarde(), observationMode: true });
+        const first = observed(history());
+        expect(first.map((e) => e.summary)).toContain(
+          'Às 10h, a estação de Bianca Nogueira seria bloqueada. Motivo: fora da jornada Tarde (das 14h às 22h).',
+        );
+        expect(observed(history())).toHaveLength(first.length);
+
+        const bianca = get<Workstation[]>('/api/estacoes').find((w) => w.employeeId === 'col-16');
+        expect(bianca).toMatchObject({ state: 'bloqueada', observed: true });
+      });
+
+      it('quem está bloqueado de verdade pela regra ativa não entra no registro', () => {
+        // Regra nova em observação para o Comercial, que segue na regra Comercial (8h às 17h).
+        const comercial = get<WorkSchedule>('/api/regras/regra-comercial');
+        const evening = new Date('2026-11-12T19:00:00-03:00');
+        call(
+          'POST',
+          '/api/regras',
+          { ...comercial, id: '', name: 'Teste', observationMode: true },
+          evening,
+        );
+        const events = get<ActivityEvent[]>('/api/historico', evening);
+        expect(observed(events)).toEqual([]);
+      });
+
+      it('no dia seguinte ao fim, a regra passa a bloquear', () => {
+        call('PUT', '/api/regras/regra-tarde', { ...tarde(), observationMode: true });
+        const after = new Date('2026-11-19T08:00:00-03:00');
+        expect(get<WorkSchedule>('/api/regras/regra-tarde', after)).toMatchObject({
+          observationMode: false,
+        });
+        expect(history(after)[0].summary).toBe(
+          'A observação da regra Tarde terminou. A partir de agora, ela bloqueia a estação.',
+        );
+      });
+    });
   });
 
   it('calcula a estação de cada colaborador com regra', () => {

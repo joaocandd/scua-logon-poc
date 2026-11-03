@@ -67,6 +67,18 @@ describe('scheduleSummary', () => {
     );
   });
 
+  it('em observação, diz até quando e que não bloqueia ninguém', () => {
+    const draft = { ...fixture('regra-comercial'), observationMode: true };
+    expect(
+      summary(draft).endsWith(' Em observação por 7 dias depois de salvar: não bloqueia ninguém.'),
+    ).toBe(true);
+    expect(
+      summary({ ...draft, observationEndsOn: '2026-11-18' }).endsWith(
+        ' Em observação até qua, 18/11: não bloqueia ninguém.',
+      ),
+    ).toBe(true);
+  });
+
   it('horário incompleto não entra no resumo', () => {
     expect(summary({ ...newScheduleDraft(), end: '' })).toMatch(
       /^Seg a sex, horário ainda incompleto\. Avisos/,

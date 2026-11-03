@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Employee, WorkSchedule } from '../shared/models';
-import { appliesTo } from '../shared/schedule-engine';
-import { NewActivityEvent, requestCreated, requestExpired } from './activity';
+import { toLocal } from '../shared/date';
+import { Employee, WorkSchedule, WorkstationStatus } from '../shared/models';
+import { appliesTo, evaluateWorkstation } from '../shared/schedule-engine';
+import {
+  blockObserved,
+  NewActivityEvent,
+  observationEnded,
+  requestCreated,
+  requestExpired,
+} from './activity';
 import { createFixtures, createLiveRequest, CURRENT_USER_ID, Fixtures } from './fixtures';
 
 /** No modo demo ao vivo, um pedido novo chega a cada 30 s. */
@@ -20,6 +27,12 @@ export class MockDb {
   /** Modo demo ao vivo: desde quando está ligado e quantos pedidos novos já chegaram. */
   private live: { since: number; delivered: number } | null = null;
 
+  /**
+   * Regras em observação: quem a regra bloquearia na última conferência ("regra:colaborador").
+   * Só a passagem de liberada para bloqueada vira registro.
+   */
+  private observedBlocks = new Set<string>();
+
   constructor() {
     this.reset();
   }
@@ -28,15 +41,71 @@ export class MockDb {
   reset(now = new Date()): void {
     this.data = createFixtures(now);
     this.live = null;
+    this.observedBlocks.clear();
   }
 
   employee(id: string): Employee | undefined {
     return this.data.employees.find((e) => e.id === id);
   }
 
-  /** Regra de jornada que vale para o colaborador, se houver. */
+  /**
+   * Regra de jornada que vale para o colaborador, se houver. A ativa vem antes da que está em
+   * observação: a pessoa pode estar nas duas enquanto a nova é observada.
+   */
   scheduleFor(employee: Employee): WorkSchedule | undefined {
-    return this.data.schedules.find((s) => appliesTo(s, employee));
+    const rules = this.data.schedules.filter((s) => appliesTo(s, employee));
+    return rules.find((s) => !s.observationMode) ?? rules[0];
+  }
+
+  /** Estado da estação pela regra dada, com as exceções, feriados e pedidos da pessoa. */
+  evaluate(schedule: WorkSchedule, employee: Employee, now: Date): WorkstationStatus {
+    return evaluateWorkstation({
+      schedule,
+      exceptions: this.data.exceptions.filter((e) => e.employeeId === employee.id),
+      holidays: this.data.holidays,
+      extensions: this.data.requests.filter((r) => r.employeeId === employee.id),
+      at: now,
+    });
+  }
+
+  /** Terminados os dias de observação, a regra passa a bloquear, e o histórico registra. */
+  endObservations(now: Date): void {
+    const today = toLocal(now).date;
+    for (const schedule of this.data.schedules) {
+      const ended = schedule.observationEndsOn && schedule.observationEndsOn < today;
+      if (schedule.observationMode && ended) {
+        schedule.observationMode = false;
+        delete schedule.observationEndsOn;
+        this.log(observationEnded(schedule, now.toISOString()));
+      }
+    }
+  }
+
+  /**
+   * Regras em observação: registra quem a regra bloquearia agora e está com a estação liberada
+   * de verdade (pela regra ativa, ou sem regra). Uma vez por passagem de liberada para bloqueada,
+   * como faria o agente do Windows ao avisar o servidor.
+   */
+  recordObservations(now: Date): void {
+    const minutes = toLocal(now).minutes;
+    const unlocked = ({ state }: WorkstationStatus) =>
+      state === 'em_jornada' || state === 'he_aprovada';
+    for (const schedule of this.data.schedules.filter((s) => s.observationMode)) {
+      for (const employee of this.data.employees.filter((e) => appliesTo(schedule, e))) {
+        const key = `${schedule.id}:${employee.id}`;
+        const observed = this.evaluate(schedule, employee, now);
+        const active = this.data.schedules.find(
+          (s) => !s.observationMode && appliesTo(s, employee),
+        );
+        const freeNow = !active || unlocked(this.evaluate(active, employee, now));
+        if (unlocked(observed) || !freeNow) {
+          this.observedBlocks.delete(key);
+        } else if (!this.observedBlocks.has(key)) {
+          this.observedBlocks.add(key);
+          this.log(blockObserved(schedule, employee, observed.reason, now.toISOString(), minutes));
+        }
+      }
+    }
   }
 
   log(event: NewActivityEvent): void {
