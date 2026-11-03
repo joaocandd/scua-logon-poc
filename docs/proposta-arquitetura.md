@@ -60,7 +60,7 @@ src/app/
 - **Escrita com `HttpClient`.** Depois de aprovar ou recusar, o serviço troca só o pedido que mudou na lista, sem recarregar tudo.
 - **Valores derivados com `computed`.** Por exemplo, os pedidos que aguardam o gestor, do que vence antes para o que vence depois.
 - **Uma fachada por tela.** Ela junta os recursos e diz em que estado a tela está: carregando, erro, sem permissão ou pronta. A tela só conhece a fachada (exemplo: `ApprovalInbox`).
-- **Sem biblioteca de estado por enquanto.** O NgRx SignalStore entra só se uma área crescer muito.
+- **Sem biblioteca de estado por enquanto.** O NgRx SignalStore entra só se uma área crescer muito (ADR 0018).
 - **Zoneless**, que é o padrão do Angular 22: a tela se atualiza quando um signal muda, sem o zone.js.
 
 ```ts
@@ -92,6 +92,8 @@ readonly pending = computed(() => this.list.value().filter((r) => r.status === '
 
 ### 2.5 Acessibilidade e testes
 
+A meta é a ABNT NBR 17225:2025, equivalente à WCAG 2.2 AA (ADR 0019). As ferramentas estão na ADR 0020.
+
 - **Unitários (Vitest):** as regras de negócio, os serviços e os componentes. Na PoC, 502 testes em 54 arquivos.
 - **Ponta a ponta (Playwright) com axe:** os fluxos completos, em desktop (1280 px), celular (390 px) e tema escuro, com o axe em todas as rotas e nos estados de erro, vazio, lento e sem permissão. Na PoC, 187 testes, que viram 606 execuções nas quatro configurações.
 - **Teclado e reflow:** um teste percorre as telas só com Tab, e outro confere 320 px e zoom de 200% sem rolagem para o lado.
@@ -102,7 +104,7 @@ readonly pending = computed(() => this.list.value().filter((r) => r.status === '
 
 ## 3. Plano de migração em fases
 
-**Por que não reescrever.** Uma reescrita congela o produto até a versão nova ficar pronta, só mostra resultado no fim e troca tudo de uma vez no dia da virada. Por etapas, cada fase entrega algo que o cliente vê, ou algo que reduz risco, e pode ser desfeita.
+**Por que não reescrever.** Uma reescrita congela o produto até a versão nova ficar pronta, só mostra resultado no fim e troca tudo de uma vez no dia da virada. Por etapas, cada fase entrega algo que o cliente vê, ou algo que reduz risco, e pode ser desfeita (ADR 0017).
 
 | Fase | Entrega | Duração |
 |---|---|---|
