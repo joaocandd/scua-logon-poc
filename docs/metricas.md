@@ -90,7 +90,7 @@ O link do e-mail (`/aprovacao/valido-ped-04`) é a comparação principal: é a 
 
 ### O que mudou
 
-1. **Fonte variável** (ADR 0013). Um arquivo de 38 kB serve os quatro pesos, no lugar de quatro arquivos de 19 kB. As páginas baixam 37 kB a menos de fonte e fazem até 3 downloads a menos.
+1. **Fonte variável** (ADR 0015). Um arquivo de 38 kB serve os quatro pesos, no lugar de quatro arquivos de 19 kB. As páginas baixam 37 kB a menos de fonte e fazem até 3 downloads a menos.
 2. **Diálogo de recusa sob demanda.** O diálogo e o Signal Forms que ele usa (`@angular/forms`, 16,6 kB com gzip) só são baixados no primeiro "Recusar". Antes, a caixa de aprovações e o link do e-mail baixavam tudo isso ao abrir, mesmo para quem só aprova.
 3. **Favicon em SVG** com a barra laranja do cabeçalho (132 bytes), no lugar do `favicon.ico` padrão do Angular (15 kB).
 
