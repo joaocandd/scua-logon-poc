@@ -44,6 +44,28 @@
       }
     </div>
 
+    @if (panel.state() === 'loading') {
+      <div class="attention" aria-busy="true">
+        @for (placeholder of [1, 2]; track placeholder) {
+          <div class="attention-skeleton" aria-hidden="true">
+            <app-skeleton variant="heading" width="50%" />
+            <app-skeleton width="70%" />
+            <app-skeleton width="60%" />
+            <app-skeleton variant="block" width="12rem" />
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="attention">
+        <app-pending-requests [summary]="pending()" [groupId]="groupId()" />
+        <app-today-alerts
+          [alerts]="alerts()"
+          [groupId]="groupId()"
+          (stationsOpened)="listOpened('sem_aprovacao')"
+        />
+      </div>
+    }
+
     <section class="block" aria-labelledby="estacoes-titulo">
       <h2 id="estacoes-titulo" class="block-title" tabindex="-1">Estações agora</h2>
 

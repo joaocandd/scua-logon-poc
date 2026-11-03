@@ -1,9 +1,11 @@
+import { addDays, toLocal } from '../../shared/date';
 import {
   ActivityEvent,
   Employee,
   ExtensionRequest,
   Group,
   Holiday,
+  OBSERVATION_DAYS,
   ScheduleException,
   WorkSchedule,
 } from '../../shared/models';
@@ -17,6 +19,9 @@ import { WORK_SCHEDULES } from './work-schedules';
 export type { ApprovalToken } from './approval-tokens';
 export { CURRENT_USER_ID, HR_VALIDATOR_ID } from './employees';
 export { createLiveRequest } from './scenario';
+
+/** Há quantos dias a regra em observação das fixtures (Noturna) começou a observar. */
+const OBSERVED_DAYS_AGO = 2;
 
 export interface Fixtures {
   employees: Employee[];
@@ -35,6 +40,11 @@ export function createFixtures(now = new Date()): Fixtures {
   const employees = structuredClone([...EMPLOYEES]);
   const groups = structuredClone([...GROUPS]);
   const schedules = structuredClone([...WORK_SCHEDULES]);
+  // A observação começou há 2 dias: ainda faltam alguns, qualquer que seja o dia em que o app abre.
+  const observationEndsOn = addDays(toLocal(now).date, OBSERVATION_DAYS - 1 - OBSERVED_DAYS_AGO);
+  for (const schedule of schedules) {
+    if (schedule.observationMode) schedule.observationEndsOn = observationEndsOn;
+  }
   const holidays = structuredClone([...HOLIDAYS]);
   const scenario = createScenario({ now, employees, groups, schedules, holidays });
   const tokens = structuredClone([...APPROVAL_TOKENS]);

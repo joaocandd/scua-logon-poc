@@ -1,0 +1,39 @@
+<section class="card" aria-labelledby="alertas-titulo">
+  <h2 id="alertas-titulo" class="title">Alertas</h2>
+  @if (alerts().length === 0) {
+    <p class="none">
+      <app-icon name="check_circle" />
+      <span>Nenhum alerta agora.</span>
+    </p>
+  } @else {
+    <ul class="alerts">
+      @for (alert of alerts(); track alert.kind) {
+        <li class="alert">
+          <app-icon name="warning" />
+          <div class="text">
+            <p class="alert-title">{{ alert.title }}</p>
+            <p class="alert-detail">{{ alert.detail }}</p>
+            @switch (alert.kind) {
+              @case ('sem_aprovacao') {
+                <a
+                  [routerLink]="[]"
+                  [queryParams]="{ estado: 'sem_aprovacao' }"
+                  queryParamsHandling="merge"
+                  [replaceUrl]="true"
+                  (click)="stationsOpened.emit()"
+                  >Ver estações</a
+                >
+              }
+              @case ('vencendo') {
+                <a routerLink="/aprovacoes" [queryParams]="approvalsQuery()">Abrir aprovações</a>
+              }
+              @case ('sem_regra') {
+                <a routerLink="/regras">Ver regras de jornada</a>
+              }
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

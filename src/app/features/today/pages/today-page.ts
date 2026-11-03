@@ -22,6 +22,7 @@ import {
 } from '../../../design-system';
 import { POLL_INTERVAL_MS, updatedLabel } from '../../../shared/live-updates';
 import { injectNow } from '../../../shared/now';
+import { pendingSummary, todayAlerts } from '../data/attention';
 import {
   countByFilter,
   emptyListText,
@@ -30,11 +31,14 @@ import {
   StationFilter,
 } from '../data/stations';
 import { TodayPanel } from '../data/today-panel';
+import { PendingRequests } from '../ui/pending-requests';
 import { StationCounters } from '../ui/station-counters';
 import { StationList } from '../ui/station-list';
+import { TodayAlerts } from '../ui/today-alerts';
 
 /**
- * Painel "Hoje" (/hoje): como estão as estações agora e o que precisa de atenção.
+ * Painel "Hoje" (/hoje): como estão as estações agora e o que precisa de atenção. No topo, os
+ * pedidos aguardando e os alertas; depois, os contadores das estações.
  *
  * Os contadores abrem a lista do estado na própria página (`?estado=`), e o grupo também fica na
  * URL (`?grupo=`): dá para compartilhar e voltar. Mudar só a query não move o foco (a casca só
@@ -52,10 +56,12 @@ import { StationList } from '../ui/station-list';
     Field,
     FieldControl,
     PageHeader,
+    PendingRequests,
     RouterLink,
     Skeleton,
     StationCounters,
     StationList,
+    TodayAlerts,
   ],
   templateUrl: './today-page.html',
   styleUrl: './today-page.scss',
@@ -67,7 +73,9 @@ export class TodayPage {
   private readonly injector = inject(Injector);
   private readonly document = inject(DOCUMENT);
 
-  /** Para o "Atualizado há X s", que muda a cada segundo. */
+  /** Para os textos com hora ("Expira em 20 min"). */
+  private readonly now = injectNow(30_000);
+  /** Para o "Atualizado há X s", que muda a cada segundo sem refazer o resto. */
   private readonly tick = injectNow(1000);
 
   /** A última consulta falhou; o painel na tela é o da consulta anterior. */
@@ -90,6 +98,20 @@ export class TodayPage {
   protected readonly counts = computed(() => countByFilter(this.stations()));
   protected readonly listRows = computed(() =>
     this.stations().filter((row) => row.filter === this.filter()),
+  );
+
+  private readonly employees = computed(() => inGroup(this.panel.employees(), this.groupId()));
+  protected readonly pending = computed(() =>
+    pendingSummary(this.panel.requests(), this.panel.employeeById(), this.groupId(), this.now()),
+  );
+  protected readonly alerts = computed(() =>
+    todayAlerts({
+      stations: this.stations(),
+      employees: this.employees(),
+      requests: this.panel.requests(),
+      schedules: this.panel.schedules(),
+      now: this.now(),
+    }),
   );
 
   protected readonly status = computed(() =>

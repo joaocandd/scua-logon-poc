@@ -495,13 +495,14 @@ describe('API simulada', () => {
         // Regra nova em observação para o Comercial, que segue na regra Comercial (8h às 17h).
         const comercial = get<WorkSchedule>('/api/regras/regra-comercial');
         const evening = new Date('2026-11-12T19:00:00-03:00');
-        call(
+        const created = call(
           'POST',
           '/api/regras',
           { ...comercial, id: '', name: 'Teste', observationMode: true },
           evening,
-        );
-        const events = get<ActivityEvent[]>('/api/historico', evening);
+        ).body as WorkSchedule;
+        // Só os registros da regra nova: a Noturna das fixtures também está em observação.
+        const events = get<ActivityEvent[]>(`/api/historico?regra=${created.id}`, evening);
         expect(observed(events)).toEqual([]);
       });
 

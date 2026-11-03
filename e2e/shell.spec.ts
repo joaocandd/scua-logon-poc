@@ -265,7 +265,8 @@ test.describe('Casca no celular', () => {
   });
 
   test('"Mais" abre as outras áreas, só com teclado', async ({ page }) => {
-    await open(page);
+    // Relatórios não tem nada focável no conteúdo: do cabeçalho, o Tab vai direto à barra inferior.
+    await open(page, '/relatorios');
     const more = page.getByRole('button', { name: 'Mais' });
 
     // Ordem do Tab: pular para o conteúdo, marca, busca, conta e a barra inferior.
