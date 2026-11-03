@@ -101,3 +101,27 @@ for (const { url, ready, loading } of screens) {
     await expectNoA11yViolations(page);
   });
 }
+
+// Áreas fora do escopo da PoC: a tela diz o que teria e onde está o plano, sem parecer quebrada.
+const outOfScope = [
+  { path: '/pessoas', mentions: 'colaborador com o grupo e a regra de jornada' },
+  { path: '/relatorios', mentions: 'relatórios de horas extras e de bloqueios' },
+  { path: '/configuracoes', mentions: 'feriados da empresa, avisos padrão, permissões' },
+];
+
+for (const { path, mentions } of outOfScope) {
+  test(`${path} diz o que está fora do escopo desta prova de conceito`, async ({ page }) => {
+    await page.goto(path);
+
+    const heading = page.getByRole('heading', {
+      level: 2,
+      name: 'Fora do escopo desta prova de conceito',
+    });
+    await expect(heading).toBeVisible();
+    await expect(page.getByText(mentions)).toBeVisible();
+    await expect(
+      page.getByText(/O plano de migração desta área está na proposta de arquitetura\./),
+    ).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+}

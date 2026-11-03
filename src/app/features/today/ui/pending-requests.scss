@@ -1,0 +1,27 @@
+@use 'card';
+
+.count {
+  margin: 0;
+  font-size: var(--text-md);
+
+  strong {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.next,
+.hr {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.hr {
+  color: var(--color-text-muted);
+}
+
+a {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}

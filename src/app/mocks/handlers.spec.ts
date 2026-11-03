@@ -2,6 +2,7 @@ import {
   ActivityEvent,
   ApprovalLink,
   ExtensionRequest,
+  Settings,
   Workstation,
   WorkSchedule,
 } from '../shared/models';
@@ -495,13 +496,14 @@ describe('API simulada', () => {
         // Regra nova em observação para o Comercial, que segue na regra Comercial (8h às 17h).
         const comercial = get<WorkSchedule>('/api/regras/regra-comercial');
         const evening = new Date('2026-11-12T19:00:00-03:00');
-        call(
+        const created = call(
           'POST',
           '/api/regras',
           { ...comercial, id: '', name: 'Teste', observationMode: true },
           evening,
-        );
-        const events = get<ActivityEvent[]>('/api/historico', evening);
+        ).body as WorkSchedule;
+        // Só os registros da regra nova: a Noturna das fixtures também está em observação.
+        const events = get<ActivityEvent[]>(`/api/historico?regra=${created.id}`, evening);
         expect(observed(events)).toEqual([]);
       });
 
@@ -529,5 +531,29 @@ describe('API simulada', () => {
       reason: 'Liberada: jornada Comercial (das 8h às 17h).',
     });
     expect(of('col-17')?.reason).toBe('Bloqueada: fora da jornada Tarde (das 14h às 22h).');
+  });
+
+  describe('configurações', () => {
+    it('começam com o custo médio da hora extra da demonstração', () => {
+      expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 45 });
+    });
+
+    it('salvam o custo médio, arredondado ao centavo', () => {
+      const saved = call('PUT', '/api/configuracoes', { overtimeHourlyCost: 52.456 });
+      expect(saved).toEqual({ status: 200, body: { overtimeHourlyCost: 52.46 } });
+      expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 52.46 });
+    });
+
+    it('recusam custo vazio, zero ou negativo, dizendo o que corrigir', () => {
+      expect(call('PUT', '/api/configuracoes', {})).toEqual({
+        status: 422,
+        body: { message: 'Informe o custo médio da hora extra.' },
+      });
+      expect(call('PUT', '/api/configuracoes', { overtimeHourlyCost: 0 })).toEqual({
+        status: 422,
+        body: { message: 'O custo médio precisa ser maior que zero.' },
+      });
+      expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 45 });
+    });
   });
 });

@@ -106,7 +106,8 @@ describe('groupOptions', () => {
       ['Atendimento', 9, 'Tarde'],
       ['Comercial', 9, 'Comercial'],
       ['Financeiro', 6, 'Comercial'],
-      ['Operações', 7, 'Noturna'],
+      // A Noturna está em observação: não conta como regra ativa.
+      ['Operações', 7, null],
       ['RH', 4, 'Flexível'],
       ['TI', 5, 'Flexível'],
     ]);

@@ -1,0 +1,25 @@
+<section class="card" aria-labelledby="pedidos-titulo">
+  <h2 id="pedidos-titulo" class="title">Pedidos aguardando</h2>
+  @if (summary().count > 0) {
+    <p class="count">
+      <strong>{{ summary().count }}</strong>
+      {{ summary().count === 1 ? 'pedido aguardando aprovação' : 'pedidos aguardando aprovação' }}
+    </p>
+    @if (summary().next; as next) {
+      <p class="next">{{ next }}</p>
+    }
+  } @else {
+    <p class="count">Nenhum pedido aguardando aprovação.</p>
+  }
+  @if (summary().hrCount > 0) {
+    <p class="hr">{{ summary().hrCount }} aguardando a validação do RH.</p>
+  }
+  <a
+    app-button
+    routerLink="/aprovacoes"
+    [queryParams]="approvalsQuery()"
+    [variant]="summary().count > 0 ? 'primary' : 'secondary'"
+    icon="fact_check"
+    >Abrir aprovações</a
+  >
+</section>

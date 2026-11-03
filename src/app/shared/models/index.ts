@@ -10,6 +10,7 @@ export type {
   DayOffException,
   ScheduleException,
 } from './schedule-exception';
+export type { Settings } from './settings';
 export {
   EXTENSION_REQUEST_STATUSES,
   SCHEDULE_STATUSES,

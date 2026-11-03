@@ -8,6 +8,7 @@ import {
   ExtensionDecision,
   ExtensionRequest,
   OBSERVATION_DAYS,
+  Settings,
   Workstation,
   WorkSchedule,
 } from '../shared/models';
@@ -81,6 +82,9 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
+
+  ['GET', '/api/configuracoes', ({ db }) => ok(db.data.settings)],
+  ['PUT', '/api/configuracoes', saveSettings],
 ];
 
 /** Responde a uma chamada a /api/... a partir do banco em memória. */
@@ -393,6 +397,20 @@ function listWorkstations({ db, now }: Context): MockResponse {
     return [{ employeeId: employee.id, ...status, ...observed }];
   });
   return ok(workstations);
+}
+
+/**
+ * Configurações da empresa. Hoje, só o custo médio da hora extra: positivo, arredondado ao
+ * centavo. Fica em memória, como as regras salvas.
+ */
+function saveSettings({ db, body }: Context): MockResponse {
+  const cost = (body as Partial<Settings> | null)?.overtimeHourlyCost;
+  if (typeof cost !== 'number' || !Number.isFinite(cost)) {
+    return fail(422, 'Informe o custo médio da hora extra.');
+  }
+  if (cost <= 0) return fail(422, 'O custo médio precisa ser maior que zero.');
+  db.data.settings = { overtimeHourlyCost: Math.round(cost * 100) / 100 };
+  return ok(db.data.settings);
 }
 
 /** "/api/pedidos/:id" casa com "/api/pedidos/ped-01" e devolve { id: "ped-01" }. */

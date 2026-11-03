@@ -406,15 +406,19 @@ test('fluxo completo: cria a regra, resolve o conflito, simula e salva em observ
   await page.getByLabel('Início da jornada').fill('09:00');
   await page.getByLabel('Fim da jornada').fill('18:00');
 
-  // Operações já está na regra Noturna: o conflito aparece na hora, dizendo quem e qual.
+  // RH já está na regra Flexível: o conflito aparece na hora, dizendo quem e qual.
   const section = page.getByRole('region', { name: 'A quem se aplica' });
-  await section.getByRole('checkbox', { name: 'Operações', exact: true }).check();
+  const group = (name: string) => section.getByRole('checkbox', { name, exact: true });
+  await group('Operações').check();
+  await group('RH').check();
   await expect(section).toContainText(
-    'Carlos Teixeira, Edson Pires, Fabiana Leal e mais 3 colaboradores já estão na regra Noturna.',
+    'Fernanda Lacerda, Juliana Prado, Ricardo Peixoto e mais 1 colaborador já estão na regra Flexível.',
   );
   await expectNoA11yViolations(page);
+  await group('RH').uncheck();
+  await expect(section).not.toContainText('já estão na regra');
 
-  // Só a diretora, que está fora da Noturna, fica nesta regra.
+  // Só a diretora fica nesta regra. A Noturna, em observação, não conta como conflito.
   await section.getByText('Ver os 7 colaboradores dos grupos').click();
   const others = ['Carlos', 'Edson', 'Fabiana', 'Márcio', 'Rogério', 'Sueli'];
   for (const name of others) {

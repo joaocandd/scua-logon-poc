@@ -20,10 +20,11 @@ import {
   Skeleton,
 } from '../../../design-system';
 import { toLocal } from '../../../shared/date';
+import { POLL_INTERVAL_MS, updatedLabel } from '../../../shared/live-updates';
 import { injectNow } from '../../../shared/now';
 import { People } from '../../people/data/people';
 import { ApprovalInbox, INBOX_FILTERS, InboxFilter, visibleItems } from '../data/approval-inbox';
-import { arrivalMessage, POLL_INTERVAL_MS, updatedLabel } from '../data/inbox-updates';
+import { arrivalMessage } from '../data/inbox-updates';
 import { summaryOf, toCardView } from '../data/request-card-view';
 import { RequestCard } from '../ui/request-card';
 import { ApprovalActions } from './approval-actions';

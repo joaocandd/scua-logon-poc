@@ -1,0 +1,38 @@
+<section class="overtime" aria-labelledby="horas-extras-titulo">
+  <h2 id="horas-extras-titulo" class="title">Horas extras do mês</h2>
+  <p class="intro">
+    Horas extras aprovadas, pelo dia da jornada{{ groupName() ? ' · ' + groupName() : '' }}.
+  </p>
+
+  <div class="months">
+    @for (month of months(); track month.label) {
+      <div class="month">
+        <h3 class="month-title">{{ month.label }}</h3>
+        @if (month.empty) {
+          <p class="none">Nenhuma hora extra aprovada em {{ month.monthName }}.</p>
+        } @else {
+          <dl class="stats">
+            <div class="stat">
+              <dt>Horas aprovadas</dt>
+              <dd class="hours">{{ month.hours }}</dd>
+            </div>
+            <div class="stat">
+              <dt>Custo estimado</dt>
+              <dd>{{ month.cost }}</dd>
+            </div>
+            <div class="stat">
+              <dt>Pedidos aprovados</dt>
+              <dd>{{ month.requests }}</dd>
+            </div>
+          </dl>
+        }
+      </div>
+    }
+  </div>
+
+  <p class="note">
+    <strong>Estimativa:</strong> horas aprovadas × custo médio de {{ costText() }} por hora. O valor
+    real sai da folha de pagamento.
+    <a routerLink="/configuracoes">Mudar o custo médio</a>
+  </p>
+</section>

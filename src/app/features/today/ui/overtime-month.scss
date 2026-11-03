@@ -1,0 +1,83 @@
+.title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+}
+
+.intro {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+// Um mês embaixo do outro no celular; lado a lado a partir de 48em.
+.months {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.month {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+}
+
+.month-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-md);
+}
+
+.none {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hours {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+  }
+}
+
+.note {
+  margin: var(--space-4) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+
+  strong {
+    color: var(--color-text);
+  }
+
+  a {
+    color: var(--color-link);
+    font-weight: 600;
+  }
+}
+
+@media (min-width: 48em) {
+  .months {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -49,7 +49,9 @@ export const WORK_SCHEDULES: readonly WorkSchedule[] = [
     breaks: [{ label: 'Pausa', start: '02:00', end: '03:00' }],
     warningMinutes: [30, 15, 5],
     requiresHrValidation: true,
-    observationMode: false,
+    // Em observação: registra quem seria bloqueado, sem bloquear. O painel "Hoje" mostra essas
+    // estações liberadas fora da jornada. O último dia (`observationEndsOn`) sai de createFixtures.
+    observationMode: true,
     // A diretora de operações não trabalha à noite e fica sem regra (estação sem controle).
     assignment: { groupIds: ['grp-operacoes'], excludedEmployeeIds: [CURRENT_USER_ID] },
   },
