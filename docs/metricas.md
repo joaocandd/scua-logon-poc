@@ -88,6 +88,8 @@ Lighthouse mobile em cinco páginas, antes e depois das correções de desempenh
 
 O link do e-mail (`/aprovacao/valido-ped-04`) é a comparação principal: é a página que o gestor abre no celular, fora do app.
 
+O `/hoje` desta auditoria ainda era a página provisória. O painel Hoje (ADR 0013) foi feito em paralelo, no PR #8, e ainda não foi medido: [MEDIR o /hoje com o painel].
+
 ### O que mudou
 
 1. **Fonte variável** (ADR 0015). Um arquivo de 38 kB serve os quatro pesos, no lugar de quatro arquivos de 19 kB. As páginas baixam 37 kB a menos de fonte e fazem até 3 downloads a menos.
@@ -131,17 +133,43 @@ O TBT varia de 0 a 40 ms entre execuções da mesma versão. A diferença no /en
 
 O LCP de todas as páginas é texto: a nota de demonstração no /entrar, o parágrafo provisório do /hoje, a descrição da página no /aprovacoes, uma ajuda do editor no /regras/regra-comercial e um alerta do pedido no link do e-mail. Ele depende da cadeia de downloads (main.js, depois o código da página, depois o que ela importa) e da fonte.
 
-### Comparação com o link atual da Scua
+### Comparação com o Scua atual
 
-| | Link atual da Scua | PoC antes | PoC depois |
+As duas páginas que abrem sem entrar no app: o login e a aprovação pelo link do e-mail. A PoC são o `/entrar` e o `/aprovacao/valido-ped-04` das tabelas acima, antes e depois da auditoria.
+
+**Login**
+
+| | Scua atual | PoC antes | PoC depois |
+|---|---|---|---|
+| Desempenho | [MEDIR] | 93 | 97 |
+| Acessibilidade | [MEDIR] | 100 | 100 |
+| LCP | [MEDIR] | 2,76 s | 2,34 s |
+| Total transferido | [MEDIR] | 219,5 kB | 169,0 kB |
+
+**Aprovação pelo link do e-mail**
+
+| | Scua atual, sem token | PoC antes | PoC depois |
 |---|---|---|---|
 | Desempenho | [MEDIR] | 90 | 94 |
 | Acessibilidade | [MEDIR] | 100 | 100 |
-| FCP | [MEDIR] | 2,36 s | 2,18 s |
 | LCP | [MEDIR] | 3,20 s | 2,69 s |
 | Total transferido | [MEDIR] | 259,8 kB | 191,8 kB |
 
-Falta o endereço do link de aprovação atual da Scua. Meça com o mesmo comando (abaixo) e não guarde o token do link neste repositório.
+No build final, sem o Angular Material (seção abaixo), a PoC ficou com desempenho 96 no login e 94 no link, e total transferido de 165,8 kB e 188,6 kB. O LCP e a acessibilidade não foram medidos de novo nesse build.
+
+**Como medir o Scua atual**
+
+- Lighthouse mobile (configuração padrão de celular), três execuções por página, no Chrome em janela anônima: sem extensões, sem cache e sem sessão aberta. Anote a mediana.
+- **Login:** a página de entrada do Scua Logon atual.
+- **Aprovação:** o endereço do link do e-mail sem o token. Assim nenhum link de verdade é usado nem fica guardado.
+- O endereço do Scua atual não entra neste repositório, nem o token de um link (ver "Confidencialidade" no `CLAUDE.md`).
+- Data da medição, versão do Chrome e versão do Lighthouse: [ANOTAR].
+
+**Cuidados ao comparar**
+
+- A PoC foi medida com um link válido, que mostra o pedido inteiro. Sem token, a página do Scua atual mostra [ANOTAR o que aparece: mensagem de erro, login ou outra coisa]. Se for só uma mensagem, a comparação favorece o Scua atual.
+- A PoC rodou num servidor local com arquivos estáticos; o Scua atual, num servidor de verdade. O Lighthouse simula a mesma rede de celular nos dois casos, mas o tempo de resposta do servidor só pesa no Scua.
+- A PoC foi medida pela linha de comando, sem interface (Lighthouse 13.5.0). O Lighthouse do Chrome usa a mesma configuração de celular, mas pode estar em outra versão.
 
 ### Pacote inicial
 
