@@ -127,6 +127,10 @@ test('o filtro por grupo vale para os contadores e para a lista', async ({ page 
     '/aprovacoes?grupo=grp-comercial',
   );
   await expect(region(page, 'Alertas')).toContainText('Nenhum alerta agora.');
+  const overtime = region(page, 'Horas extras do mês');
+  await expect(overtime).toContainText('Horas extras aprovadas, pelo dia da jornada · Comercial.');
+  await expect(overtime).toContainText('Nenhuma hora extra aprovada em novembro.');
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*1h30/);
   await expect(counter(page, 'Em jornada')).toHaveAccessibleName('0 Em jornada');
   await counter(page, 'Bloqueada').click();
   await expect(page).toHaveURL('/hoje?grupo=grp-comercial&estado=bloqueada');
@@ -136,6 +140,40 @@ test('o filtro por grupo vale para os contadores e para a lista', async ({ page 
   await counter(page, 'Em intervalo').click();
   await expect(page.getByText('Nenhuma estação em intervalo agora em Comercial.')).toBeVisible();
   await expectNoA11yViolations(page);
+});
+
+test('horas extras do mês: novembro até hoje ao lado de outubro inteiro, com o custo estimado', async ({
+  page,
+}) => {
+  await openPanel(page);
+  const overtime = region(page, 'Horas extras do mês');
+  // Novembro: Igor (1h), Natália (2h) e Tatiane (1h30). Outubro: Lucas, Márcio e Larissa.
+  const november = overtime.getByRole('heading', { level: 3, name: 'Novembro até hoje' });
+  await expect(november).toBeVisible();
+  await expect(overtime).toContainText(/Horas aprovadas\s*4h30\s*Custo estimado\s*R\$ 202,50/);
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*5h30/);
+  await expect(overtime).toContainText('R$ 247,50');
+  await expect(overtime).toContainText(
+    'Estimativa: horas aprovadas × custo médio de R$ 45,00 por hora. O valor real sai da folha de pagamento.',
+  );
+  await expectNoA11yViolations(page);
+});
+
+test('o custo médio salvo em Configurações muda a estimativa', async ({ page }) => {
+  await openPanel(page);
+  await region(page, 'Horas extras do mês')
+    .getByRole('link', { name: 'Mudar o custo médio' })
+    .click();
+
+  await expect(page).toHaveURL('/configuracoes');
+  await page.getByLabel('Custo médio da hora extra (R$ por hora)').fill('60');
+  await page.getByRole('button', { name: 'Salvar custo' }).click();
+  await expect(page.locator('app-toast-panel')).toContainText('R$ 60,00 por hora');
+
+  await page.getByRole('link', { name: 'Hoje', exact: true }).first().click();
+  const overtime = region(page, 'Horas extras do mês');
+  await expect(overtime).toContainText('R$ 270,00');
+  await expect(overtime).toContainText('custo médio de R$ 60,00 por hora');
 });
 
 test('ao vivo: consulta de novo e os números acompanham a hora', async ({ page }) => {
@@ -150,6 +188,21 @@ test('ao vivo: consulta de novo e os números acompanham a hora', async ({ page 
   await expect(counter(page, 'Hora extra aprovada')).toHaveAccessibleName('1 Hora extra aprovada');
   await expect(page.getByText('Nenhuma estação em intervalo agora.')).toBeVisible();
   await expect(page.getByText('Atualizado agora')).toBeVisible();
+});
+
+test('carregando: esqueletos e o aviso para o leitor de tela, sem números pela metade', async ({
+  page,
+}) => {
+  await openPanel(page, '/hoje?simular=lento');
+  await expect(page.getByRole('status')).toHaveText('Carregando o painel');
+  await expect(page.locator('[aria-busy="true"]').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Horas extras do mês' })).toBeHidden();
+  await expectNoA11yViolations(page);
+
+  await expect(counter(page, 'Em jornada')).toHaveAccessibleName('9 Em jornada', {
+    timeout: 10_000,
+  });
+  await expect(page.getByRole('heading', { name: 'Horas extras do mês' })).toBeVisible();
 });
 
 test('sem estações controladas, diz por quê e leva às regras', async ({ page }) => {

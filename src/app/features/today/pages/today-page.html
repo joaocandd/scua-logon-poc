@@ -134,5 +134,15 @@
         }
       }
     </section>
+
+    <!-- Só com o painel pronto: o custo chega antes dos pedidos, e o mês sairia incompleto. -->
+    @if (panel.state() === 'ready') {
+      <app-overtime-month
+        class="block"
+        [overtime]="overtime()"
+        [hourlyCost]="panel.hourlyCost()"
+        [groupName]="groupName()"
+      />
+    }
   }
 }

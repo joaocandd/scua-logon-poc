@@ -4,6 +4,7 @@
       <a
         class="counter"
         [id]="'contador-' + state"
+        [attr.data-tone]="info[state].tone"
         [routerLink]="[]"
         [queryParams]="{ estado: state }"
         queryParamsHandling="merge"
@@ -12,7 +13,10 @@
         (click)="opened.emit(state)"
       >
         <span class="count">{{ counts()[state] }}</span>
-        <app-status-badge [status]="state" />
+        <span class="label">
+          <app-icon [name]="info[state].icon" />
+          <span>{{ info[state].label }}</span>
+        </span>
       </a>
     </li>
   }

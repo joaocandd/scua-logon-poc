@@ -20,9 +20,11 @@ import {
   Skeleton,
   STATUS_INFO,
 } from '../../../design-system';
+import { toLocal } from '../../../shared/date';
 import { POLL_INTERVAL_MS, updatedLabel } from '../../../shared/live-updates';
 import { injectNow } from '../../../shared/now';
 import { pendingSummary, todayAlerts } from '../data/attention';
+import { monthlyOvertime } from '../data/monthly-overtime';
 import {
   countByFilter,
   emptyListText,
@@ -31,6 +33,7 @@ import {
   StationFilter,
 } from '../data/stations';
 import { TodayPanel } from '../data/today-panel';
+import { OvertimeMonth } from '../ui/overtime-month';
 import { PendingRequests } from '../ui/pending-requests';
 import { StationCounters } from '../ui/station-counters';
 import { StationList } from '../ui/station-list';
@@ -38,7 +41,7 @@ import { TodayAlerts } from '../ui/today-alerts';
 
 /**
  * Painel "Hoje" (/hoje): como estão as estações agora e o que precisa de atenção. No topo, os
- * pedidos aguardando e os alertas; depois, os contadores das estações.
+ * pedidos aguardando e os alertas; depois, os contadores das estações e as horas extras do mês.
  *
  * Os contadores abrem a lista do estado na própria página (`?estado=`), e o grupo também fica na
  * URL (`?grupo=`): dá para compartilhar e voltar. Mudar só a query não move o foco (a casca só
@@ -55,6 +58,7 @@ import { TodayAlerts } from '../ui/today-alerts';
     ErrorState,
     Field,
     FieldControl,
+    OvertimeMonth,
     PageHeader,
     PendingRequests,
     RouterLink,
@@ -111,6 +115,17 @@ export class TodayPage {
       requests: this.panel.requests(),
       schedules: this.panel.schedules(),
       now: this.now(),
+    }),
+  );
+
+  protected readonly overtime = computed(() =>
+    monthlyOvertime({
+      requests: this.panel.requests(),
+      employees: this.employees(),
+      schedules: this.panel.schedules(),
+      exceptions: this.panel.exceptions(),
+      holidays: this.panel.holidays(),
+      today: toLocal(this.now()).date,
     }),
   );
 
