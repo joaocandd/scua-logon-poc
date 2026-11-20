@@ -28,6 +28,7 @@ Uma ADR não é reescrita quando a decisão muda. Uma ADR nova a substitui, e a 
 | [0018](0018-estado-com-signals-e-httpresource.md) | Estado com signals e `httpResource`, sem biblioteca de estado | aceita | 29/10/2026 |
 | [0019](0019-meta-de-acessibilidade.md) | Meta de acessibilidade: ABNT NBR 17225:2025 (WCAG 2.2 AA) | aceita | 28/10/2026 |
 | [0020](0020-testes-com-vitest-playwright-e-axe.md) | Testes com Vitest, Playwright e axe | aceita | 28/10/2026 |
+| [0021](0021-graficos-em-svg-e-serie-ficticia.md) | Gráficos em SVG próprio e série histórica fictícia | aceita | 20/11/2026 |
 
 Duas observações:
 
@@ -44,6 +45,7 @@ Duas observações:
 - **Fluxo A, aprovar hora extra:** 0009 (caixa de aprovações), 0010 (link do e-mail).
 - **Fluxo B, regras de jornada:** 0011 e 0012.
 - **Painel Hoje:** 0013.
+- **Relatórios, Estações e gráficos:** 0021.
 
 ## Temas do prompt 12 e onde estão
 

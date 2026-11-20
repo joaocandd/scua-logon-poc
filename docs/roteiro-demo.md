@@ -6,11 +6,12 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
 |---|---|---|
 | 1. Gancho | 0:00 a 1:30 | Pessoa 1 |
 | 2. Antes e depois: login e link do e-mail | 1:30 a 4:00 | Pessoa 2 |
-| 3. Fluxo A no celular, ao vivo | 4:00 a 8:30 | Pessoa 2 e Pessoa 3 |
-| 4. Link do e-mail | 8:30 a 10:30 | Pessoa 2 |
-| 5. Fluxo B: regra de jornada, simulador e modo observação | 10:30 a 15:00 | Pessoa 3 e Pessoa 1 |
-| 6. Painel Hoje | 15:00 a 16:30 | Pessoa 1 |
-| 7. Números e próximos passos | 16:30 a 18:00 | Pessoa 1 e Pessoa 3 |
+| 3. Fluxo A no celular, ao vivo | 4:00 a 8:00 | Pessoa 2 e Pessoa 3 |
+| 4. Link do e-mail | 8:00 a 10:00 | Pessoa 2 |
+| 5. Fluxo B: regra de jornada, simulador e modo observação | 10:00 a 14:00 | Pessoa 3 e Pessoa 1 |
+| 6. Painel Hoje | 14:00 a 15:30 | Pessoa 1 |
+| 7. Relatórios e Estações | 15:30 a 16:30 | Pessoa 3 |
+| 8. Números e próximos passos | 16:30 a 18:00 | Pessoa 1 e Pessoa 3 |
 
 ## Antes de começar (fora do tempo)
 
@@ -21,6 +22,7 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
    2. `http://localhost:4400/aprovacao/valido-ped-02` e, na mesma aba, deixe pronto para digitar `/aprovacao/expirado-ped-22`
    3. `http://localhost:4400/regras`
    4. `http://localhost:4400/hoje`
+   5. `http://localhost:4400/relatorios`
 4. Na aba do Fluxo A, deixe o DevTools em modo celular (Ctrl+Shift+M), largura 390 px. **Não abra ainda** o `/aprovacoes?demo=ao-vivo`: o primeiro pedido novo chega 30 s depois que a página abre, e a ideia é ele chegar durante a fala.
 5. Os horários e as contagens dependem da hora em que o app abre (os dados são relativos a "agora"). Não decore números da tela; os nomes e os alertas são sempre os mesmos.
 
@@ -40,7 +42,9 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
    **Pessoa 2:** "No Lighthouse de celular, o login da prova de conceito tira 97 de desempenho e 100 de acessibilidade, com 169 kB transferidos. O login atual tira [MEDIR] e [MEDIR]."
 4. **Pessoa 2:** "Na tela atual, inspecionada em 28/10, o navegador carrega ao mesmo tempo o Angular Material, o Bootstrap 4, o jQuery, o Font Awesome 5 e o Material Icons. Aqui é um design system só, com a marca da Scua, e uma fonte variável de 38 kB para todos os pesos."
 
-## 3. Fluxo A no celular, ao vivo · 4:00 a 8:30
+## 3. Fluxo A no celular, ao vivo · 4:00 a 8:00
+
+Para caber em 4 minutos, o Desfazer aparece só uma vez, no lote (passo 8).
 
 1. **Clique:** na aba do Fluxo A, em modo celular, abra `http://localhost:4400/aprovacoes?demo=ao-vivo`.
    **Pessoa 2:** "Esta é a caixa do gestor no celular. Cada pedido já traz o contexto para decidir: até que horas, quanto passa e o que acontece se aprovar."
@@ -50,18 +54,16 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
    **Pessoa 2:** "O Mateus sairia às 23h30 e quebraria as 11 h de descanso entre jornadas. O sistema diz em português: no dia seguinte, a estação só libera às 10h30."
 4. **Clique:** **Aprovar** no cartão de **Jéssica Moura**.
    **Pessoa 3:** "Um toque aprova. O cartão mostra o resultado na hora e o foco vai para Desfazer."
-5. **Clique:** **Desfazer** no mesmo cartão.
-   **Pessoa 3:** "Errou o toque? Desfaz ali mesmo, sem diálogo de 'tem certeza?' antes de cada aprovação."
-6. **Tela:** o cartão novo que chega (marcado **Novo**), uns 30 s depois de abrir a página.
+5. **Tela:** o cartão novo que chega (marcado **Novo**), uns 30 s depois de abrir a página.
    **Pessoa 3:** "Enquanto falávamos, chegou um pedido novo. A lista se atualiza sozinha e o leitor de tela anuncia com discrição, sem roubar o foco."
-7. **Clique:** **Recusar** no cartão de **Lucas Bittencourt**; digite um motivo curto e clique em **Recusar pedido**.
+6. **Clique:** **Recusar** no cartão de **Lucas Bittencourt**; digite um motivo curto e clique em **Recusar pedido**.
    **Pessoa 2:** "Recusar pede o motivo, porque o colaborador precisa saber o porquê. O motivo fica no histórico."
-8. **Clique:** marque as caixas de dois pedidos (por exemplo **Jéssica Moura** e **Mateus Farias**) e toque em **Aprovar selecionados**.
+7. **Clique:** marque as caixas de dois pedidos (por exemplo **Mateus Farias** e **Vinícius Amaral**) e toque em **Aprovar selecionados**.
    **Pessoa 2:** "Aprovar em lote mostra quais pedidos e repete os alertas antes de confirmar. Lote não esconde o risco."
-9. **Clique:** **Aprovar 2 pedidos**; depois, **Desfazer** no aviso do rodapé.
-   **Pessoa 3:** "O aviso no rodapé também desfaz o lote inteiro."
+8. **Clique:** **Aprovar 2 pedidos**; depois, **Desfazer** no aviso do rodapé.
+   **Pessoa 3:** "Errou? Toda decisão desfaz ali mesmo, sem diálogo de 'tem certeza?' antes de cada aprovação. Aqui, o lote inteiro."
 
-## 4. Link do e-mail · 8:30 a 10:30
+## 4. Link do e-mail · 8:00 a 10:00
 
 1. **Clique:** aba `/aprovacao/valido-ped-02`. Se quiser, também em modo celular.
    **Pessoa 2:** "O gestor nem sempre abre o app. Pelo link do e-mail, sem login e sem menu, ele vê o mesmo contexto: o Lucas passa de 2 h, a linha do tempo mostra até onde a estação libera."
@@ -71,28 +73,26 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
    **Pessoa 2:** "Link vencido não mostra código de erro. Diz o que aconteceu, de quem era o pedido, a que horas venceu e o que fazer."
 4. **Pessoa 2:** "Esta página tira 94 de desempenho e 100 de acessibilidade no Lighthouse de celular. A página atual do link tira [MEDIR] e [MEDIR]."
 
-## 5. Fluxo B: regra de jornada, simulador e modo observação · 10:30 a 15:00
+## 5. Fluxo B: regra de jornada, simulador e modo observação · 10:00 a 14:00
 
-Fecha o modo celular: o RH trabalha no desktop.
+Fecha o modo celular: o RH trabalha no desktop. Para caber em 4 minutos, o salvar com conflito (antigo passo 3) sai: o conflito já aparece na tela ao abrir a regra.
 
 1. **Clique:** aba `/regras`.
    **Pessoa 3:** "Agora o RH. Cada regra mostra horário, dias, grupos, quantas pessoas e o status, sem abrir nada."
 2. **Clique:** **Fechamento do mês**.
    **Pessoa 3:** "O RH começou uma regra para o Financeiro, que já está na Comercial. O conflito aparece na hora, com nomes: Aline, Diego, Gustavo e mais 3 já estão na Comercial."
-3. **Clique:** **Salvar regra**.
-   **Pessoa 3:** "Salvar não deixa passar e leva o foco até os grupos. O sistema explica o que fazer: tirar o grupo de uma das regras."
-4. **Clique:** volte para **Regras de jornada** e abra **Comercial**. Altere o **Fim da jornada** para `18:00`.
+3. **Clique:** volte para **Regras de jornada** e abra **Comercial**. Altere o **Fim da jornada** para `18:00`.
    **Pessoa 3:** "A linha do tempo e o resumo em português mudam enquanto digito. Laranja é liberado; a hachura é bloqueado, o mesmo padrão do site da Scua."
-5. **Clique:** no **Simulador "e se?"**, escolha **João Pedro Antunes**, a data `10/03/2027` (uma quarta-feira sem feriado nem exceção) e a hora `18:10`.
+4. **Clique:** no **Simulador "e se?"**, escolha **João Pedro Antunes**, a data `10/03/2027` (uma quarta-feira sem feriado nem exceção) e a hora `18:10`.
    **Pessoa 1:** "E se o João estiver trabalhando às 18h10? O simulador responde antes de salvar: com a regra nova, a estação estaria liberada. É a pergunta que o RH faz ao suporte hoje."
-6. **Clique:** **Salvar regra**.
+5. **Clique:** **Salvar regra**.
    **Pessoa 1:** "Antes de salvar, o diálogo diz o impacto: quantas pessoas, o que muda e quem seria afetado agora mesmo."
-7. **Clique:** **Continuar editando**. Marque **Observar por 7 dias antes de bloquear** e clique em **Salvar regra** de novo.
+6. **Clique:** **Continuar editando**. Marque **Observar por 7 dias antes de bloquear** e clique em **Salvar regra** de novo.
    **Pessoa 1:** "E se o RH não tiver certeza? O modo observação deixa a regra valer sem bloquear ninguém por 7 dias. O Scua Logon só registra quem seria bloqueado."
-8. **Clique:** **Continuar editando**, clique em **Regras de jornada**, depois em **Sair sem salvar**, e abra **Noturna**.
+7. **Clique:** **Continuar editando**, clique em **Regras de jornada**, depois em **Sair sem salvar**, e abra **Noturna**.
    **Pessoa 1:** "A Noturna já está em observação. Em **Quem seria bloqueado**, está a lista de quem a regra teria bloqueado e quando. Com isso, o RH liga a regra com segurança, e não no susto."
 
-## 6. Painel Hoje · 15:00 a 16:30
+## 6. Painel Hoje · 14:00 a 15:30
 
 1. **Clique:** aba `/hoje`.
    **Pessoa 1:** "Para o administrador, o dia em uma tela: pedidos aguardando, o próximo que vence, e os alertas."
@@ -100,10 +100,19 @@ Fecha o modo celular: o RH trabalha no desktop.
    **Pessoa 1:** "Este alerta vem da Noturna em observação: estas estações estariam bloqueadas agora. Vira informação para decidir, não surpresa."
 3. **Clique:** **Ver estações**; depois **Fechar lista**.
    **Pessoa 1:** "Cada número abre a lista de pessoas e o motivo, em português."
-4. **Tela:** horas extras do mês.
-   **Pessoa 1:** "Horas extras do mês contra o mês passado, com o custo estimado. O valor da hora vem das Configurações; é estimativa, o real sai da folha."
+4. **Tela:** os dois gráficos abaixo dos contadores e as horas extras do mês.
+   **Pessoa 1:** "Pedidos de hoje por status e horas extras da semana, cada um com o link para o relatório. Embaixo, o mês contra o mês passado, com o custo estimado: é estimativa, o real sai da folha."
 
-## 7. Números e próximos passos · 16:30 a 18:00
+## 7. Relatórios e Estações · 15:30 a 16:30
+
+1. **Clique:** aba `/relatorios`.
+   **Pessoa 3:** "Tempo de Bloqueio, Gráfico de Ausência e os relatórios de hora extra do sistema atual viram uma tela só, com período e grupo na URL e CSV em cada bloco. Os números são fictícios."
+2. **Clique:** escolha o período **Últimos 7 dias**; depois, com o teclado, Tab até um gráfico e setas para os lados.
+   **Pessoa 3:** "Cada gráfico anda pelo teclado, mostra o valor no foco e abre como tabela para quem usa leitor de tela."
+3. **Clique:** **Estações** no menu; em **Estado**, escolha **Liberada sem aprovação**.
+   **Pessoa 3:** "Cada estação com o estado de agora, pelo mesmo motor de regras, e a última atividade. A auditoria fica em Relatórios › Auditoria, e os registros não podem ser editados."
+
+## 8. Números e próximos passos · 16:30 a 18:00
 
 1. **Pessoa 3:** "Na prova de conceito, o pacote inicial caiu de 468 kB para 302 kB. O link do e-mail subiu de 90 para 94 de desempenho, e a caixa de aprovações de 87 para 93."
 2. **Pessoa 3:** "Acessibilidade: o axe roda em todas as telas, no celular e no desktop, nos temas claro e escuro, a cada mudança de código. Há também testes só com teclado, em 320 px e com zoom de 200%."

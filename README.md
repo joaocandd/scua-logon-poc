@@ -11,7 +11,7 @@ Esta prova de conceito mostra duas tarefas de ponta a ponta:
 - **Fluxo A · Aprovar hora extra** (gestor, celular primeiro): caixa de pedidos com o contexto de cada um, aprovar, recusar com motivo, aprovar em lote e desfazer. O gestor também decide pelo link do e-mail, sem entrar no app.
 - **Fluxo B · Configurar regra de jornada** (RH, desktop): editor com linha do tempo, resumo em português, conflitos explicados em texto, simulador "e se?" e prévia do impacto antes de salvar.
 
-E três extras: login acessível, a página pública de aprovação por e-mail com erros humanos e o painel "Hoje".
+E os extras: login acessível, a página pública de aprovação por e-mail com erros humanos, o painel "Hoje" com gráficos, relatórios (horas extras, tempo de bloqueio e ausência), a lista de estações, a auditoria e a ajuda. Onde cada item do menu do console atual fica na proposta está em [`docs/mapa-de-telas.md`](docs/mapa-de-telas.md).
 
 Não há backend, autenticação real nem integrações (Teams, WhatsApp, login corporativo). Tudo é simulado no navegador.
 
@@ -85,12 +85,16 @@ O CI (`.github/workflows/ci.yml`) roda, em cada push e pull request: a conferên
 | Endereço | O que mostra |
 |---|---|
 | `/entrar` | Login. `/entrar/esqueci-minha-senha` explica a quem pedir uma senha nova |
-| `/hoje` | Painel ao vivo: pedidos aguardando, alertas, estações por estado e horas extras do mês |
+| `/hoje` | Painel ao vivo: pedidos aguardando, alertas, estações por estado, pedidos de hoje por status, horas extras da semana e do mês |
 | `/aprovacoes` | Caixa de aprovações (fluxo A). `/aprovacoes/ped-02` abre o detalhe de um pedido |
 | `/aprovacao/:token` | Página pública do link do e-mail, fora do app (tokens abaixo) |
 | `/regras` | Regras de jornada (fluxo B). `/regras/nova` cria; `/regras/regra-comercial` edita; `/regras/regra-fechamento` já abre com um conflito entre regras |
+| `/estacoes` | Estações: máquina, colaborador, grupo, estado agora, regra e última atividade, com busca e filtros |
+| `/relatorios` | Horas extras, tempo de bloqueio e ausência por dia e por grupo, nos últimos 7 ou 30 dias, com CSV. Números fictícios (ADR 0021) |
+| `/relatorios/auditoria` | Registro de eventos (acessos, pedidos, decisões, desfazer, regras), com filtros e CSV |
 | `/configuracoes` | Custo médio da hora extra, usado no painel Hoje, e o botão "Restaurar dados de demonstração" |
-| `/pessoas`, `/relatorios` | Fora do escopo: a tela diz o que ficaria ali |
+| `/ajuda` | Perguntas frequentes (no menu do usuário, com o Sair) |
+| `/pessoas` | Fora do escopo: a tela diz o que ficaria ali e quais itens do sistema atual vão para lá |
 
 ## Como simular estados
 
@@ -132,9 +136,11 @@ src/
       today/         painel ao vivo                 /hoje
       approvals/     caixa de aprovações (fluxo A)  /aprovacoes  e  /aprovacao/:token
       schedules/     regras de jornada (fluxo B)    /regras  e  /regras/:id
+      workstations/  estações                       /estacoes
       people/        colaboradores e grupos         /pessoas
-      reports/       relatórios                     /relatorios
+      reports/       relatórios e auditoria         /relatorios  e  /relatorios/auditoria
       settings/      configurações                  /configuracoes
+      help/          ajuda                          /ajuda
     shared/          modelos, datas e horas, motor de regras (schedule-engine)
     mocks/           banco em memória, fixtures e rotas da API simulada
   styles/            tokens.css: as cores, medidas e fontes da marca
@@ -187,10 +193,11 @@ O axe não substitui o teste com leitor de tela, que continua manual.
 - [`docs/proposta-arquitetura.md`](docs/proposta-arquitetura.md): rascunho da proposta para a Scua, com o plano de migração.
 - [`docs/metricas.md`](docs/metricas.md): medições de desempenho e tamanho, e como repetir.
 - [`docs/roteiro-demo.md`](docs/roteiro-demo.md): o roteiro da apresentação, em 18 minutos.
+- [`docs/mapa-de-telas.md`](docs/mapa-de-telas.md): os 15 itens do menu do console atual, onde cada um fica na proposta e o status na PoC.
 - [`docs/tema-material.md`](docs/tema-material.md): o tema do Angular Material a partir dos tokens, para as telas atuais da Scua.
 - [`docs/prompts-claude-code.md`](docs/prompts-claude-code.md): os prompts usados para construir a PoC com o Claude Code.
 - [`CLAUDE.md`](CLAUDE.md): o contexto do projeto (regras de negócio, tokens, voz e acessibilidade). A cópia em `.github/copilot-instructions.md` precisa ficar igual; o CI confere.
 
 ## Dados
 
-Todos os dados são fictícios: nomes inventados e e-mails no domínio reservado `.example`. Nada da Scua entra neste repositório: nem dados de clientes, nem credenciais, nem documentos internos, nem código.
+Todos os dados são fictícios: nomes inventados e e-mails no domínio reservado `.example`. A série dos relatórios, os nomes das máquinas e a última atividade das estações são gerados com semente fixa (`src/app/mocks/history.ts` e `src/app/mocks/workstation-info.ts`). Nada da Scua entra neste repositório: nem dados de clientes, nem credenciais, nem documentos internos, nem código.
