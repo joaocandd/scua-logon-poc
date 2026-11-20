@@ -37,6 +37,7 @@ const screens: Screen[] = [
   },
   { url: '/relatorios?simular=vazio', ready: heading('Nenhum dado no período') },
   { url: '/configuracoes', ready: button('Renata Albuquerque') },
+  { url: '/ajuda', ready: heading('Ajuda') },
   { url: '/endereco-que-nao-existe', ready: button('Renata Albuquerque') },
   { url: '/aprovacoes', ready: button('Aprovar o pedido de Lucas Bittencourt') },
   { url: '/aprovacoes/ped-02', ready: (page) => page.locator('#detalhe-titulo') },

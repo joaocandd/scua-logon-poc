@@ -31,6 +31,7 @@ const ICONS = [
   'event',
   'fact_check',
   'group',
+  'help',
   'history',
   'hourglass_top',
   'inbox',

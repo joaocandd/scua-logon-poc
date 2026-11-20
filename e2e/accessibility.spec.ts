@@ -23,6 +23,7 @@ test('o título da aba repete o <h1> de cada área', async ({ page }) => {
     { path: '/pessoas', heading: 'Pessoas' },
     { path: '/relatorios', heading: 'Relatórios' },
     { path: '/configuracoes', heading: 'Configurações' },
+    { path: '/ajuda', heading: 'Ajuda' },
     { path: '/endereco-que-nao-existe', heading: 'Página não encontrada' },
   ];
   for (const { path, heading } of areas) {
@@ -45,11 +46,19 @@ for (const { url, ready, loading } of screens) {
 
 // Áreas fora do escopo da PoC: a tela diz o que teria e onde está o plano, sem parecer quebrada.
 const outOfScope = [
-  { path: '/pessoas', mentions: 'colaborador com o grupo e a regra de jornada' },
-  { path: '/configuracoes', mentions: 'feriados da empresa, avisos padrão, permissões' },
+  {
+    path: '/pessoas',
+    mentions: 'colaborador com o grupo e a regra de jornada',
+    current: 'No sistema atual: Usuários e Carga de Dados.',
+  },
+  {
+    path: '/configuracoes',
+    mentions: 'feriados da empresa, avisos padrão, permissões',
+    current: 'No sistema atual: Administrador.',
+  },
 ];
 
-for (const { path, mentions } of outOfScope) {
+for (const { path, mentions, current } of outOfScope) {
   test(`${path} diz o que está fora do escopo desta prova de conceito`, async ({ page }) => {
     await page.goto(path);
 
@@ -59,6 +68,8 @@ for (const { path, mentions } of outOfScope) {
     });
     await expect(heading).toBeVisible();
     await expect(page.getByText(mentions)).toBeVisible();
+    // Diz quais itens do menu do console atual vêm para esta área.
+    await expect(page.getByText(current)).toBeVisible();
     await expect(
       page.getByText(/O plano de migração desta área está na proposta de arquitetura\./),
     ).toBeVisible();

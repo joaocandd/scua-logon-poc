@@ -1,5 +1,6 @@
 import { Menu, MenuItem, MenuTrigger } from '@angular/aria/menu';
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Icon, IconName } from '../../design-system';
 import { Auth } from '../auth/auth';
 import { CurrentUser } from '../auth/current-user';
@@ -12,10 +13,10 @@ interface ThemeOption {
 }
 
 /** Valor de cada item do menu: um tema ou uma ação. */
-type MenuValue = ThemePreference | 'sair';
+type MenuValue = ThemePreference | 'ajuda' | 'sair';
 
 /**
- * Menu do usuário no cabeçalho: quem está usando o app, a escolha do tema e "Sair". Botão e menu seguem
+ * Menu do usuário no cabeçalho: quem está usando o app, a escolha do tema, "Ajuda" e "Sair". Botão e menu seguem
  * o padrão ARIA de menu button pelo Angular Aria: setas percorrem as opções, Enter ou Espaço
  * escolhe, Esc fecha e o foco volta para o botão.
  */
@@ -29,6 +30,7 @@ export class UserMenu {
   protected readonly currentUser = inject(CurrentUser);
   protected readonly theme = inject(Theme);
   private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
 
   protected readonly themes: ThemeOption[] = [
     { value: 'light', label: 'Claro', icon: 'light_mode' },
@@ -38,6 +40,7 @@ export class UserMenu {
 
   protected select(value: MenuValue | undefined): void {
     if (value === 'sair') void this.auth.signOut();
+    else if (value === 'ajuda') void this.router.navigateByUrl('/ajuda');
     else if (value) this.theme.set(value);
   }
 }

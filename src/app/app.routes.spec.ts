@@ -27,6 +27,7 @@ describe('Rotas do app', () => {
     ['/estacoes', 'Estações'],
     ['/pessoas', 'Pessoas'],
     ['/relatorios/auditoria', 'Auditoria'],
+    ['/ajuda', 'Ajuda'],
     ['/relatorios', 'Relatórios'],
     ['/configuracoes', 'Configurações'],
     ['/endereco-que-nao-existe', 'Página não encontrada'],

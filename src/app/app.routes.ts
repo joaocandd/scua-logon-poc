@@ -105,6 +105,11 @@ export const routes: Routes = [
           import('./features/settings/pages/settings-page').then((m) => m.SettingsPage),
       },
       {
+        path: 'ajuda',
+        title: 'Ajuda',
+        loadComponent: () => import('./features/help/pages/help-page').then((m) => m.HelpPage),
+      },
+      {
         path: '**',
         title: 'Página não encontrada',
         loadComponent: () => import('./core/not-found/not-found-page').then((m) => m.NotFoundPage),

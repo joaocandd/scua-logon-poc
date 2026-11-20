@@ -28,6 +28,7 @@ export const screens: Screen[] = [
   { url: '/hoje?simular=lento', ready: 'Hoje', loading: true },
   { url: '/pessoas', ready: 'Pessoas' },
   { url: '/configuracoes', ready: 'Configurações' },
+  { url: '/ajuda', ready: 'Ajuda' },
   { url: '/endereco-que-nao-existe', ready: 'Página não encontrada' },
 
   // Fluxo A: caixa de aprovações
