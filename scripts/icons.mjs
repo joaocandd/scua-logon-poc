@@ -41,6 +41,7 @@ const ICONS = [
   'more_time',
   'pending_actions',
   'person',
+  'restart_alt',
   'schedule',
   'search',
   'search_off',

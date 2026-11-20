@@ -68,6 +68,34 @@
       </form>
     </section>
 
+    <section class="section" aria-labelledby="demo-titulo">
+      <h2 id="demo-titulo" class="section-title">Dados de demonstração</h2>
+      <p class="intro">
+        Volta pedidos, regras, histórico e configurações ao começo da apresentação. Use antes de
+        cada demonstração.
+      </p>
+
+      <div role="alert">
+        @if (restoreError(); as message) {
+          <p class="alert">
+            <app-icon name="error" />
+            <span>{{ message }}</span>
+          </p>
+        }
+      </div>
+
+      <button
+        app-button
+        type="button"
+        variant="secondary"
+        icon="restart_alt"
+        [loading]="restoring()"
+        (click)="restoreDemoData()"
+      >
+        Restaurar dados de demonstração
+      </button>
+    </section>
+
     <app-empty-state
       icon="settings"
       heading="Fora do escopo desta prova de conceito"

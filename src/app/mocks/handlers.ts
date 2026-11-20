@@ -85,6 +85,16 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 
   ['GET', '/api/configuracoes', ({ db }) => ok(db.data.settings)],
   ['PUT', '/api/configuracoes', saveSettings],
+
+  // Modo demo: volta todos os dados ao começo da apresentação (botão em /configuracoes).
+  [
+    'POST',
+    '/api/demo/restaurar',
+    ({ db, now }) => {
+      db.reset(now);
+      return ok({ restoredAt: now.toISOString() });
+    },
+  ],
 ];
 
 /** Responde a uma chamada a /api/... a partir do banco em memória. */

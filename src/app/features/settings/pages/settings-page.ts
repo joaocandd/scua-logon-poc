@@ -17,6 +17,7 @@ import {
 } from '@angular/forms/signals';
 import {
   Button,
+  ConfirmDialog,
   EmptyState,
   ErrorState,
   Field,
@@ -30,6 +31,7 @@ import { apiErrorMessage } from '../../../shared/api-error';
 import { formatMoney, parseMoney, toMoneyInput } from '../../../shared/money';
 import { isRetrying, loadState, retryFailed } from '../../schedules/data/load-state';
 import { CompanySettings } from '../data/company-settings';
+import { DemoData } from '../data/demo-data';
 import { overtimeCostError } from '../data/overtime-cost';
 
 interface CostDraft {
@@ -38,8 +40,9 @@ interface CostDraft {
 }
 
 /**
- * Configurações (/configuracoes). Nesta prova de conceito, só o custo médio da hora extra, que o
- * painel "Hoje" usa para estimar o custo do mês. Embaixo, o que a área teria e está fora do escopo.
+ * Configurações (/configuracoes). Nesta prova de conceito, o custo médio da hora extra, que o
+ * painel "Hoje" usa para estimar o custo do mês, e o botão do modo demo que restaura os dados da
+ * apresentação. Embaixo, o que a área teria e está fora do escopo.
  *
  * O formulário usa Signal Forms com o Field do design system. Erros de campo só depois da primeira
  * tentativa de salvar (ADR 0008).
@@ -64,6 +67,8 @@ interface CostDraft {
 export class SettingsPage {
   private readonly settings = inject(CompanySettings);
   private readonly toast = inject(Toast);
+  private readonly confirm = inject(ConfirmDialog);
+  private readonly demoData = inject(DemoData);
   private readonly injector = inject(Injector);
 
   private readonly resources = [this.settings.current];
@@ -117,6 +122,34 @@ export class SettingsPage {
 
   protected errorOf(field: FieldTree<string>): string | null {
     return this.showFieldErrors() ? (field().errors()[0]?.message ?? null) : null;
+  }
+
+  protected readonly restoring = signal(false);
+  /** Erro ao restaurar os dados de demonstração. */
+  protected readonly restoreError = signal<string | null>(null);
+
+  protected async restoreDemoData(): Promise<void> {
+    const confirmed = await this.confirm.open({
+      title: 'Restaurar os dados de demonstração?',
+      message:
+        'Pedidos, regras, histórico e configurações voltam ao começo da demonstração. O que foi aprovado, recusado ou salvo até agora se perde.',
+      confirmLabel: 'Restaurar dados',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    this.restoring.set(true);
+    this.restoreError.set(null);
+    try {
+      await this.demoData.restore();
+      this.formError.set(null);
+      this.showFieldErrors.set(false);
+      this.toast.show({ message: 'Dados de demonstração restaurados.' });
+    } catch (error) {
+      this.restoreError.set(apiErrorMessage(error));
+    } finally {
+      this.restoring.set(false);
+    }
   }
 
   protected retry(): void {
