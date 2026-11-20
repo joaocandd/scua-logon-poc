@@ -30,7 +30,8 @@ A caixa de aprovações também depende de quem está usando o app: as decisões
 
 ## Consequências
 
-- Trocar pelo login real é mudar quem responde a `/api/sessao` (ou apontar o `Auth` para o provedor). A tela e o `CurrentUser` continuam iguais. [CONFIRMAR] como o Scua Logon autentica hoje (sessão por cookie, token ou login corporativo), porque isso define o que o `Auth` guarda.
+- Trocar pelo login real é mudar quem responde a `/api/sessao` (ou apontar o `Auth` para o provedor). A tela e o `CurrentUser` continuam iguais.
+- O Scua atual tem rotas de token e de ADFS no código carregado pelo navegador. Fonte: inspeção da equipe no ambiente de demonstração, em 28/10/2026 (o endereço não foi guardado). Isso indica login com token e login corporativo pelo ADFS. As duas `POST` da PoC já correspondem a esses dois caminhos: `/api/sessao` (usuário e senha) e `/api/sessao/corporativa` (login único). O tipo exato continua [CONFIRMAR] (como o token é guardado, se há sessão por cookie e qual protocolo o ADFS usa), porque isso define o que o `Auth` guarda.
 - A sessão fica só na memória. Recarregar a página "sai", mas o `/api/eu` devolve a mesma pessoa, então nada muda na demonstração.
 - Não há proteção de rota nem "Sair". Quem abre `/aprovacoes` sem entrar usa o app como a usuária da demonstração. O `signOut` saiu porque ninguém o usava. [CONFIRMAR] se a demo precisa mandar para `/entrar` quem não entrou.
 - A tela de entrada só baixa a API simulada no primeiro "Entrar". O Lighthouse do `/entrar` mede a página sem esse download (docs/metricas.md).
