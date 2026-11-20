@@ -7,6 +7,7 @@ import { expectNoA11yViolations } from './support/a11y';
 const AREAS = [
   { name: 'Hoje', path: '/hoje' },
   { name: 'Aprovações', path: '/aprovacoes' },
+  { name: 'Estações', path: '/estacoes' },
   { name: 'Pessoas', path: '/pessoas' },
   { name: 'Regras de jornada', path: '/regras' },
   { name: 'Relatórios', path: '/relatorios' },
@@ -69,7 +70,7 @@ test.describe('Casca no desktop', () => {
   test('percorre todo o menu só com teclado', async ({ page }) => {
     await open(page);
 
-    // Ordem do Tab: pular para o conteúdo, marca, busca, conta e as seis áreas.
+    // Ordem do Tab: pular para o conteúdo, marca, busca, conta e as sete áreas.
     const order = [
       'Pular para o conteúdo',
       'Scua Logon',
@@ -77,6 +78,7 @@ test.describe('Casca no desktop', () => {
       'Renata Albuquerque',
       'Hoje',
       PENDING,
+      'Estações',
       'Pessoas',
       'Regras de jornada',
       'Relatórios',

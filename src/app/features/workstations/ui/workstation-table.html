@@ -1,0 +1,37 @@
+<table class="table" aria-label="Estações">
+  <thead>
+    <tr>
+      <th scope="col">Estação</th>
+      <th scope="col">Colaborador</th>
+      <th scope="col">Grupo</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Regra</th>
+      <th scope="col">Última atividade</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.employeeId) {
+      <tr>
+        <th scope="row" class="host">{{ row.hostname }}</th>
+        <td class="employee">{{ row.employeeName }}</td>
+        <!-- Os rótulos dentro das células só aparecem no celular, onde o cabeçalho some. -->
+        <td class="group">
+          <span class="cell-label" aria-hidden="true">Grupo:</span>
+          {{ row.groupName }}
+        </td>
+        <td class="status">
+          <app-status-badge [status]="row.status" />
+          <span class="reason">{{ row.reason }}</span>
+        </td>
+        <td class="schedule">
+          <span class="cell-label" aria-hidden="true">Regra:</span>
+          <a [routerLink]="['/regras', row.scheduleId]">{{ row.scheduleName }}</a>
+        </td>
+        <td class="activity">
+          <span class="cell-label" aria-hidden="true">Última atividade:</span>
+          {{ lastActivity(row) }}
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

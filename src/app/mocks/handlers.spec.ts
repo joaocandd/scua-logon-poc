@@ -3,7 +3,7 @@ import {
   ApprovalLink,
   ExtensionRequest,
   Settings,
-  Workstation,
+  WorkstationDetail,
   WorkSchedule,
 } from '../shared/models';
 import { MockDb } from './db';
@@ -488,7 +488,9 @@ describe('API simulada', () => {
         );
         expect(observed(history())).toHaveLength(first.length);
 
-        const bianca = get<Workstation[]>('/api/estacoes').find((w) => w.employeeId === 'col-16');
+        const bianca = get<WorkstationDetail[]>('/api/estacoes').find(
+          (w) => w.employeeId === 'col-16',
+        );
         expect(bianca).toMatchObject({ state: 'bloqueada', observed: true });
       });
 
@@ -521,7 +523,7 @@ describe('API simulada', () => {
   });
 
   it('calcula a estação de cada colaborador com regra', () => {
-    const workstations = get<Workstation[]>('/api/estacoes');
+    const workstations = get<WorkstationDetail[]>('/api/estacoes');
     const of = (id: string) => workstations.find((w) => w.employeeId === id);
     expect(workstations).toHaveLength(39);
     expect(of('col-25')).toBeUndefined();
@@ -529,7 +531,16 @@ describe('API simulada', () => {
       employeeId: 'col-08',
       state: 'em_jornada',
       reason: 'Liberada: jornada Comercial (das 8h às 17h).',
+      // Dados da lista de /estacoes (fictícios): máquina, regra e último uso há poucos minutos.
+      hostname: expect.stringMatching(/^COM-(PC|NB)-008$/),
+      scheduleId: 'regra-comercial',
+      lastActivityAt: expect.any(String),
     });
+    const lastUse = Date.parse(of('col-08')!.lastActivityAt!);
+    expect(NOW.getTime() - lastUse).toBeGreaterThanOrEqual(60_000);
+    expect(NOW.getTime() - lastUse).toBeLessThanOrEqual(9 * 60_000);
+    // Atendimento (Tarde, 14h às 22h) às 10h: a estação bloqueou ontem às 22h.
+    expect(of('col-17')?.lastActivityAt).toBe('2026-11-12T01:00:00.000Z');
     expect(of('col-17')?.reason).toBe('Bloqueada: fora da jornada Tarde (das 14h às 22h).');
   });
 

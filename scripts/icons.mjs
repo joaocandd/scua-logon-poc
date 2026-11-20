@@ -23,6 +23,7 @@ const ICONS = [
   'coffee',
   'dark_mode',
   'delete',
+  'desktop_windows',
   'do_not_disturb_on',
   'domain',
   'download',

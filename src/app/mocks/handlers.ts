@@ -9,7 +9,7 @@ import {
   ExtensionRequest,
   OBSERVATION_DAYS,
   Settings,
-  Workstation,
+  WorkstationDetail,
   WorkSchedule,
 } from '../shared/models';
 import { requestContext } from '../shared/request-context';
@@ -19,6 +19,7 @@ import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved } from './activity';
 import { createHistory } from './history';
+import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
 
 export interface MockRequest {
@@ -401,12 +402,30 @@ function listActivity({ db, query }: Context): MockResponse {
  * Quem só está numa regra em observação vem marcado: o estado é o que a regra faria, sem bloquear.
  */
 function listWorkstations({ db, now }: Context): MockResponse {
-  const workstations: Workstation[] = db.data.employees.flatMap((employee) => {
+  const workstations: WorkstationDetail[] = db.data.employees.flatMap((employee) => {
     const schedule = db.scheduleFor(employee);
     if (!schedule) return [];
     const status = db.evaluate(schedule, employee, now);
     const observed = schedule.observationMode ? { observed: true } : {};
-    return [{ employeeId: employee.id, ...status, ...observed }];
+    const exceptions = db.data.exceptions.filter((e) => e.employeeId === employee.id);
+    const lastActivityAt = lastActivity(
+      schedule,
+      exceptions,
+      db.data.holidays,
+      status.state,
+      employee.id,
+      now,
+    );
+    return [
+      {
+        employeeId: employee.id,
+        ...status,
+        ...observed,
+        hostname: hostnameOf(employee),
+        scheduleId: schedule.id,
+        ...(lastActivityAt && { lastActivityAt }),
+      },
+    ];
   });
   return ok(workstations);
 }

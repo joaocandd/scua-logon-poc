@@ -36,6 +36,7 @@ const screens: { url: string; ready: (page: Page) => Locator }[] = [
   { url: '/regras/regra-comercial', ready: heading('Comercial') },
   { url: '/regras/regra-noturna', ready: heading('Noturna') },
   { url: '/regras/nova', ready: heading('Nova regra') },
+  { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
   { url: '/relatorios', ready: heading('Horas extras') },
   { url: '/relatorios?periodo=7&grupo=grp-ti', ready: heading('Horas extras') },
 ];

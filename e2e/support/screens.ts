@@ -62,6 +62,15 @@ export const screens: Screen[] = [
   { url: '/regras/nova', ready: 'Nova regra' },
   { url: '/regras/nao-existe', ready: 'Regra não encontrada' },
 
+  // Estações
+  { url: '/estacoes', ready: 'Estações' },
+  { url: '/estacoes?estado=sem_aprovacao', ready: 'Estações' },
+  { url: '/estacoes?busca=xyz', ready: 'Nenhuma estação encontrada' },
+  { url: '/estacoes?simular=erro', ready: 'Não conseguimos carregar as estações' },
+  { url: '/estacoes?simular=vazio', ready: 'Nenhuma estação controlada' },
+  { url: '/estacoes?simular=lento', ready: 'Estações', loading: true },
+  { url: '/estacoes?simular=sem-permissao', ready: 'Você não tem acesso às estações' },
+
   // Relatórios
   { url: '/relatorios', ready: 'Horas extras' },
   { url: '/relatorios?periodo=7&grupo=grp-atendimento', ready: 'Horas extras' },

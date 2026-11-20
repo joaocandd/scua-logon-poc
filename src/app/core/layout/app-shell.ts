@@ -62,7 +62,7 @@ export class AppShell {
     ),
     { initialValue: this.router.url },
   );
-  /** A página atual está no "Mais" (Pessoas, Regras, Relatórios ou Configurações). */
+  /** A página atual está no "Mais" (Estações, Pessoas, Regras, Relatórios ou Configurações). */
   protected readonly moreActive = computed(() =>
     NAV_ITEMS.some((item) => !item.onMobileBar && isWithin(this.url(), item.path)),
   );

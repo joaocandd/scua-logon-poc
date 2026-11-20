@@ -27,4 +27,4 @@ export {
   type Weekday,
   type WorkSchedule,
 } from './work-schedule';
-export type { Workstation, WorkstationStatus } from './workstation';
+export type { Workstation, WorkstationDetail, WorkstationStatus } from './workstation';

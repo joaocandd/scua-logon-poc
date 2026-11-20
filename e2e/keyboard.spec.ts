@@ -28,6 +28,8 @@ const screens: Screen[] = [
   { url: '/aprovacao/valido-ped-02?simular=erro', ready: button('Tentar de novo') },
   { url: '/hoje', ready: button('Renata Albuquerque') },
   { url: '/pessoas', ready: button('Renata Albuquerque') },
+  { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
+  { url: '/estacoes?busca=xyz', ready: button('Limpar filtros') },
   { url: '/relatorios', ready: heading('Horas extras') },
   { url: '/relatorios?simular=vazio', ready: heading('Nenhum dado no período') },
   { url: '/configuracoes', ready: button('Renata Albuquerque') },

@@ -20,6 +20,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     onMobileBar: true,
     showsPendingCount: true,
   },
+  { label: 'Estações', path: '/estacoes', icon: 'desktop_windows', onMobileBar: false },
   { label: 'Pessoas', path: '/pessoas', icon: 'group', onMobileBar: false },
   { label: 'Regras de jornada', path: '/regras', icon: 'schedule', onMobileBar: false },
   { label: 'Relatórios', path: '/relatorios', icon: 'bar_chart', onMobileBar: false },

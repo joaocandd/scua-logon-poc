@@ -51,6 +51,12 @@ export const routes: Routes = [
         ],
       },
       {
+        path: 'estacoes',
+        title: 'Estações',
+        loadComponent: () =>
+          import('./features/workstations/pages/workstations-page').then((m) => m.WorkstationsPage),
+      },
+      {
         path: 'regras',
         title: 'Regras de jornada',
         loadComponent: () =>

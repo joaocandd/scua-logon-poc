@@ -18,6 +18,7 @@ test('a página inicial abre o painel Hoje', async ({ page }) => {
 test('o título da aba repete o <h1> de cada área', async ({ page }) => {
   const areas = [
     { path: '/aprovacoes', heading: 'Aprovações' },
+    { path: '/estacoes', heading: 'Estações' },
     { path: '/regras', heading: 'Regras de jornada' },
     { path: '/pessoas', heading: 'Pessoas' },
     { path: '/relatorios', heading: 'Relatórios' },
