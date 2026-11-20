@@ -1,0 +1,48 @@
+<div class="charts">
+  <div class="card">
+    <app-bar-chart
+      heading="Pedidos de hoje por status"
+      [headingLevel]="2"
+      orientation="horizontal"
+      [data]="byStatus()"
+      [format]="formats.count"
+      labelHeader="Status"
+      valueHeader="Pedidos"
+    />
+    <a class="more" routerLink="/relatorios" [queryParams]="reportQuery()">Ver relatórios</a>
+  </div>
+
+  <div class="card">
+    @switch (overtimeState()) {
+      @case ('loading') {
+        <div class="skeleton" aria-busy="true">
+          <div aria-hidden="true">
+            <app-skeleton variant="heading" width="60%" />
+            <app-skeleton variant="block" width="100%" />
+          </div>
+        </div>
+      }
+      @case ('error') {
+        <h2 class="error-title">Horas extras dos últimos 7 dias</h2>
+        <p class="error">
+          Não conseguimos carregar este gráfico. Os outros números do painel estão em dia.
+        </p>
+      }
+      @default {
+        <app-bar-chart
+          heading="Horas extras dos últimos 7 dias"
+          description="Série fictícia, a mesma dos relatórios."
+          [headingLevel]="2"
+          [data]="overtime()"
+          [format]="formats.hours"
+          [height]="180"
+          valueHeader="Horas extras"
+          emptyText="Nenhuma hora extra nos últimos 7 dias."
+        />
+      }
+    }
+    <a class="more" routerLink="/relatorios" [queryParams]="weekQuery()">
+      Ver relatório de horas extras
+    </a>
+  </div>
+</div>

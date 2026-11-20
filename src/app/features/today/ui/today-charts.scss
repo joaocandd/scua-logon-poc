@@ -1,0 +1,54 @@
+// Um embaixo do outro no celular; lado a lado a partir de 64em.
+:host {
+  display: block;
+}
+
+.charts {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+}
+
+.more {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  // Alvo de toque de 44 px.
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+}
+
+.skeleton > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.error-title {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 64em) {
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

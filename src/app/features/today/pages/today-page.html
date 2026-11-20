@@ -135,6 +135,16 @@
       }
     </section>
 
+    @if (panel.state() === 'ready') {
+      <app-today-charts
+        class="block"
+        [byStatus]="requestsByStatus()"
+        [overtime]="weekOvertime()"
+        [overtimeState]="weekOvertimeState()"
+        [groupId]="groupId()"
+      />
+    }
+
     <!-- Só com o painel pronto: o custo chega antes dos pedidos, e o mês sairia incompleto. -->
     @if (panel.state() === 'ready') {
       <app-overtime-month

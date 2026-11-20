@@ -32,12 +32,16 @@ import {
   parseFilter,
   StationFilter,
 } from '../data/stations';
+import { DailyReport } from '../../reports/data/daily-report';
+import { loadState } from '../../schedules/data/load-state';
+import { todayRequestsByStatus, weekOvertime } from '../data/today-charts';
 import { TodayPanel } from '../data/today-panel';
 import { OvertimeMonth } from '../ui/overtime-month';
 import { PendingRequests } from '../ui/pending-requests';
 import { StationCounters } from '../ui/station-counters';
 import { StationList } from '../ui/station-list';
 import { TodayAlerts } from '../ui/today-alerts';
+import { TodayCharts } from '../ui/today-charts';
 
 /**
  * Painel "Hoje" (/hoje): como estão as estações agora e o que precisa de atenção. No topo, os
@@ -66,6 +70,7 @@ import { TodayAlerts } from '../ui/today-alerts';
     StationCounters,
     StationList,
     TodayAlerts,
+    TodayCharts,
   ],
   templateUrl: './today-page.html',
   styleUrl: './today-page.scss',
@@ -128,6 +133,32 @@ export class TodayPage {
       today: toLocal(this.now()).date,
     }),
   );
+
+  /** Pedidos de hoje por status, no grupo escolhido. */
+  protected readonly requestsByStatus = computed(() =>
+    todayRequestsByStatus(
+      this.panel.requests(),
+      this.panel.employeeById(),
+      this.groupId(),
+      this.now(),
+    ),
+  );
+
+  /**
+   * Horas extras dos últimos 7 dias (série fictícia dos relatórios). Vem de outra chamada: se ela
+   * falhar, só o gráfico mostra o erro; o resto do painel continua.
+   */
+  private readonly dailyReport = inject(DailyReport);
+  protected readonly weekOvertime = computed(() =>
+    weekOvertime(
+      this.dailyReport.list.hasValue() ? this.dailyReport.list.value() : [],
+      this.groupId(),
+    ),
+  );
+  protected readonly weekOvertimeState = computed(() => {
+    const state = loadState([this.dailyReport.list]);
+    return state === 'forbidden' ? 'error' : state;
+  });
 
   protected readonly status = computed(() =>
     this.panel.state() === 'loading' ? 'Carregando o painel' : this.announcement(),

@@ -233,3 +233,35 @@ test('sem permissão, diz a quem pedir acesso', async ({ page }) => {
   await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
   await expectNoA11yViolations(page);
 });
+
+test('abaixo dos contadores: pedidos de hoje por status e horas extras da semana', async ({
+  page,
+}) => {
+  await openPanel(page);
+
+  const byStatus = page.getByRole('group', { name: 'Pedidos de hoje por status' });
+  await expect(byStatus.getByRole('img')).toHaveCount(6);
+  // Status sempre pelo rótulo: o nome de cada barra diz qual é.
+  await expect(byStatus.getByRole('img').first()).toHaveAccessibleName(/^Aguardando gestor: \d+$/);
+  const week = page.getByRole('group', { name: 'Horas extras dos últimos 7 dias' });
+  await expect(week.getByRole('img')).toHaveCount(7);
+
+  // Só com teclado: as setas passam pelos status.
+  await byStatus.getByRole('img').first().focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(byStatus.getByRole('img').nth(1)).toBeFocused();
+
+  await expect(page.getByRole('link', { name: 'Ver relatório de horas extras' })).toHaveAttribute(
+    'href',
+    '/relatorios?periodo=7',
+  );
+  // O grupo do painel vai junto para o relatório.
+  await page.getByLabel('Grupo').selectOption({ label: 'TI' });
+  await expect(page.getByRole('link', { name: 'Ver relatório de horas extras' })).toHaveAttribute(
+    'href',
+    '/relatorios?periodo=7&grupo=grp-ti',
+  );
+  await page.getByRole('link', { name: 'Ver relatório de horas extras' }).click();
+  await expect(page).toHaveURL('/relatorios?periodo=7&grupo=grp-ti');
+  await expect(page.getByRole('heading', { level: 1, name: 'Relatórios' })).toBeVisible();
+});
