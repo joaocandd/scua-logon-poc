@@ -20,7 +20,7 @@ Não há backend, autenticação real nem integrações (Teams, WhatsApp, login 
 | | |
 |---|---|
 | Protótipo | [LINK DO PROTÓTIPO] |
-| PoC publicada | [LINK DA POC PUBLICADA] |
+| PoC publicada | [LINK DA POC PUBLICADA]. Ainda não publicada: estamos confirmando com a Scua se pode ficar num endereço aberto. Até lá, veja [Demo no computador](#demo-no-computador) |
 | Storybook (design system) | [LINK DO STORYBOOK PUBLICADO]. No computador: `npm run storybook` |
 
 ## Como rodar
@@ -39,9 +39,30 @@ npm start
 
 Para entrar, use qualquer usuário e senha. A senha `erro` simula credencial inválida. Todo login entra como Renata Albuquerque, a aprovadora da demonstração (ADR 0016).
 
-Os dados ficam na memória do navegador: recarregar a página volta ao começo.
+Os dados ficam na memória do navegador: recarregar a página volta ao começo. Sem recarregar, o botão "Restaurar dados de demonstração", em `/configuracoes`, faz o mesmo.
 
 Para os testes de ponta a ponta, instale também o navegador do Playwright, uma vez: `npx playwright install chromium`.
+
+## Demo no computador
+
+Para apresentar, use o build de produção, que é o que seria publicado: mais leve e sem as mensagens do modo de desenvolvimento. Não precisa de internet depois do `npm ci`.
+
+1. Instale as dependências, se ainda não instalou: `npm ci`.
+2. Rode:
+
+   ```bash
+   npm run demo
+   ```
+
+   O comando faz o build de produção (`npm run build`) e serve a pasta `dist/scua-logon-poc/browser` com o `scripts/serve-dist.mjs`, sem pacote extra.
+3. Espere a linha `Servindo … em http://localhost:4400` e abra http://localhost:4400 no Chrome. Qualquer endereço do app funciona direto, como http://localhost:4400/aprovacoes?demo=ao-vivo.
+4. Para mostrar o celular, use o modo celular do DevTools (Ctrl+Shift+M) com 390 px de largura. Um celular na mesma rede também abre o app em `http://<IP do computador>:4400`, se o firewall deixar.
+5. Antes de cada apresentação, em **Configurações**, clique em **Restaurar dados de demonstração**. Recarregar a página também volta os dados ao começo.
+6. Para encerrar, Ctrl+C no terminal.
+
+Outra porta: `npm run build` e depois `node scripts/serve-dist.mjs dist/scua-logon-poc/browser 4500`.
+
+O caminho de cliques e o que dizer em cada passo estão em [`docs/roteiro-demo.md`](docs/roteiro-demo.md).
 
 ## Scripts
 
@@ -52,6 +73,7 @@ Para os testes de ponta a ponta, instale também o navegador do Playwright, uma 
 | `npm run e2e` | Ponta a ponta e acessibilidade (Playwright e axe) em desktop (1280 px), celular (390 px) e tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/` |
 | `npm run lint` | ESLint com regras de acessibilidade de template, tipos do `e2e/` e Prettier. `npm run format` corrige a formatação |
 | `npm run build` | Build de produção em `dist/` |
+| `npm run demo` | Build de produção servido em http://localhost:4400, para a apresentação (veja [Demo no computador](#demo-no-computador)) |
 | `npm run contrast` | Contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro |
 | `npm run storybook` | Storybook em http://localhost:6006. `npm run build-storybook` gera em `dist/storybook/` |
 | `npm run icons` | Regenera os ícones depois de mudar a lista em `scripts/icons.mjs` |
@@ -66,8 +88,8 @@ O CI (`.github/workflows/ci.yml`) roda, em cada push e pull request: a conferên
 | `/hoje` | Painel ao vivo: pedidos aguardando, alertas, estações por estado e horas extras do mês |
 | `/aprovacoes` | Caixa de aprovações (fluxo A). `/aprovacoes/ped-02` abre o detalhe de um pedido |
 | `/aprovacao/:token` | Página pública do link do e-mail, fora do app (tokens abaixo) |
-| `/regras` | Regras de jornada (fluxo B). `/regras/nova` cria; `/regras/regra-comercial` edita |
-| `/configuracoes` | Custo médio da hora extra, usado no painel Hoje |
+| `/regras` | Regras de jornada (fluxo B). `/regras/nova` cria; `/regras/regra-comercial` edita; `/regras/regra-fechamento` já abre com um conflito entre regras |
+| `/configuracoes` | Custo médio da hora extra, usado no painel Hoje, e o botão "Restaurar dados de demonstração" |
 | `/pessoas`, `/relatorios` | Fora do escopo: a tela diz o que ficaria ali |
 
 ## Como simular estados
@@ -154,6 +176,7 @@ A meta é a ABNT NBR 17225:2025, equivalente à WCAG 2.2 AA. O que roda sozinho,
 - axe em todas as rotas e nos estados simulados das telas principais, em desktop e celular, nos temas claro e escuro;
 - percurso só com teclado: ordem do foco, anel de foco visível e diálogos que prendem e devolvem o foco;
 - largura de 320 px e zoom de 200% sem rolagem para o lado;
+- nenhum erro ou aviso no console do navegador, nas mesmas rotas e estados do axe;
 - contraste dos pares de cor usados no produto (texto, status, botões em hover e foco), lidos do `tokens.css`, nos dois temas.
 
 O axe não substitui o teste com leitor de tela, que continua manual.
@@ -163,6 +186,7 @@ O axe não substitui o teste com leitor de tela, que continua manual.
 - [`docs/adr/`](docs/adr/README.md): as decisões de arquitetura, com índice.
 - [`docs/proposta-arquitetura.md`](docs/proposta-arquitetura.md): rascunho da proposta para a Scua, com o plano de migração.
 - [`docs/metricas.md`](docs/metricas.md): medições de desempenho e tamanho, e como repetir.
+- [`docs/roteiro-demo.md`](docs/roteiro-demo.md): o roteiro da apresentação, em 18 minutos.
 - [`docs/tema-material.md`](docs/tema-material.md): o tema do Angular Material a partir dos tokens, para as telas atuais da Scua.
 - [`docs/prompts-claude-code.md`](docs/prompts-claude-code.md): os prompts usados para construir a PoC com o Claude Code.
 - [`CLAUDE.md`](CLAUDE.md): o contexto do projeto (regras de negócio, tokens, voz e acessibilidade). A cópia em `.github/copilot-instructions.md` precisa ficar igual; o CI confere.

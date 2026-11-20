@@ -1,6 +1,6 @@
 // Serve o build de produção como uma hospedagem estática: gzip, cache longo nos arquivos com hash
 // no nome e o index.html em qualquer rota (fallback de SPA). Serve para medir com o Lighthouse
-// (docs/metricas.md) sem depender de pacote extra.
+// (docs/metricas.md) e para a demo (`npm run demo`, docs/roteiro-demo.md), sem pacote extra.
 //
 // Uso: node scripts/serve-dist.mjs [pasta] [porta]
 // Padrão: dist/scua-logon-poc/browser na porta 4400.

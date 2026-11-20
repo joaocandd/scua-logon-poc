@@ -141,6 +141,7 @@ Node 24 (`.nvmrc`). Depois de clonar: `npm ci` e `npx playwright install chromiu
 - `npm run e2e`: ponta a ponta e acessibilidade (Playwright + axe) em desktop (1280 px), celular (390 px) e desktop no tema escuro. Sobe o servidor sozinho; relatório em `playwright-report/`.
 - `npm run lint`: ESLint (com acessibilidade de template), tipos do `e2e/` e Prettier. `npm run format` corrige a formatação (Markdown fica de fora).
 - `npm run build`: build de produção em `dist/`.
+- `npm run demo`: build de produção servido em http://localhost:4400, para a apresentação (roteiro em `docs/roteiro-demo.md`).
 - `npm run contrast`: contraste WCAG dos pares de cor do `tokens.css`, nos temas claro e escuro.
 - `npm run storybook`: Storybook em http://localhost:6006 (botão claro/escuro na barra). `npm run build-storybook` gera em `dist/storybook/`.
 - `npm run icons`: regenera `src/app/design-system/icon/icons.ts` depois de mudar a lista em `scripts/icons.mjs`.
