@@ -55,4 +55,20 @@ export const WORK_SCHEDULES: readonly WorkSchedule[] = [
     // A diretora de operações não trabalha à noite e fica sem regra (estação sem controle).
     assignment: { groupIds: ['grp-operacoes'], excludedEmployeeIds: [CURRENT_USER_ID] },
   },
+  {
+    id: 'regra-fechamento',
+    name: 'Fechamento do mês',
+    weekdays: [...WEEKDAYS],
+    start: '08:00',
+    end: '18:00',
+    breaks: [{ label: 'Almoço', start: '12:00', end: '13:00' }],
+    warningMinutes: [15, 5],
+    requiresHrValidation: true,
+    // Cenário da demo: o RH começou a regra do Financeiro, que ainda está na Comercial. O editor
+    // mostra o conflito na hora. Fica por último e em observação, então não muda a estação de
+    // ninguém (a Comercial vence) e não registra bloqueios: das 8h às 18h, com o mesmo almoço,
+    // ela libera sempre que a Comercial libera.
+    observationMode: true,
+    assignment: { groupIds: ['grp-financeiro'], excludedEmployeeIds: [] },
+  },
 ];

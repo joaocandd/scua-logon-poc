@@ -12,7 +12,13 @@ function rows(schedules: readonly WorkSchedule[] = WORK_SCHEDULES) {
 
 describe('scheduleRows', () => {
   it('ordena as regras pelo nome', () => {
-    expect(rows().map((r) => r.name)).toEqual(['Comercial', 'Flexível', 'Noturna', 'Tarde']);
+    expect(rows().map((r) => r.name)).toEqual([
+      'Comercial',
+      'Fechamento do mês',
+      'Flexível',
+      'Noturna',
+      'Tarde',
+    ]);
   });
 
   it('mostra horário, dias, grupos e status da regra', () => {

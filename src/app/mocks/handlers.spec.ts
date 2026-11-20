@@ -26,7 +26,7 @@ describe('API simulada', () => {
   it('lista as coleções', () => {
     expect(get<unknown[]>('/api/colaboradores')).toHaveLength(40);
     expect(get<unknown[]>('/api/grupos')).toHaveLength(6);
-    expect(get<unknown[]>('/api/regras')).toHaveLength(4);
+    expect(get<unknown[]>('/api/regras')).toHaveLength(5);
     expect(get<unknown[]>('/api/feriados')).toHaveLength(10);
     expect(get<unknown[]>('/api/excecoes')).toHaveLength(4);
     expect(get<unknown[]>('/api/pedidos')).toHaveLength(25);
@@ -445,7 +445,7 @@ describe('API simulada', () => {
       const response = call('POST', '/api/regras', { ...tarde(), id: '', name: 'Plantão' });
       expect(response.status).toBe(201);
       expect((response.body as WorkSchedule).id).toMatch(/^regra-/);
-      expect(get<unknown[]>('/api/regras')).toHaveLength(5);
+      expect(get<unknown[]>('/api/regras')).toHaveLength(6);
     });
 
     it('recusa regra sem nome, sem dias ou com horário inválido', () => {

@@ -473,3 +473,20 @@ test('com a API fora do ar, oferece tentar de novo', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Tentar de novo' })).toBeVisible();
   await expectNoA11yViolations(page);
 });
+
+test('a regra Fechamento do mês já abre com o conflito, e salvar leva até os grupos', async ({
+  page,
+}) => {
+  await page.goto('/regras/regra-fechamento');
+  await expect(page.getByRole('heading', { level: 1, name: 'Fechamento do mês' })).toBeVisible();
+
+  const section = page.getByRole('region', { name: 'A quem se aplica' });
+  await expect(section).toContainText(
+    'Aline Cardoso, Diego Arantes, Gustavo Ramalho e mais 3 colaboradores já estão na regra Comercial.',
+  );
+  await expectNoA11yViolations(page);
+
+  await page.getByRole('button', { name: 'Salvar regra' }).click();
+  await expect(section.getByRole('checkbox', { name: 'Financeiro', exact: true })).toBeFocused();
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
+});

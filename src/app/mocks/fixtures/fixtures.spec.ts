@@ -10,7 +10,7 @@ describe('fixtures', () => {
   const data = createFixtures(NOW);
   const ids = <T extends { id: string }>(list: T[]) => new Set(list.map((item) => item.id));
 
-  it('têm 40 colaboradores, 6 grupos, 4 regras e os 10 feriados nacionais de 2026', () => {
+  it('têm 40 colaboradores, 6 grupos, 5 regras e os 10 feriados nacionais de 2026', () => {
     expect(data.employees).toHaveLength(40);
     expect(data.groups.map((g) => g.name)).toEqual([
       'Financeiro',
@@ -25,6 +25,7 @@ describe('fixtures', () => {
       'Flexível 10:00–19:00',
       'Tarde 14:00–22:00',
       'Noturna 22:00–06:00',
+      'Fechamento do mês 08:00–18:00',
     ]);
     expect(data.holidays).toHaveLength(10);
     expect(data.holidays.every((h) => h.date.startsWith('2026-'))).toBe(true);
@@ -66,11 +67,25 @@ describe('fixtures', () => {
     }
   });
 
-  it('cada colaborador tem uma regra só; a diretora de operações fica sem regra', () => {
+  it('cada colaborador segue uma regra só; a diretora de operações fica sem regra', () => {
     for (const employee of data.employees) {
       const rules = data.schedules.filter((s) => appliesTo(s, employee));
-      expect(rules.length, employee.name).toBe(employee.id === CURRENT_USER_ID ? 0 : 1);
+      const active = rules.filter((s) => !s.observationMode);
+      expect(active.length, employee.name).toBeLessThanOrEqual(1);
+      expect(rules.length > 0, employee.name).toBe(employee.id !== CURRENT_USER_ID);
     }
+  });
+
+  it('cenário de conflito: o Financeiro está na Comercial e na regra Fechamento do mês', () => {
+    for (const employee of data.employees) {
+      const rules = data.schedules.filter((s) => appliesTo(s, employee)).map((s) => s.id);
+      const expected =
+        employee.groupId === 'grp-financeiro' ? ['regra-comercial', 'regra-fechamento'] : [];
+      // Só o Financeiro tem duas regras, e a Comercial (ativa) vem antes: é ela que vale.
+      if (rules.length > 1 || expected.length) expect(rules, employee.name).toEqual(expected);
+    }
+    const fechamento = data.schedules.find((s) => s.id === 'regra-fechamento')!;
+    expect(fechamento.observationMode).toBe(true);
   });
 
   it('as decisões seguem a regra: o RH só entra onde a regra pede', () => {
