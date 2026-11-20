@@ -75,16 +75,6 @@
             >
               {{ bar.valueText }}
             </text>
-            @if (focused() && active() === bar.index) {
-              <rect
-                class="focus-ring"
-                x="1"
-                [attr.y]="bar.rowY + 1"
-                [attr.width]="width() - 2"
-                [attr.height]="rowHeight - 2"
-                rx="4"
-              />
-            }
           </g>
         }
         <line
@@ -138,16 +128,6 @@
             />
             @if (bar.path) {
               <path class="bar" [attr.d]="bar.path" />
-            }
-            @if (focused() && active() === bar.index) {
-              <rect
-                class="focus-ring"
-                [attr.x]="bar.bandX + 1"
-                [attr.y]="margins().top - 20"
-                [attr.width]="bar.bandWidth - 2"
-                [attr.height]="plotHeight() + 20"
-                rx="4"
-              />
             }
             @if (bar.showValue) {
               <text

@@ -82,15 +82,12 @@
           @if (showAllMarkers() || point.showValue || active() === point.index) {
             <circle class="marker" [attr.cx]="point.x" [attr.cy]="point.y" r="4" />
           }
-          @if (focused() && active() === point.index) {
-            <circle class="focus-ring" [attr.cx]="point.x" [attr.cy]="point.y" r="9" />
-          }
           @if (point.showValue) {
             <text
               class="value"
               [attr.x]="point.x"
               [attr.y]="point.y - 12"
-              text-anchor="middle"
+              [attr.text-anchor]="anchorOf(point.index)"
               aria-hidden="true"
             >
               {{ point.valueText }}

@@ -45,7 +45,6 @@ for (const { url, ready, loading } of screens) {
 // Áreas fora do escopo da PoC: a tela diz o que teria e onde está o plano, sem parecer quebrada.
 const outOfScope = [
   { path: '/pessoas', mentions: 'colaborador com o grupo e a regra de jornada' },
-  { path: '/relatorios', mentions: 'relatórios de horas extras e de bloqueios' },
   { path: '/configuracoes', mentions: 'feriados da empresa, avisos padrão, permissões' },
 ];
 

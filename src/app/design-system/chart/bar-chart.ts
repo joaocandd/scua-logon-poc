@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { ChartBase } from './chart-base';
 import { ChartFrame } from './chart-frame';
-import { barPath, hbarPath } from './chart-scale';
+import { barPath, hbarPath, visibleLabels } from './chart-scale';
 
 /** Largura máxima da barra, em px: o resto da faixa fica de respiro. */
 const MAX_BAR_WIDTH = 24;
@@ -67,10 +67,15 @@ export class BarChart extends ChartBase {
         path: hbarPath(left, rowY + (ROW_HEIGHT - ROW_BAR) / 2, end - left, ROW_BAR),
       };
     });
+    // Marcas do eixo que cabem lado a lado: as outras ficam só como linha de grade.
+    const tickLabels = this.tickLabels();
+    const spacing = plotWidth / Math.max(1, tickLabels.length - 1);
+    const longestTick = Math.max(...tickLabels.map((t) => t.length));
+    const shown = visibleLabels(tickLabels.length, spacing, longestTick * CHAR_WIDTH + 8).reverse();
     const ticks = this.scale().ticks.map((value, i) => ({
       value,
       x: xOf(value),
-      label: this.tickLabels()[i],
+      label: shown[i] ? tickLabels[i] : '',
     }));
     return { left, top, plotHeight, height: top + plotHeight + 24, rows, ticks };
   });

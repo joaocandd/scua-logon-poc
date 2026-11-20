@@ -131,7 +131,6 @@ describe.each([
     await fixture.whenStable();
     expect(document.activeElement).toBe(marks(host)[3]);
     expect(host.querySelector('.tooltip')?.textContent).toContain('3,5 h');
-    expect(host.querySelector('.focus-ring')).not.toBeNull();
 
     svg.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();

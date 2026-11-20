@@ -1,0 +1,43 @@
+// Celular primeiro: filtros um embaixo do outro; a partir de 48em, na mesma linha.
+:host {
+  display: block;
+  max-width: 72rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.note {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.block-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-ring);
+}
+
+@media (min-width: 48em) {
+  .toolbar {
+    flex-direction: row;
+  }
+
+  .filter {
+    min-width: 14rem;
+  }
+}

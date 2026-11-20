@@ -46,5 +46,11 @@ export class LineChart extends ChartBase {
     })),
   );
 
+  /** O primeiro e o último valor escritos não passam da borda do gráfico. */
+  protected anchorOf(index: number): 'start' | 'middle' | 'end' {
+    if (index === 0) return 'start';
+    return index === this.data().length - 1 ? 'end' : 'middle';
+  }
+
   protected readonly tabStop = computed(() => Math.min(this.cursor(), this.data().length - 1));
 }

@@ -27,7 +27,6 @@ export const screens: Screen[] = [
   { url: '/hoje?simular=vazio', ready: 'Hoje' },
   { url: '/hoje?simular=lento', ready: 'Hoje', loading: true },
   { url: '/pessoas', ready: 'Pessoas' },
-  { url: '/relatorios', ready: 'Relatórios' },
   { url: '/configuracoes', ready: 'Configurações' },
   { url: '/endereco-que-nao-existe', ready: 'Página não encontrada' },
 
@@ -62,4 +61,12 @@ export const screens: Screen[] = [
   },
   { url: '/regras/nova', ready: 'Nova regra' },
   { url: '/regras/nao-existe', ready: 'Regra não encontrada' },
+
+  // Relatórios
+  { url: '/relatorios', ready: 'Horas extras' },
+  { url: '/relatorios?periodo=7&grupo=grp-atendimento', ready: 'Horas extras' },
+  { url: '/relatorios?simular=erro', ready: 'Não conseguimos carregar os relatórios' },
+  { url: '/relatorios?simular=vazio', ready: 'Nenhum dado no período' },
+  { url: '/relatorios?simular=lento', ready: 'Relatórios', loading: true },
+  { url: '/relatorios?simular=sem-permissao', ready: 'Você não tem acesso aos relatórios' },
 ];

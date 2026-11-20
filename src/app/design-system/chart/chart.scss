@@ -49,6 +49,12 @@
 .mark {
   cursor: default;
   outline: none;
+
+  // Anel de foco do design system em volta da faixa do ponto (a coluna ou a linha inteira).
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
 }
 
 .band {
@@ -86,13 +92,6 @@
   fill: var(--color-accent);
   stroke: var(--color-surface);
   stroke-width: 2;
-}
-
-// O SVG não mostra o anel de foco do navegador em <g>: o anel é desenhado.
-.focus-ring {
-  fill: none;
-  stroke: var(--color-focus-ring);
-  stroke-width: var(--focus-ring-width);
 }
 
 .tooltip {
