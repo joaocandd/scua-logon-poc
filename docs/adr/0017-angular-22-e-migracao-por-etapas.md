@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O desafio é modernizar o front-end do Scua Logon. As telas atuais usam Angular com o Angular Material (premissa da [proposta de arquitetura](../proposta-arquitetura.md); versões: [CONFIRMAR]). A PoC precisa responder a duas perguntas: em que base as telas novas nascem e como o produto chega lá sem parar.
+O desafio é modernizar o front-end do Scua Logon. As telas atuais estão no **Angular 15.2.10**, com o Angular Material, o Bootstrap 4 e o jQuery, rotas com hash (`/#/`) e cerca de 24 módulos carregados sob demanda. Fonte: inspeção da equipe no navegador, no ambiente de demonstração do Scua atual, em 28/10/2026 (atributo `ng-version` e classes `mat-`; o endereço não foi guardado). A versão exata do Material não aparece no navegador: [CONFIRMAR] (ver a seção 1 da [proposta de arquitetura](../proposta-arquitetura.md)). A PoC precisa responder a duas perguntas: em que base as telas novas nascem e como o produto chega lá sem parar.
 
 ## Decisão
 
@@ -17,10 +17,11 @@ O desafio é modernizar o front-end do Scua Logon. As telas atuais usam Angular 
 
 - **Reescrever tudo em Angular 22 e trocar num dia só.** O produto fica parado até a versão nova ficar pronta, o resultado só aparece no fim e o risco chega todo de uma vez.
 - **Outro framework (React, Vue).** As telas novas não conviveriam com as atuais no mesmo app, e a equipe da Scua teria de aprender outra base. A migração por etapas deixaria de ser possível.
-- **Uma versão anterior do Angular, mais perto da atual da Scua.** Encurtaria a fase 2 da proposta, mas a PoC mostraria um jeito de escrever que já está saindo. O `httpResource`, por exemplo, só é API estável a partir da 22 (`@publicApi 22.0`).
+- **Uma versão anterior do Angular, mais perto da 15 da Scua.** Encurtaria a fase 2 da proposta, mas a PoC mostraria um jeito de escrever que já está saindo. O `httpResource`, por exemplo, só é API estável a partir da 22 (`@publicApi 22.0`).
 
 ## Consequências
 
 - O Angular lança uma versão principal a cada seis meses e dá suporte a cada uma por 18 meses (6 de suporte ativo e 12 de LTS). Manter a PoC em dia é um `ng update` por versão principal.
 - Algumas APIs usadas são recentes: Signal Forms (ADR 0008), Angular Aria (ADR 0007) e o Storybook com Vite (ADR 0003). Elas ficam atrás dos componentes do design system, e uma mudança nelas mexe em poucos arquivos.
-- A PoC não diz quanto custa a fase 2: depende da versão das telas atuais. Se elas forem AngularJS (1.x), não há `ng update` e o plano muda (proposta, "Riscos e mitigação"). [CONFIRMAR a versão com a Scua]
+- A fase 2 tem sete etapas, da 15 até a 22. Como as telas atuais são Angular moderno, e não AngularJS (1.x), o `ng update` e as migrações automáticas valem para cada etapa (inspeção de 28/10). A duração de cada etapa continua [ESTIMAR COM A EQUIPE].
+- A 15 está fora de suporte desde maio de 2024. *Impacto: até a fase 2 terminar, falhas de segurança do Angular não são corrigidas nas telas atuais.*

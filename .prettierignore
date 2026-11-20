@@ -4,6 +4,7 @@
 /playwright-report
 /test-results
 /blob-report
+/.vscode
 package-lock.json
 
 # Documentos ficam como a equipe escreve (o CLAUDE.md é compacto de propósito).

@@ -93,6 +93,14 @@ describe('assignmentConflicts', () => {
     expect(problems).toEqual([]);
   });
 
+  it('a regra Fechamento do mês das fixtures já mostra o conflito com a Comercial', () => {
+    const fechamento = WORK_SCHEDULES.find((s) => s.id === 'regra-fechamento')!;
+    const rest = WORK_SCHEDULES.filter((s) => s.id !== fechamento.id);
+    expect(assignmentConflicts(fechamento, EMPLOYEES, rest).map((p) => p.message)).toEqual([
+      'Aline Cardoso, Diego Arantes, Gustavo Ramalho e mais 3 colaboradores já estão na regra Comercial. Cada colaborador segue uma regra só: tire o grupo de uma das regras ou deixe essas pessoas de fora desta.',
+    ]);
+  });
+
   it('regra em observação não conta', () => {
     const observed = others.map((s) => ({ ...s, observationMode: true }));
     expect(assignmentConflicts(rule(['grp-ti']), EMPLOYEES, observed)).toEqual([]);

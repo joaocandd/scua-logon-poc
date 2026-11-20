@@ -26,7 +26,7 @@ describe('API simulada', () => {
   it('lista as coleções', () => {
     expect(get<unknown[]>('/api/colaboradores')).toHaveLength(40);
     expect(get<unknown[]>('/api/grupos')).toHaveLength(6);
-    expect(get<unknown[]>('/api/regras')).toHaveLength(4);
+    expect(get<unknown[]>('/api/regras')).toHaveLength(5);
     expect(get<unknown[]>('/api/feriados')).toHaveLength(10);
     expect(get<unknown[]>('/api/excecoes')).toHaveLength(4);
     expect(get<unknown[]>('/api/pedidos')).toHaveLength(25);
@@ -445,7 +445,7 @@ describe('API simulada', () => {
       const response = call('POST', '/api/regras', { ...tarde(), id: '', name: 'Plantão' });
       expect(response.status).toBe(201);
       expect((response.body as WorkSchedule).id).toMatch(/^regra-/);
-      expect(get<unknown[]>('/api/regras')).toHaveLength(5);
+      expect(get<unknown[]>('/api/regras')).toHaveLength(6);
     });
 
     it('recusa regra sem nome, sem dias ou com horário inválido', () => {
@@ -555,5 +555,24 @@ describe('API simulada', () => {
       });
       expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 45 });
     });
+  });
+
+  it('restaurar os dados de demonstração desfaz decisões, regras e configurações', () => {
+    const pending = get<ExtensionRequest[]>('/api/pedidos').filter(
+      (r) => r.status === 'aguardando_gestor',
+    );
+    call('POST', `/api/pedidos/${pending[0].id}/aprovar`, { step: 'gestor' });
+    call('PUT', '/api/configuracoes', { overtimeHourlyCost: 80 });
+    db.startLiveDemo(NOW);
+
+    expect(call('POST', '/api/demo/restaurar', {})).toEqual({
+      status: 200,
+      body: { restoredAt: NOW.toISOString() },
+    });
+    expect(get<ExtensionRequest>(`/api/pedidos/${pending[0].id}`).status).toBe('aguardando_gestor');
+    expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 45 });
+    // O modo ao vivo desliga: uma hora depois, nenhum pedido novo chegou.
+    const later = new Date(NOW.getTime() + 60 * 60 * 1000);
+    expect(get<ExtensionRequest[]>('/api/pedidos', later).length).toBe(25);
   });
 });

@@ -15,17 +15,27 @@ Rascunho da equipe para a Scua. Ele parte do que a prova de conceito (PoC) const
 
 ## 1. Ponto de partida
 
-O que a equipe sabe e o que precisa confirmar com a Scua antes de estimar:
+O que a equipe sabe e o que precisa confirmar com a Scua antes de estimar.
+
+**Fonte das linhas marcadas com (28/10):** inspeção da equipe no navegador, no ambiente de demonstração do Scua Logon atual, em 28/10/2026: o atributo `ng-version` da página, as classes dos elementos e os arquivos carregados. O endereço não foi guardado (ver "Confidencialidade" no `CLAUDE.md`).
 
 | Tema | Situação |
 |---|---|
-| Versão do Angular das telas atuais | [CONFIRMAR] |
-| Versão do Angular Material | As telas atuais usam o Material (premissa da fase 1). Versão: [CONFIRMAR] |
-| Outras bibliotecas de interface | [CONFIRMAR] |
+| Versão do Angular das telas atuais | **Angular 15.2.10** (28/10). É Angular moderno, e não AngularJS: o `ng update` vale para a migração. A 15 está fora de suporte desde maio de 2024 |
+| Versão do Angular Material | Presente: classes `mat-` (28/10). A versão não aparece no navegador. O Material acompanha a versão do Angular, então deve ser a 15: [CONFIRMAR] |
+| Outras bibliotecas de interface | Bootstrap 4, jQuery, Font Awesome 5 e Material Icons, junto com o Material. Fontes Roboto e Montserrat em `.otf` (28/10) |
+| Rotas | Com hash (`/#/...`) e cerca de 24 módulos carregados sob demanda (28/10) |
 | Testes automáticos que já existem | [CONFIRMAR] |
 | Desempenho e acessibilidade do login e do link do e-mail | [MEDIR] (`metricas.md`, "Comparação com o Scua atual") |
-| Contrato da API e forma de autenticação | [CONFIRMAR] |
+| Contrato da API | [CONFIRMAR] |
+| Forma de autenticação | O código carregado tem rotas de token e de ADFS (28/10), o que indica login por token e login corporativo pelo ADFS da Microsoft. O tipo exato: [CONFIRMAR] |
 | Navegadores e aparelhos que os clientes usam | [CONFIRMAR] |
+
+O que isso muda no plano:
+
+- **Fase 2 tem sete etapas:** da 15 para a 16, 17, 18, 19, 20, 21 e 22, uma por vez. *Impacto: o custo da fase 2 fica previsível, e o produto sai de uma versão sem correções de segurança.*
+- **Fase 1 cuida de três camadas de estilo:** o Material, o Bootstrap 4 e as fontes `.otf`. Hoje convivem dois conjuntos de componentes (Material e Bootstrap) e dois de ícones (Font Awesome e Material Icons). *Impacto: a marca nova só fica igual em todas as telas se os três apontarem para os mesmos tokens.*
+- **Links antigos com `#`:** os endereços que já circulam (favoritos e, provavelmente, os links dos e-mails) têm `/#/`. As telas novas usam endereços sem `#` (ADR 0001), então o app precisa redirecionar os antigos (riscos, abaixo). [CONFIRMAR o formato do link do e-mail de aprovação]
 
 ## 2. Arquitetura proposta
 
@@ -131,14 +141,15 @@ A meta é a ABNT NBR 17225:2025, equivalente à WCAG 2.2 AA (ADR 0019). As ferra
   - **O primário exato.** O tema gerado pelo Material usaria #9E4300, e não o laranja da marca.
   - **O hover e o foco que não clareiam o botão.** No padrão do Material, o texto branco sobre #C2560A cai de 4,54:1 para 3,87:1 e reprova.
 - O `npm run contrast` ganha os pares do Material listados no documento.
-- **Atenção à versão.** O SCSS do `tema-material.md` usa a API de tema do Material 3 (`mat.theme` e `mat.theme-overrides`), das versões recentes. Se as telas atuais estiverem numa versão sem essa API, a tabela de mapeamento continua valendo, mas é aplicada com a API de tema da versão instalada, ou a fase 1 espera parte da fase 2. [CONFIRMAR a versão do Material]
+- **Atenção à versão.** O SCSS do `tema-material.md` usa a API de tema do Material 3 (`mat.theme` e `mat.theme-overrides`), das versões recentes, que o Material 15 não tem. As telas atuais estão no Angular 15.2 (inspeção de 28/10, seção 1), então a tabela de mapeamento continua valendo, mas é aplicada com a API de tema do Material 15 (`mat.define-palette` e `mat.define-light-theme`), ou a fase 1 espera parte da fase 2. [CONFIRMAR a versão do Material]
+- **Bootstrap 4 e fontes.** O Bootstrap 4 também passa a ler os tokens: as variáveis dele (`$primary`, `$body-color`, `$border-color` e as outras) apontam para as mesmas cores. Isso só funciona se o Bootstrap for compilado do Sass no projeto: [CONFIRMAR se ele vem do Sass ou de um CSS pronto]. A Roboto e a Montserrat em `.otf` dão lugar à Montserrat variável em `woff2` (ADR 0015).
 - Tema escuro nas telas atuais: [CONFIRMAR se entra na fase 1 ou depois].
 - **Pronto quando:** todas as telas estão com a marca nova, o contraste passa no CI e a rede da fase 0 continua verde.
 - *Impacto: o cliente vê a marca nova em todo o produto cedo, sem nenhum componente trocado. É uma mudança visível com pouco risco.*
 
 ### Fase 2 · Atualização de versão, uma de cada vez
 
-- Do Angular [CONFIRMAR a versão atual] até o 22, **uma versão principal por vez**, como recomenda o guia oficial de atualização do Angular. Para cada uma: `ng update @angular/core@N @angular/cli@N`, depois `@angular/material@N` e `@angular/cdk@N`. O `ng update` roda as migrações automáticas daquela versão.
+- Do Angular 15.2 (inspeção de 28/10, seção 1) até o 22, **uma versão principal por vez**, sete etapas no total, como recomenda o guia oficial de atualização do Angular. Para cada uma: `ng update @angular/core@N @angular/cli@N`, depois `@angular/material@N` e `@angular/cdk@N`. O `ng update` roda as migrações automáticas daquela versão.
 - Cada passo é um pull request com a rede da fase 0 verde e uma publicação. Só depois vem o próximo.
 - As bibliotecas de terceiros acompanham cada passo. As que não tiverem versão compatível, ou que mudaram de licença (o PrimeNG passou a ter licença comercial na v22), entram na lista da fase 4.
 - No fim, as migrações para o jeito atual de escrever Angular, também uma de cada vez: `ng generate @angular/core:standalone`, `@angular/core:control-flow` (`@if` e `@for`), `@angular/core:route-lazy-loading` e `@angular/core:signal-inputs`. O zoneless vem por último, porque muda quando a tela se atualiza e pede o teste de cada área.
@@ -194,11 +205,14 @@ A meta é a ABNT NBR 17225:2025, equivalente à WCAG 2.2 AA (ADR 0019). As ferra
 
 | Risco | O que pode acontecer | Mitigação |
 |---|---|---|
-| Versão atual muito antiga | Muitas etapas na fase 2. Se as telas forem AngularJS (1.x), não há `ng update`, e este plano muda | Confirmar a versão antes de estimar. Uma versão por vez, sempre com a rede de testes. Se for AngularJS, avaliar a convivência por rota. [CONFIRMAR] |
+| Versão atual antiga | As telas estão no Angular 15.2, fora de suporte desde maio de 2024: são sete etapas na fase 2. Não é AngularJS, então o `ng update` vale (inspeção de 28/10) | Uma versão por vez, sempre com a rede de testes. As migrações automáticas de cada versão rodam no seu próprio pull request |
+| Bootstrap 4 e jQuery junto com o Material | Dois conjuntos de estilos e código que mexe na página por fora do Angular. A troca de versão ou de tela quebra o que o jQuery espera achar | Levantar na fase 0 onde o jQuery é usado. Na fase 3, cada área nova sai sem Bootstrap e sem jQuery; os dois saem na fase 4 |
+| Links antigos com `#` | Favoritos e links de e-mails já enviados (`/#/...`) deixam de abrir a tela certa quando as rotas perdem o `#` | Na troca, a página inicial lê o `#` e redireciona para o endereço novo. Teste de ponta a ponta com os endereços antigos |
 | Material sem a API de tema do Material 3 | A fase 1 não aplica o SCSS do `tema-material.md` como está | Aplicar o mesmo mapeamento com a API da versão instalada, ou adiantar parte da fase 2 |
 | Testes frágeis | Testes que dependem de classes CSS quebram nas fases 1 e 3 sem que haja um defeito de verdade | Achar os elementos pelo papel e pelo rótulo, como nos testes da PoC |
 | Duas versões convivendo | Manutenção dobrada e diferenças entre a tela antiga e a nova | Prazo para cada chave. A tela antiga sai na fase 4 |
 | Contrato da API diferente do da PoC | As telas novas não encaixam na API real | Traduzir nos serviços de `data/`, sem mexer nas telas. Validar o contrato na fase 0. [CONFIRMAR com o backend] |
+| Login por token e pelo ADFS | As telas novas precisam da mesma sessão que as atuais, nos dois tipos de login | O `Auth` da PoC já separa o login da tela (ADR 0016): troca-se só quem responde. Testar os dois logins na fase 0. [CONFIRMAR o tipo de autenticação] |
 | APIs novas do Angular mudarem | O Signal Forms é recente (ADR 0008), e o Storybook com Vite está em preview (ADR 0003) | Os dois ficam atrás dos componentes do design system. A ADR 0003 descreve a volta para o builder estável |
 | Biblioteca de terceiros parada ou com licença nova | Trava a fase 2 | Levantar as bibliotecas na fase 0 e trocar por CDK, Angular Aria ou componente próprio |
 | Acessibilidade só automática | O axe não pega a ordem de leitura confusa nem o texto sem sentido | Teste manual com leitor de tela em cada área, antes de ligar a chave |
@@ -208,9 +222,9 @@ A meta é a ABNT NBR 17225:2025, equivalente à WCAG 2.2 AA (ADR 0019). As ferra
 
 ## 5. O que precisamos da Scua
 
-1. A versão do Angular e do Material das telas atuais, e a lista das outras bibliotecas.
+1. A confirmação do que vimos no navegador em 28/10 (Angular 15.2.10, Material, Bootstrap 4, jQuery, Font Awesome 5, Material Icons, rotas com `#`), a versão exata do Material e se o Bootstrap vem do Sass.
 2. Os testes automáticos que já existem e os fluxos que a Scua considera críticos.
-3. O contrato da API e como o front-end autentica hoje (ADR 0016).
+3. O contrato da API e como o front-end autentica hoje. Vimos rotas de token e de ADFS no código (ADR 0016).
 4. Onde ficariam as chaves de liga e desliga: por cliente, por grupo ou por usuário.
 5. A ordem das áreas na fase 3 e os clientes piloto.
 6. Os navegadores e aparelhos que os clientes usam.
