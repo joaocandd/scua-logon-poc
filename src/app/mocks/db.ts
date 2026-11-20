@@ -10,6 +10,7 @@ import {
   requestExpired,
 } from './activity';
 import { createFixtures, createLiveRequest, CURRENT_USER_ID, Fixtures } from './fixtures';
+import { nowDate } from '../shared/clock';
 
 /** No modo demo ao vivo, um pedido novo chega a cada 30 s. */
 export const LIVE_INTERVAL_MS = 30_000;
@@ -38,7 +39,7 @@ export class MockDb {
   }
 
   /** Volta aos dados de demonstração, com datas relativas a `now`, e desliga o modo ao vivo. */
-  reset(now = new Date()): void {
+  reset(now = nowDate()): void {
     this.data = createFixtures(now);
     this.live = null;
     this.observedBlocks.clear();
@@ -129,7 +130,7 @@ export class MockDb {
    * Liga o modo demo ao vivo (?demo=ao-vivo): o primeiro pedido novo chega 30 s depois. Fica ligado
    * até a página recarregar, mesmo que a URL perca o parâmetro. Ligar de novo não reinicia a conta.
    */
-  startLiveDemo(now = new Date()): void {
+  startLiveDemo(now = nowDate()): void {
     this.live ??= { since: now.getTime(), delivered: 0 };
   }
 

@@ -1,0 +1,30 @@
+// Faixa discreta mas visível no topo, com o pêssego da marca: texto em #8F3D06 passa no contraste.
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 var(--space-2);
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-highlight-bg);
+  color: var(--color-text-on-highlight);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.text {
+  margin: 0;
+}
+
+.off {
+  min-height: var(--control-height);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-on-highlight);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}

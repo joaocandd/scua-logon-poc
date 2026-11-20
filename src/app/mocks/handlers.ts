@@ -21,6 +21,7 @@ import { decisionUndone, requestDecided, scheduleSaved, signedIn } from './activ
 import { createHistory } from './history';
 import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
+import { nowDate } from '../shared/clock';
 
 export interface MockRequest {
   method: string;
@@ -101,7 +102,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 ];
 
 /** Responde a uma chamada a /api/... a partir do banco em memória. */
-export function handleApiRequest(db: MockDb, request: MockRequest, now = new Date()): MockResponse {
+export function handleApiRequest(db: MockDb, request: MockRequest, now = nowDate()): MockResponse {
   const url = new URL(request.url, 'http://localhost');
   db.expirePending(now);
   db.deliverLiveRequests(now);
@@ -228,7 +229,7 @@ function undo({ db, params, body, now }: Context): MockResponse {
  * do grupo) aprova o pedido. A tela recebe 409, "Este pedido já foi aprovado por Marina às 18h03.",
  * como aconteceria com dois gestores decidindo ao mesmo tempo.
  */
-export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = new Date()): void {
+export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = nowDate()): void {
   const { pathname } = new URL(request.url, 'http://localhost');
   const params = matchPath('/api/pedidos/:id/:action', pathname);
   const target = db.data.requests.find((r) => r.id === params?.['id']);

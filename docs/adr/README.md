@@ -29,6 +29,7 @@ Uma ADR não é reescrita quando a decisão muda. Uma ADR nova a substitui, e a 
 | [0019](0019-meta-de-acessibilidade.md) | Meta de acessibilidade: ABNT NBR 17225:2025 (WCAG 2.2 AA) | aceita | 28/10/2026 |
 | [0020](0020-testes-com-vitest-playwright-e-axe.md) | Testes com Vitest, Playwright e axe | aceita | 28/10/2026 |
 | [0021](0021-graficos-em-svg-e-serie-ficticia.md) | Gráficos em SVG próprio e série histórica fictícia | aceita | 20/11/2026 |
+| [0022](0022-relogio-de-demonstracao.md) | Relógio de demonstração (`?relogio=`) | aceita | 20/11/2026 |
 
 Duas observações:
 
@@ -39,7 +40,7 @@ Duas observações:
 
 - **Base do app:** 0017 (versão do Angular e migração), 0001 (SPA), 0007 (casca), 0016 (login).
 - **Design system e marca:** 0004 (componentes e ícones), 0014 (sem Material; antes, 0002), 0015 (fonte), 0003 (Storybook).
-- **Dados e estado:** 0005 (API simulada), 0018 (signals e `httpResource`), 0006 (datas e motor de regras).
+- **Dados e estado:** 0005 (API simulada), 0022 (relógio de demonstração), 0018 (signals e `httpResource`), 0006 (datas e motor de regras).
 - **Formulários:** 0008, e os erros de regra do editor na 0011.
 - **Qualidade:** 0019 (meta de acessibilidade), 0020 (testes).
 - **Fluxo A, aprovar hora extra:** 0009 (caixa de aprovações), 0010 (link do e-mail).

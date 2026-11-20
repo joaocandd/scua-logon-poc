@@ -55,7 +55,8 @@ Para apresentar, use o build de produção, que é o que seria publicado: mais l
    ```
 
    O comando faz o build de produção (`npm run build`) e serve a pasta `dist/scua-logon-poc/browser` com o `scripts/serve-dist.mjs`, sem pacote extra.
-3. Espere a linha `Servindo … em http://localhost:4400` e abra http://localhost:4400 no Chrome. Qualquer endereço do app funciona direto, como http://localhost:4400/aprovacoes?demo=ao-vivo.
+3. Espere a linha `Servindo … em http://localhost:4400` e abra **http://localhost:4400/entrar?relogio=2026-11-24T17:40** no Chrome. Qualquer endereço do app funciona direto, como http://localhost:4400/aprovacoes?demo=ao-vivo.
+   O `?relogio=2026-11-24T17:40` liga o **relógio de demonstração**: o app vive numa terça-feira às 17h40, com gente em jornada, pedidos aguardando e o alerta da Noturna, qualquer que seja o dia real (a demo é num sábado). O tempo anda normalmente a partir dali. O relógio fica guardado na aba (sessionStorage) e vale em todas as telas; a faixa no topo mostra a hora e tem o botão **Desligar**. Cada aba nova precisa do parâmetro. Sem ele, nada muda.
 4. Para mostrar o celular, use o modo celular do DevTools (Ctrl+Shift+M) com 390 px de largura. Um celular na mesma rede também abre o app em `http://<IP do computador>:4400`, se o firewall deixar.
 5. Antes de cada apresentação, em **Configurações**, clique em **Restaurar dados de demonstração**. Recarregar a página também volta os dados ao começo.
 6. Para encerrar, Ctrl+C no terminal.
@@ -108,8 +109,9 @@ Acrescente o parâmetro ao endereço de qualquer tela, por exemplo `/aprovacoes?
 | `?simular=sem-permissao` | A pessoa entra, mas não pode ver os dados |
 | `?simular=decidido` | Ao aprovar ou recusar, outro gestor já decidiu o pedido |
 | `?demo=ao-vivo` | Chega um pedido novo a cada 30 s na caixa de aprovações, até recarregar a página |
+| `?relogio=2026-11-24T17:40` | Relógio de demonstração: o app vive no dia e na hora escolhidos (São Paulo), e o tempo anda dali. Fica guardado na aba até clicar em **Desligar** na faixa do topo |
 
-O parâmetro vale para o endereço aberto. Ao navegar pelo menu, ele sai e as chamadas voltam ao normal (ADR 0005).
+O parâmetro vale para o endereço aberto. Ao navegar pelo menu, ele sai e as chamadas voltam ao normal (ADR 0005). A exceção é o `?relogio=`, que fica guardado na aba (ADR 0022).
 
 ## Tokens de aprovação de exemplo
 

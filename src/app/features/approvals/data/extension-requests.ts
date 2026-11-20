@@ -2,6 +2,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { ExtensionRequest } from '../../../shared/models';
+import { now } from '../../../shared/clock';
 
 /** Pedidos de extensão: a caixa de aprovações (fluxo A) lê e decide por aqui. */
 @Injectable({ providedIn: 'root' })
@@ -24,7 +25,7 @@ export class ExtensionRequests {
   constructor() {
     // A primeira carga e o "Tentar de novo" também contam como atualização.
     effect(() => {
-      if (this.list.status() === 'resolved') untracked(() => this.refreshedAt.set(Date.now()));
+      if (this.list.status() === 'resolved') untracked(() => this.refreshedAt.set(now()));
     });
   }
 
@@ -56,7 +57,7 @@ export class ExtensionRequests {
     const known = new Set((this.list.hasValue() ? this.list.value() : []).map((r) => r.id));
     const latest = await firstValueFrom(this.http.get<ExtensionRequest[]>('/api/pedidos'));
     this.list.set(latest);
-    this.refreshedAt.set(Date.now());
+    this.refreshedAt.set(now());
     return latest.filter((r) => !known.has(r.id));
   }
 

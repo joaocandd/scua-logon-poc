@@ -17,14 +17,15 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
 
 1. No computador da demo: `npm run demo` e espere "Servindo … em http://localhost:4400" (passo a passo no [README](../README.md#demo-no-computador)). Não precisa de internet.
 2. Chrome em janela anônima, zoom em 100%, notificações do sistema desligadas.
-3. Abra estas abas, nesta ordem. Cada aba tem os próprios dados: recarregar uma aba volta os dados dela ao começo.
-   1. `http://localhost:4400/entrar`
-   2. `http://localhost:4400/aprovacao/valido-ped-02` e, na mesma aba, deixe pronto para digitar `/aprovacao/expirado-ped-22`
-   3. `http://localhost:4400/regras`
-   4. `http://localhost:4400/hoje`
-   5. `http://localhost:4400/relatorios`
+3. Abra estas abas, nesta ordem, **todas com o relógio de demonstração** (`?relogio=2026-11-24T17:40`, uma terça às 17h40). Cada aba tem os próprios dados e o próprio relógio: recarregar uma aba volta os dados dela ao começo, e o relógio continua de onde estava.
+   1. `http://localhost:4400/entrar?relogio=2026-11-24T17:40`
+   2. `http://localhost:4400/aprovacao/valido-ped-02?relogio=2026-11-24T17:40` e, na mesma aba, deixe pronto para digitar `/aprovacao/expirado-ped-22` (sem o parâmetro: a aba já guardou o relógio)
+   3. `http://localhost:4400/regras?relogio=2026-11-24T17:40`
+   4. `http://localhost:4400/hoje?relogio=2026-11-24T17:40`
+   5. `http://localhost:4400/relatorios?relogio=2026-11-24T17:40`
+   Cada aba mostra no topo a faixa "Relógio de demonstração: terça, 24/11, 17h40 · Desligar". Sem ela, o app usa a hora real, e no sábado da demo quase tudo aparece "Fora do expediente".
 4. Na aba do Fluxo A, deixe o DevTools em modo celular (Ctrl+Shift+M), largura 390 px. **Não abra ainda** o `/aprovacoes?demo=ao-vivo`: o primeiro pedido novo chega 30 s depois que a página abre, e a ideia é ele chegar durante a fala.
-5. Os horários e as contagens dependem da hora em que o app abre (os dados são relativos a "agora"). Não decore números da tela; os nomes e os alertas são sempre os mesmos.
+5. Com o relógio de demonstração, o app abre sempre na terça às 17h40, e o tempo anda dali: o Comercial já saiu, a Flexível e a Tarde estão na jornada, e a Noturna, em observação, deixa as estações de Operações liberadas sem aprovação. Todos os cenários deste roteiro foram conferidos nesse horário (`e2e/demo-clock.spec.ts`). Os horários finos ("expira em…") dependem de quanto tempo a aba está aberta: não decore números da tela.
 
 ## 1. Gancho · 0:00 a 1:30
 
@@ -46,7 +47,7 @@ Caminho de cliques da apresentação, com o que dizer em cada passo e quem fala.
 
 Para caber em 4 minutos, o Desfazer aparece só uma vez, no lote (passo 8).
 
-1. **Clique:** na aba do Fluxo A, em modo celular, abra `http://localhost:4400/aprovacoes?demo=ao-vivo`.
+1. **Clique:** na aba do Fluxo A, em modo celular, abra `http://localhost:4400/aprovacoes?demo=ao-vivo` (a aba já guardou o relógio de demonstração).
    **Pessoa 2:** "Esta é a caixa do gestor no celular. Cada pedido já traz o contexto para decidir: até que horas, quanto passa e o que acontece se aprovar."
 2. **Tela:** o cartão de **Lucas Bittencourt**.
    **Pessoa 2:** "O Lucas pede 2h30. O cartão avisa que passa do limite de 2 h extras da CLT, que a estação libera só até 19h e que depois vai para o RH. O gestor não precisa fazer conta."
@@ -125,3 +126,4 @@ Fecha o modo celular: o RH trabalha no desktop. Para caber em 4 minutos, o salva
 - **O pedido novo não chegou no Fluxo A:** confira se o endereço tem `?demo=ao-vivo`. Recarregar a página reinicia a contagem de 30 s.
 - **Um cartão já foi decidido em outra aba:** cada aba tem os próprios dados, então isso não acontece entre abas. Se acontecer na mesma aba, use **Desfazer** ou restaure os dados.
 - **O servidor caiu:** no terminal, `npm run demo` de novo. Não precisa de internet.
+- **A faixa do relógio sumiu ou a tela mostra "Fora do expediente":** a aba está sem o relógio de demonstração. Abra o mesmo endereço com `?relogio=2026-11-24T17:40` no fim.

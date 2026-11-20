@@ -26,6 +26,9 @@ export const screens: Screen[] = [
   { url: '/hoje?simular=erro', ready: 'Hoje' },
   { url: '/hoje?simular=vazio', ready: 'Hoje' },
   { url: '/hoje?simular=lento', ready: 'Hoje', loading: true },
+  // Relógio de demonstração: a faixa no topo, numa terça às 17h40.
+  { url: '/hoje?relogio=2026-11-24T17:40', ready: 'Hoje' },
+  { url: '/entrar?relogio=2026-11-24T17:40', ready: 'Entrar' },
   { url: '/pessoas', ready: 'Pessoas' },
   { url: '/configuracoes', ready: 'Configurações' },
   { url: '/ajuda', ready: 'Ajuda' },
