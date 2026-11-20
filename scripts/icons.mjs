@@ -46,6 +46,7 @@ const ICONS = [
   'schedule',
   'search',
   'search_off',
+  'table_rows',
   'settings',
   'timer_off',
   'today',

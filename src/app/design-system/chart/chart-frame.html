@@ -1,0 +1,55 @@
+<div class="header">
+  <div class="titles">
+    @if (headingLevel() === 2) {
+      <h2 class="heading" [id]="chartId() + '-titulo'">{{ heading() }}</h2>
+    } @else {
+      <h3 class="heading" [id]="chartId() + '-titulo'">{{ heading() }}</h3>
+    }
+    @if (description()) {
+      <p class="description">{{ description() }}</p>
+    }
+  </div>
+  @if (rows().length > 0) {
+    <button
+      type="button"
+      class="table-toggle"
+      [attr.aria-expanded]="tableOpen()"
+      [attr.aria-controls]="chartId() + '-tabela'"
+      (click)="toggleTable()"
+    >
+      <app-icon [name]="tableOpen() ? 'bar_chart' : 'table_rows'" />
+      {{ tableOpen() ? 'Ver como gráfico' : 'Ver como tabela' }}
+    </button>
+  }
+</div>
+
+@if (rows().length === 0) {
+  <p class="empty">{{ emptyText() }}</p>
+} @else {
+  <div [hidden]="tableOpen()">
+    <ng-content />
+  </div>
+  <div class="table-wrap" [id]="chartId() + '-tabela'" [hidden]="!tableOpen()">
+    <table class="table">
+      <caption class="cdk-visually-hidden">
+        {{
+          heading()
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ labelHeader() }}</th>
+          <th scope="col" class="numeric">{{ valueHeader() }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track $index) {
+          <tr>
+            <th scope="row">{{ row.label }}</th>
+            <td class="numeric">{{ row.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

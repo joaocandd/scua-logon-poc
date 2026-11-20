@@ -1,0 +1,195 @@
+<app-chart-frame
+  [chartId]="id"
+  [heading]="heading()"
+  [description]="description()"
+  [headingLevel]="headingLevel()"
+  [rows]="rows()"
+  [labelHeader]="labelHeader()"
+  [valueHeader]="valueHeader()"
+  [emptyText]="emptyText()"
+>
+  <div #plot class="plot" (mouseleave)="onPointerLeave()">
+    <p class="cdk-visually-hidden" [id]="id + '-dica'">Use as setas para passar pelos valores.</p>
+    <svg
+      class="svg"
+      role="group"
+      [attr.aria-labelledby]="id + '-titulo'"
+      [attr.aria-describedby]="id + '-dica'"
+      [attr.width]="width()"
+      [attr.height]="svgHeight()"
+      [attr.viewBox]="'0 0 ' + width() + ' ' + svgHeight()"
+      (keydown)="onKeydown($event)"
+    >
+      @if (orientation() === 'horizontal') {
+        @let h = horizontal();
+        <g class="grid" aria-hidden="true">
+          @for (tick of h.ticks; track tick.value) {
+            <line
+              [attr.x1]="tick.x"
+              [attr.x2]="tick.x"
+              [attr.y1]="h.top"
+              [attr.y2]="h.top + h.plotHeight"
+            />
+            <text
+              class="tick"
+              [attr.x]="tick.x"
+              [attr.y]="h.top + h.plotHeight + 16"
+              text-anchor="middle"
+            >
+              {{ tick.label }}
+            </text>
+          }
+        </g>
+        @for (bar of h.rows; track bar.index) {
+          <g
+            class="mark"
+            role="img"
+            [attr.tabindex]="bar.index === tabStop() ? 0 : -1"
+            [attr.data-index]="bar.index"
+            [attr.aria-label]="bar.name"
+            (focus)="onFocus(bar.index)"
+            (blur)="onBlur()"
+            (mouseenter)="onPointerEnter(bar.index)"
+          >
+            <!-- A linha inteira, com o rótulo, é a área do mouse. -->
+            <rect
+              class="band"
+              [class.active]="active() === bar.index"
+              x="0"
+              [attr.y]="bar.rowY"
+              [attr.width]="width()"
+              [attr.height]="rowHeight"
+            />
+            <text class="category" x="0" [attr.y]="bar.mid" dy="0.32em" aria-hidden="true">
+              {{ bar.datum.label }}
+            </text>
+            @if (bar.path) {
+              <path class="bar" [attr.d]="bar.path" />
+            }
+            <text
+              class="value"
+              [attr.x]="bar.end + 6"
+              [attr.y]="bar.mid"
+              dy="0.32em"
+              aria-hidden="true"
+            >
+              {{ bar.valueText }}
+            </text>
+            @if (focused() && active() === bar.index) {
+              <rect
+                class="focus-ring"
+                x="1"
+                [attr.y]="bar.rowY + 1"
+                [attr.width]="width() - 2"
+                [attr.height]="rowHeight - 2"
+                rx="4"
+              />
+            }
+          </g>
+        }
+        <line
+          class="axis"
+          aria-hidden="true"
+          [attr.x1]="h.left"
+          [attr.x2]="h.left"
+          [attr.y1]="h.top"
+          [attr.y2]="h.top + h.plotHeight"
+        />
+      } @else {
+        <g class="grid" aria-hidden="true">
+          @for (tick of ticks(); track tick.value) {
+            <line
+              [attr.x1]="margins().left"
+              [attr.x2]="width() - margins().right"
+              [attr.y1]="tick.y"
+              [attr.y2]="tick.y"
+            />
+            <text
+              class="tick"
+              [attr.x]="margins().left - 8"
+              [attr.y]="tick.y"
+              dy="0.32em"
+              text-anchor="end"
+            >
+              {{ tick.label }}
+            </text>
+          }
+        </g>
+
+        @for (bar of bars(); track bar.index) {
+          <g
+            class="mark"
+            role="img"
+            [attr.tabindex]="bar.index === tabStop() ? 0 : -1"
+            [attr.data-index]="bar.index"
+            [attr.aria-label]="bar.name"
+            (focus)="onFocus(bar.index)"
+            (blur)="onBlur()"
+            (mouseenter)="onPointerEnter(bar.index)"
+          >
+            <!-- A faixa inteira é a área do mouse: maior que a barra. -->
+            <rect
+              class="band"
+              [class.active]="active() === bar.index"
+              [attr.x]="bar.bandX"
+              [attr.y]="margins().top"
+              [attr.width]="bar.bandWidth"
+              [attr.height]="plotHeight()"
+            />
+            @if (bar.path) {
+              <path class="bar" [attr.d]="bar.path" />
+            }
+            @if (focused() && active() === bar.index) {
+              <rect
+                class="focus-ring"
+                [attr.x]="bar.bandX + 1"
+                [attr.y]="margins().top - 20"
+                [attr.width]="bar.bandWidth - 2"
+                [attr.height]="plotHeight() + 20"
+                rx="4"
+              />
+            }
+            @if (bar.showValue) {
+              <text
+                class="value"
+                [attr.x]="bar.x"
+                [attr.y]="bar.y - 6"
+                text-anchor="middle"
+                aria-hidden="true"
+              >
+                {{ bar.valueText }}
+              </text>
+            }
+            @if (bar.showLabel) {
+              <text
+                class="label"
+                [attr.x]="bar.x"
+                [attr.y]="baseline() + 18"
+                text-anchor="middle"
+                aria-hidden="true"
+              >
+                {{ bar.datum.label }}
+              </text>
+            }
+          </g>
+        }
+
+        <line
+          class="axis"
+          aria-hidden="true"
+          [attr.x1]="margins().left"
+          [attr.x2]="width() - margins().right"
+          [attr.y1]="baseline()"
+          [attr.y2]="baseline()"
+        />
+      }
+    </svg>
+
+    @if (tooltip(); as tip) {
+      <div class="tooltip" aria-hidden="true" [style.left.px]="tip.left" [style.top.px]="tip.top">
+        <strong class="tooltip-value">{{ tip.slot.valueText }}</strong>
+        <span class="tooltip-label">{{ tip.slot.datum.longLabel ?? tip.slot.datum.label }}</span>
+      </div>
+    }
+  </div>
+</app-chart-frame>
