@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, Injector } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
 import { apiErrorStatus } from '../../shared/api-error';
 import { Employee } from '../../shared/models';
@@ -32,6 +33,15 @@ export class Auth {
   /** Simula o login único da empresa, que no produto real abriria a página do provedor. */
   signInWithCorporateAccount(): Promise<Employee> {
     return this.start(this.http.post<Employee>('/api/sessao/corporativa', {}));
+  }
+
+  /**
+   * "Sair": limpa a sessão simulada (o usuário atual) e volta para a tela de entrada. Não chama a
+   * API: no produto real, aqui o servidor encerraria a sessão; na PoC, a sessão vive só no app.
+   */
+  async signOut(): Promise<void> {
+    this.injector.get(CurrentUser).clear();
+    await this.injector.get(Router).navigateByUrl('/entrar');
   }
 
   private async start(call: Observable<Employee>): Promise<Employee> {

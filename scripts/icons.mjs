@@ -34,6 +34,7 @@ const ICONS = [
   'hourglass_top',
   'inbox',
   'light_mode',
+  'logout',
   'lock',
   'lock_clock',
   'lock_open',

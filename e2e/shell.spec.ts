@@ -235,6 +235,31 @@ test.describe('Casca no desktop', () => {
   });
 });
 
+test('"Sair", no menu do usuário, volta para a tela de entrada e limpa a sessão', async ({
+  page,
+}) => {
+  await open(page);
+  const trigger = page.getByRole('button', { name: 'Renata Albuquerque' });
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  const menu = page.getByRole('menu', { name: 'Sua conta' });
+  await expect(menu.getByRole('group', { name: 'Tema' })).toBeVisible();
+  // Só com teclado: das opções de tema, a seta leva até "Sair".
+  const signOut = menu.getByRole('menuitem', { name: 'Sair' });
+  await pressUntilFocused(page, 'ArrowDown', signOut);
+  await page.keyboard.press('Enter');
+
+  await expect(page).toHaveURL('/entrar');
+  await expect(page.getByRole('heading', { level: 1, name: 'Entrar' })).toBeVisible();
+
+  // Entrando de novo, a mesma pessoa volta ao menu.
+  await page.getByLabel('Usuário', { exact: true }).fill('renata.albuquerque');
+  await page.getByLabel('Senha', { exact: true }).fill('qualquer-senha');
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page).toHaveURL('/hoje');
+  await expect(page.getByRole('button', { name: 'Renata Albuquerque' })).toBeVisible();
+});
+
 test.describe('Casca no celular', () => {
   test.skip(({ isMobile }) => !isMobile, 'A barra inferior só aparece abaixo de 1024 px');
 

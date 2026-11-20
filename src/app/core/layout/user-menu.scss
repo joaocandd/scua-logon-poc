@@ -112,6 +112,11 @@
   flex: 1;
 }
 
+.separator {
+  margin: var(--space-2) 0;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
 .check {
   color: var(--color-link);
 }
