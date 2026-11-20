@@ -24,5 +24,5 @@ Para cobrir as telas do console atual que a PoC não tinha (Tempo de Bloqueio, G
 ## Consequências
 
 - Nenhuma dependência nova. Os gráficos passam pelo axe, pelo teste de teclado e pelo de 320 px como qualquer tela.
-- Os números dos relatórios são de demonstração e a tela diz isso. O cartão "Horas extras do mês" do painel Hoje conta só os pedidos das fixtures, então não bate com a série de 7 dias ao lado; o gráfico avisa que é a série fictícia dos relatórios.
+- Os números dos relatórios são de demonstração e a tela diz isso. O cartão "Horas extras do mês" do painel Hoje usa a mesma série (a API devolve desde o 1º dia do mês anterior), então Hoje e Relatórios mostram o mesmo total; um teste unitário confere (`monthly-overtime.spec.ts`). A série também conta os pedidos aprovados por dia (`approvedCount`), para o cartão dizer quantos pedidos.
 - No produto, a série viria do agente do Windows e do banco da Scua; a tela não muda, só a origem de `/api/relatorios/diario`.

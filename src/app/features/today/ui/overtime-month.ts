@@ -6,7 +6,7 @@ import { estimatedCost, MonthlyOvertime, MonthOvertime } from '../data/monthly-o
 
 /**
  * Horas extras do mês no painel "Hoje": o mês até hoje ao lado do mês anterior inteiro, com o custo
- * estimado. Sem gráfico: são dois números, e a lista de valores já é a forma acessível de lê-los.
+ * estimado. Os números vêm da mesma série dos relatórios. Sem gráfico: são dois números, e a lista de valores já é a forma acessível de lê-los.
  */
 @Component({
   selector: 'app-overtime-month',

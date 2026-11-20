@@ -24,6 +24,7 @@ function row(
     date,
     groupId,
     overtimeMinutes: 0,
+    approvedCount: 0,
     blockedMinutes: 0,
     absentCount: 0,
     scheduledCount: 0,

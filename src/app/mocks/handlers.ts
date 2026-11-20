@@ -18,7 +18,7 @@ import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved, signedIn } from './activity';
-import { createHistory } from './history';
+import { createHistory, historyDaysFor } from './history';
 import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
 import { nowDate } from '../shared/clock';
@@ -440,11 +440,12 @@ function listWorkstations({ db, now }: Context): MockResponse {
 }
 
 /**
- * Série diária por grupo dos últimos 30 dias, para os relatórios. FICTÍCIA: sai do createHistory,
- * com semente fixa, a partir das regras, feriados, exceções e pedidos aprovados do banco.
+ * Série diária por grupo, desde o primeiro dia do mês anterior (no mínimo 30 dias), para os
+ * relatórios e para as horas extras do mês no painel Hoje. FICTÍCIA: sai do createHistory, com
+ * semente fixa, a partir das regras, feriados, exceções e pedidos aprovados do banco.
  */
 function dailyReport({ db, now }: Context): MockResponse {
-  return ok(createHistory({ ...db.data, now }));
+  return ok(createHistory({ ...db.data, now }, historyDaysFor(now)));
 }
 
 /**

@@ -60,6 +60,7 @@ describe('gráficos do painel Hoje', () => {
       date: `2026-11-${String(i + 3).padStart(2, '0')}`,
       groupId: 'grp-ti',
       overtimeMinutes: 90,
+      approvedCount: 1,
       blockedMinutes: 0,
       absentCount: 0,
       scheduledCount: 0,

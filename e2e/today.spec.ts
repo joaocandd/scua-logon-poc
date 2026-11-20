@@ -129,8 +129,11 @@ test('o filtro por grupo vale para os contadores e para a lista', async ({ page 
   await expect(region(page, 'Alertas')).toContainText('Nenhum alerta agora.');
   const overtime = region(page, 'Horas extras do mês');
   await expect(overtime).toContainText('Horas extras aprovadas, pelo dia da jornada · Comercial.');
-  await expect(overtime).toContainText('Nenhuma hora extra aprovada em novembro.');
-  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*1h30/);
+  // A mesma série fictícia dos relatórios, só do Comercial.
+  await expect(overtime).toContainText(
+    /Novembro até hoje\s*Horas aprovadas\s*4h\s*Custo estimado\s*R\$ 180,00/,
+  );
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*37h30/);
   await expect(counter(page, 'Em jornada')).toHaveAccessibleName('0 Em jornada');
   await counter(page, 'Bloqueada').click();
   await expect(page).toHaveURL('/hoje?grupo=grp-comercial&estado=bloqueada');
@@ -147,12 +150,14 @@ test('horas extras do mês: novembro até hoje ao lado de outubro inteiro, com o
 }) => {
   await openPanel(page);
   const overtime = region(page, 'Horas extras do mês');
-  // Novembro: Igor (1h), Natália (2h) e Tatiane (1h30). Outubro: Lucas, Márcio e Larissa.
+  // A série fictícia dos relatórios (com os pedidos aprovados das fixtures), em 3/11 às 18h20.
   const november = overtime.getByRole('heading', { level: 3, name: 'Novembro até hoje' });
   await expect(november).toBeVisible();
-  await expect(overtime).toContainText(/Horas aprovadas\s*4h30\s*Custo estimado\s*R\$ 202,50/);
-  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*5h30/);
-  await expect(overtime).toContainText('R$ 247,50');
+  await expect(overtime).toContainText(/Horas aprovadas\s*8h30\s*Custo estimado\s*R\$ 382,50/);
+  await expect(overtime).toContainText(/Pedidos aprovados\s*6 pedidos/);
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*85h30/);
+  await expect(overtime).toContainText('R$ 3.847,50');
+  await expect(overtime).toContainText('Série fictícia, a mesma dos relatórios.');
   await expect(overtime).toContainText(
     'Estimativa: horas aprovadas × custo médio de R$ 45,00 por hora. O valor real sai da folha de pagamento.',
   );
@@ -172,7 +177,7 @@ test('o custo médio salvo em Configurações muda a estimativa', async ({ page 
 
   await page.getByRole('link', { name: 'Hoje', exact: true }).first().click();
   const overtime = region(page, 'Horas extras do mês');
-  await expect(overtime).toContainText('R$ 270,00');
+  await expect(overtime).toContainText('R$ 510,00');
   await expect(overtime).toContainText('custo médio de R$ 60,00 por hora');
 });
 

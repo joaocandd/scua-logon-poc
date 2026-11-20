@@ -11,6 +11,8 @@ export interface DailyGroupStats {
   groupId: string;
   /** Horas extras aprovadas, em minutos (cada colaborador conta no máximo 2 h por dia). */
   overtimeMinutes: number;
+  /** Pedidos de extensão aprovados no dia (os das fixtures e os fictícios). */
+  approvedCount: number;
   /**
    * Minutos de estação bloqueada com o colaborador diante dela: a tela de bloqueio aberta antes do
    * início, no intervalo ou depois do fim da jornada.

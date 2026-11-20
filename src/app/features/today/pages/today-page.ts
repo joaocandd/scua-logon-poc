@@ -123,15 +123,9 @@ export class TodayPage {
     }),
   );
 
+  /** Horas extras do mês: a mesma série dos relatórios, para os dois mostrarem o mesmo total. */
   protected readonly overtime = computed(() =>
-    monthlyOvertime({
-      requests: this.panel.requests(),
-      employees: this.employees(),
-      schedules: this.panel.schedules(),
-      exceptions: this.panel.exceptions(),
-      holidays: this.panel.holidays(),
-      today: toLocal(this.now()).date,
-    }),
+    monthlyOvertime(this.seriesRows(), this.groupId(), toLocal(this.now()).date),
   );
 
   /** Pedidos de hoje por status, no grupo escolhido. */
@@ -149,12 +143,10 @@ export class TodayPage {
    * falhar, só o gráfico mostra o erro; o resto do painel continua.
    */
   private readonly dailyReport = inject(DailyReport);
-  protected readonly weekOvertime = computed(() =>
-    weekOvertime(
-      this.dailyReport.list.hasValue() ? this.dailyReport.list.value() : [],
-      this.groupId(),
-    ),
+  private readonly seriesRows = computed(() =>
+    this.dailyReport.list.hasValue() ? this.dailyReport.list.value() : [],
   );
+  protected readonly weekOvertime = computed(() => weekOvertime(this.seriesRows(), this.groupId()));
   protected readonly weekOvertimeState = computed(() => {
     const state = loadState([this.dailyReport.list]);
     return state === 'forbidden' ? 'error' : state;

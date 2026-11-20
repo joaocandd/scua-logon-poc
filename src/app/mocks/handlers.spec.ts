@@ -544,9 +544,11 @@ describe('API simulada', () => {
     expect(of('col-17')?.reason).toBe('Bloqueada: fora da jornada Tarde (das 14h às 22h).');
   });
 
-  it('série diária fictícia dos relatórios: 30 dias, por grupo', () => {
+  it('série diária fictícia: desde 1º do mês anterior (no mínimo 30 dias), por grupo', () => {
     const rows = get<{ date: string; groupId: string }[]>('/api/relatorios/diario');
-    expect(rows).toHaveLength(30 * 6);
+    // De 01/10 a 12/11: 43 dias, para as horas extras de outubro inteiro no painel Hoje.
+    expect(rows).toHaveLength(43 * 6);
+    expect(rows[0]).toMatchObject({ date: '2026-10-01' });
     expect(rows.at(-1)).toMatchObject({ date: '2026-11-12', groupId: 'grp-rh' });
   });
 

@@ -26,8 +26,21 @@ import {
 import { overtimeMinutes } from '../shared/request-context';
 import { appliesTo, isShift, plannedShift } from '../shared/schedule-engine';
 
-/** Quantos dias, contando hoje, a série cobre. */
+/** Quantos dias, contando hoje, a série cobre no mínimo (o período mais longo dos relatórios). */
 export const HISTORY_DAYS = 30;
+
+/**
+ * Dias que a API devolve: desde o primeiro dia do mês anterior, para o cartão "Horas extras do mês"
+ * do painel Hoje usar a mesma série dos relatórios; nunca menos de 30.
+ */
+export function historyDaysFor(now: Date): number {
+  const today = toLocal(now).date;
+  const [year, month] = today.split('-').map(Number);
+  const first =
+    month === 1 ? `${year - 1}-12-01` : `${year}-${String(month - 1).padStart(2, '0')}-01`;
+  const days = Math.round((Date.parse(today) - Date.parse(first)) / 86_400_000) + 1;
+  return Math.max(HISTORY_DAYS, days);
+}
 
 /** Semente da série. Mudar a semente muda todos os números. */
 const SEED = 'scua-logon-poc';
@@ -75,6 +88,7 @@ export function createHistory(input: HistoryInput, days = HISTORY_DAYS): DailyGr
         date,
         groupId: group.id,
         overtimeMinutes: 0,
+        approvedCount: 0,
         blockedMinutes: 0,
         absentCount: 0,
         scheduledCount: 0,
@@ -102,6 +116,7 @@ function addEmployeeDay(row: DailyGroupStats, employee: Employee, input: History
   const rules = { schedule, exceptions, holidays: input.holidays };
   const realOvertime = approved.reduce((sum, r) => sum + overtimeMinutes(r, rules), 0);
   row.overtimeMinutes += Math.min(realOvertime, 120);
+  row.approvedCount += approved.length;
 
   // A jornada ainda não terminou: ausência e bloqueio do dia ficam para depois.
   const ended = Date.parse(toInstant(row.date, plan.end)) <= input.now.getTime();
@@ -121,6 +136,7 @@ function addEmployeeDay(row: DailyGroupStats, employee: Employee, input: History
   if (random() < profile.blocked) row.blockedMinutes += 5 + Math.floor(random() * 36);
   if (approved.length === 0 && random() < profile.overtime) {
     row.overtimeMinutes += OVERTIME_STEPS[Math.floor(random() * OVERTIME_STEPS.length)];
+    row.approvedCount++;
   }
 }
 
