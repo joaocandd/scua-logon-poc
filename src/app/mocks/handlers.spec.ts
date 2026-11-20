@@ -533,6 +533,12 @@ describe('API simulada', () => {
     expect(of('col-17')?.reason).toBe('Bloqueada: fora da jornada Tarde (das 14h às 22h).');
   });
 
+  it('série diária fictícia dos relatórios: 30 dias, por grupo', () => {
+    const rows = get<{ date: string; groupId: string }[]>('/api/relatorios/diario');
+    expect(rows).toHaveLength(30 * 6);
+    expect(rows.at(-1)).toMatchObject({ date: '2026-11-12', groupId: 'grp-rh' });
+  });
+
   describe('configurações', () => {
     it('começam com o custo médio da hora extra da demonstração', () => {
       expect(get<Settings>('/api/configuracoes')).toEqual({ overtimeHourlyCost: 45 });

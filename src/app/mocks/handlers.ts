@@ -18,6 +18,7 @@ import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved } from './activity';
+import { createHistory } from './history';
 import { MockDb } from './db';
 
 export interface MockRequest {
@@ -82,6 +83,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
+  ['GET', '/api/relatorios/diario', dailyReport],
 
   ['GET', '/api/configuracoes', ({ db }) => ok(db.data.settings)],
   ['PUT', '/api/configuracoes', saveSettings],
@@ -407,6 +409,14 @@ function listWorkstations({ db, now }: Context): MockResponse {
     return [{ employeeId: employee.id, ...status, ...observed }];
   });
   return ok(workstations);
+}
+
+/**
+ * Série diária por grupo dos últimos 30 dias, para os relatórios. FICTÍCIA: sai do createHistory,
+ * com semente fixa, a partir das regras, feriados, exceções e pedidos aprovados do banco.
+ */
+function dailyReport({ db, now }: Context): MockResponse {
+  return ok(createHistory({ ...db.data, now }));
 }
 
 /**
