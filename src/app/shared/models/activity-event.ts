@@ -1,4 +1,6 @@
 export type ActivityEventType =
+  /** Alguém entrou no console (login). */
+  | 'acesso'
   | 'pedido_criado'
   | 'pedido_aprovado'
   | 'pedido_recusado'

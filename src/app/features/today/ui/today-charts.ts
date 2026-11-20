@@ -25,6 +25,7 @@ export class TodayCharts {
   protected readonly formats = { count, hours };
 
   /** Os links levam o grupo escolhido no painel. */
-  protected readonly reportQuery = computed(() => ({ grupo: this.groupId() }));
+  /** Os pedidos de hoje vêm do registro da auditoria (que filtra por pessoa, não por grupo). */
+  protected readonly auditQuery = { tipo: 'pedidos', periodo: 'hoje' };
   protected readonly weekQuery = computed(() => ({ periodo: 7, grupo: this.groupId() }));
 }

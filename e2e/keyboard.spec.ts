@@ -31,6 +31,10 @@ const screens: Screen[] = [
   { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
   { url: '/estacoes?busca=xyz', ready: button('Limpar filtros') },
   { url: '/relatorios', ready: heading('Horas extras') },
+  {
+    url: '/relatorios/auditoria',
+    ready: (page) => page.getByRole('table', { name: 'Registro de eventos' }),
+  },
   { url: '/relatorios?simular=vazio', ready: heading('Nenhum dado no período') },
   { url: '/configuracoes', ready: button('Renata Albuquerque') },
   { url: '/endereco-que-nao-existe', ready: button('Renata Albuquerque') },

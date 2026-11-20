@@ -78,4 +78,16 @@ export const screens: Screen[] = [
   { url: '/relatorios?simular=vazio', ready: 'Nenhum dado no período' },
   { url: '/relatorios?simular=lento', ready: 'Relatórios', loading: true },
   { url: '/relatorios?simular=sem-permissao', ready: 'Você não tem acesso aos relatórios' },
+
+  // Auditoria
+  { url: '/relatorios/auditoria', ready: 'Auditoria' },
+  { url: '/relatorios/auditoria?tipo=acessos&periodo=7', ready: 'Auditoria' },
+  { url: '/relatorios/auditoria?periodo=hoje&tipo=desfazer', ready: 'Nenhum evento encontrado' },
+  { url: '/relatorios/auditoria?simular=erro', ready: 'Não conseguimos carregar o registro' },
+  { url: '/relatorios/auditoria?simular=vazio', ready: 'Nenhum evento registrado' },
+  { url: '/relatorios/auditoria?simular=lento', ready: 'Auditoria', loading: true },
+  {
+    url: '/relatorios/auditoria?simular=sem-permissao',
+    ready: 'Você não tem acesso à auditoria',
+  },
 ];

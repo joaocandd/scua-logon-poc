@@ -17,7 +17,7 @@ import { requestTimeline } from '../shared/request-timeline';
 import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
-import { decisionUndone, requestDecided, scheduleSaved } from './activity';
+import { decisionUndone, requestDecided, scheduleSaved, signedIn } from './activity';
 import { createHistory } from './history';
 import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
@@ -55,7 +55,7 @@ export const DEMO_INVALID_PASSWORD = 'erro';
 const ROUTES: [method: string, path: string, handler: Handler][] = [
   ['GET', '/api/eu', currentUser],
   ['POST', '/api/sessao', signIn],
-  ['POST', '/api/sessao/corporativa', currentUser],
+  ['POST', '/api/sessao/corporativa', (context) => signIn(context, true)],
   ['GET', '/api/colaboradores', ({ db }) => ok(db.data.employees)],
   ['GET', '/api/grupos', ({ db }) => ok(db.data.groups)],
   ['GET', '/api/feriados', ({ db }) => ok(db.data.holidays)],
@@ -129,12 +129,20 @@ function currentUser({ db }: Context): MockResponse {
  * Login simulado: qualquer usuário e senha preenchidos entram como a usuária da demonstração
  * (Renata Albuquerque, que aprova todos os grupos). A senha "erro" simula credencial inválida.
  */
-function signIn(context: Context): MockResponse {
-  const { username, password } = (context.body ?? {}) as Record<string, unknown>;
-  const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
-  if (!filled(username) || !filled(password)) return fail(422, 'Informe o usuário e a senha.');
-  if (password === DEMO_INVALID_PASSWORD) return fail(401, 'Usuário ou senha incorretos.');
-  return currentUser(context);
+function signIn(context: Context, corporate = false): MockResponse {
+  if (!corporate) {
+    const { username, password } = (context.body ?? {}) as Record<string, unknown>;
+    const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
+    if (!filled(username) || !filled(password)) return fail(422, 'Informe o usuário e a senha.');
+    if (password === DEMO_INVALID_PASSWORD) return fail(401, 'Usuário ou senha incorretos.');
+  }
+  const response = currentUser(context);
+  // A auditoria registra cada entrada.
+  const actor = context.db.employee(context.db.currentUserId);
+  if (response.status === 200 && actor) {
+    context.db.log(signedIn(actor, context.now.toISOString(), corporate));
+  }
+  return response;
 }
 
 /**

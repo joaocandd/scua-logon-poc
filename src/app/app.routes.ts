@@ -94,6 +94,11 @@ export const routes: Routes = [
           import('./features/reports/pages/reports-page').then((m) => m.ReportsPage),
       },
       {
+        path: 'relatorios/auditoria',
+        title: 'Auditoria',
+        loadComponent: () => import('./features/reports/pages/audit-page').then((m) => m.AuditPage),
+      },
+      {
         path: 'configuracoes',
         title: 'Configurações',
         loadComponent: () =>

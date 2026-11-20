@@ -9,7 +9,9 @@
       labelHeader="Status"
       valueHeader="Pedidos"
     />
-    <a class="more" routerLink="/relatorios" [queryParams]="reportQuery()">Ver relatórios</a>
+    <a class="more" routerLink="/relatorios/auditoria" [queryParams]="auditQuery">
+      Ver o registro de hoje
+    </a>
   </div>
 
   <div class="card">

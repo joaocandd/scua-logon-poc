@@ -25,6 +25,7 @@ import {
   requestDecided,
   requestExpired,
   scheduleSaved,
+  signedIn,
 } from '../activity';
 import { HR_VALIDATOR_ID } from './employees';
 
@@ -456,6 +457,25 @@ function buildHistory(
   const hr = person(HR_VALIDATOR_ID);
   events.push(scheduleSaved(byId(context.schedules, 'regra-flexivel'), hr, daysAgo(20), true));
   events.push(scheduleSaved(byId(context.schedules, 'regra-tarde'), hr, daysAgo(3), false));
+
+  // Acessos ao console nos últimos dias, para a auditoria: a diretora, o RH e os gestores.
+  const accesses: [employeeId: string, days: number, corporate: boolean][] = [
+    ['col-25', 0.1, true],
+    ['col-37', 0.3, false],
+    ['col-07', 0.5, true],
+    ['col-25', 1.2, true],
+    ['col-16', 1.4, false],
+    ['col-37', 2.3, false],
+    ['col-26', 2.6, true],
+    ['col-25', 4.2, true],
+    ['col-01', 5.4, false],
+    ['col-37', 8.3, false],
+    ['col-32', 12.4, true],
+    ['col-25', 15.2, true],
+  ];
+  for (const [id, days, corporate] of accesses) {
+    events.push(signedIn(person(id), daysAgo(days), corporate));
+  }
 
   return events
     .sort((a, b) => a.at.localeCompare(b.at))
