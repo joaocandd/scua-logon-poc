@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -10,6 +11,7 @@ import {
   PageHeader,
   Skeleton,
   STATUS_INFO,
+  Toast,
 } from '../../../design-system';
 import { isRetrying, loadState, retryFailed } from '../../schedules/data/load-state';
 import { WorkSchedules } from '../../schedules/data/work-schedules';
@@ -18,6 +20,7 @@ import { WorkstationDirectory } from '../../workstations/data/workstation-direct
 import { EmployeeOvertime } from '../data/employee-overtime';
 import { People } from '../data/people';
 import { countLabel, filterPeople, parseOrder, personRows } from '../data/people-list';
+import { IMPORT_DIALOG_TITLE_ID, ImportDialog, ImportDialogData } from '../ui/import-dialog';
 import { PeopleTable } from '../ui/people-table';
 import { PeopleTabs } from '../ui/people-tabs';
 
@@ -58,6 +61,8 @@ export class PeoplePage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
+  private readonly dialog = inject(Dialog);
+  private readonly toast = inject(Toast);
 
   private readonly resources = [
     this.people.employees,
@@ -160,6 +165,26 @@ export class PeoplePage {
   protected clearFilters(): void {
     this.search.set('');
     this.navigate({ busca: null, grupo: null, regra: null, estado: null });
+  }
+
+  /**
+   * Importar planilha (substitui a "Carga de Dados" do console atual). SIMULADO: o diálogo mostra
+   * a prévia do arquivo de exemplo e, ao confirmar, só o aviso; a lista não muda.
+   */
+  protected openImport(): void {
+    if (this.dialog.openDialogs.length > 0) return;
+    const ref = this.dialog.open<number, ImportDialogData>(ImportDialog, {
+      data: { groups: this.groups() },
+      ariaLabelledBy: IMPORT_DIALOG_TITLE_ID,
+      maxWidth: 'calc(100vw - 2 * var(--space-4))',
+      restoreFocus: true,
+    });
+    ref.closed.subscribe((imported) => {
+      if (!imported) return;
+      this.toast.show({
+        message: `${imported} colaboradores importados. Simulação: a lista não muda nesta prova de conceito.`,
+      });
+    });
   }
 
   protected retry(): void {

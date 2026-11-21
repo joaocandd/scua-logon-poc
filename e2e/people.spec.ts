@@ -176,3 +176,42 @@ test('aba Grupos: um cartão por grupo, e "Ver colaboradores" abre a lista filtr
   await expect(page).toHaveURL('/pessoas?grupo=grp-ti');
   await expect(table(page).getByRole('rowheader')).toHaveCount(5);
 });
+
+test('importar planilha (simulado): prévia com 2 erros explicados e importação de 3', async ({
+  page,
+}) => {
+  await openPeople(page);
+  const open = page.getByRole('button', { name: 'Importar planilha' });
+  await open.click();
+
+  const dialog = page.getByRole('dialog', { name: 'Importar colaboradores' });
+  await expect(dialog).toContainText('a importação é simulada');
+  await expectNoA11yViolations(page);
+
+  await dialog.getByRole('button', { name: 'Usar arquivo de exemplo' }).click();
+  await expect(
+    dialog.getByRole('heading', { name: 'Prévia de colaboradores-exemplo.csv' }),
+  ).toBeFocused();
+  await expect(dialog.getByRole('listitem')).toHaveCount(5);
+  await expect(dialog).toContainText('3 prontas para importar, 2 com erro');
+  await expect(dialog).toContainText('E-mail inválido: “otavio.rezende@empresa”');
+  await expect(dialog).toContainText('O grupo “Logística” não existe');
+  await expectNoA11yViolations(page);
+
+  await dialog.getByRole('button', { name: 'Importar 3 colaboradores' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText('3 colaboradores importados. Simulação')).toBeVisible();
+  await expect(open).toBeFocused();
+  // Simulação: a lista não muda.
+  await expect(table(page).getByRole('rowheader')).toHaveCount(40);
+});
+
+test('importar planilha: Esc cancela e devolve o foco ao botão', async ({ page }) => {
+  await openPeople(page);
+  const open = page.getByRole('button', { name: 'Importar planilha' });
+  await open.click();
+  await expect(page.getByRole('dialog', { name: 'Importar colaboradores' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(open).toBeFocused();
+});

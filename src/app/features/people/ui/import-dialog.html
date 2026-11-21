@@ -1,0 +1,63 @@
+<h2 class="title" [id]="titleId">Importar colaboradores</h2>
+
+@if (rows(); as preview) {
+  <!-- tabindex="-1": recebe o foco quando a prévia aparece. -->
+  <h3 #previewHeading class="subtitle" tabindex="-1">Prévia de {{ fileName }}</h3>
+  <p class="summary">
+    {{ preview.length }} linhas: {{ valid().length }} prontas para importar,
+    {{ invalidCount() }} com erro. As linhas com erro ficam de fora; corrija a planilha e importe de
+    novo.
+  </p>
+
+  <ol class="rows">
+    @for (row of preview; track row.line) {
+      <li class="row" [class.invalid]="row.error">
+        <p class="who">
+          <span class="line">Linha {{ row.line }}</span>
+          <strong>{{ row.name }}</strong>
+          <span class="muted">{{ row.registration }} · {{ row.jobTitle }} · {{ row.group }}</span>
+          <span class="muted email">{{ row.email }}</span>
+        </p>
+        @if (row.error; as error) {
+          <p class="result error">
+            <app-icon name="error" />
+            <span>{{ error }}</span>
+          </p>
+        } @else {
+          <p class="result ok">
+            <app-icon name="check_circle" />
+            <span>Pronta para importar</span>
+          </p>
+        }
+      </li>
+    }
+  </ol>
+
+  <div class="actions">
+    <button app-button type="button" variant="ghost" (click)="chooseAnother()">
+      Escolher outro arquivo
+    </button>
+    <button app-button type="button" variant="secondary" (click)="ref.close()">Cancelar</button>
+    <button app-button type="button" icon="check" (click)="confirm()">
+      {{ importLabel() }}
+    </button>
+  </div>
+} @else {
+  <p class="summary">
+    Planilha em CSV ou Excel, uma linha por colaborador, com nome, e-mail, matrícula, cargo e grupo.
+    Antes de importar, você confere uma prévia com os erros de cada linha.
+  </p>
+  <p class="note">
+    <app-icon name="info" />
+    <span>
+      Nesta prova de conceito, a importação é simulada: use o arquivo de exemplo. Nada é gravado.
+    </span>
+  </p>
+
+  <div class="actions">
+    <button app-button type="button" variant="secondary" (click)="ref.close()">Cancelar</button>
+    <button #chooseButton app-button type="button" icon="upload_file" (click)="useSample()">
+      Usar arquivo de exemplo
+    </button>
+  </div>
+}

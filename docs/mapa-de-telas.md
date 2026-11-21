@@ -16,7 +16,7 @@ Status na PoC:
 | Jornada de trabalho | **Regras de jornada** (`/regras`), fluxo B | pronto |
 | Extensão de jornada | **Aprovações** (`/aprovacoes`), fluxo A, e o link do e-mail (`/aprovacao/:token`) | pronto |
 | Relatórios | **Relatórios** (`/relatorios`): horas extras, tempo de bloqueio e ausência | pronto |
-| Carga de Dados | **Pessoas** (`/pessoas`), como importação de colaboradores e grupos | fora do escopo |
+| Carga de Dados | **Pessoas** (`/pessoas`) › **Importar planilha**: prévia com a validação de cada linha antes de importar | pronto (simulado, com arquivo de exemplo) |
 | Estações | **Estações** (`/estacoes`): estado de cada estação, regra e última atividade | pronto |
 | Administrador | **Configurações** (`/configuracoes`): permissões de acesso e quem administra | parcial (só o custo médio da hora extra e o restaurar dados de demonstração) |
 | Pausas | Provavelmente nos intervalos de **Regras de jornada** | a verificar |

@@ -1,7 +1,13 @@
 <app-page-header
   heading="Pessoas"
   description="Colaboradores e grupos, com a regra de jornada e a estação de cada um."
-/>
+>
+  @if (state() === 'ready') {
+    <button app-button type="button" variant="secondary" icon="upload_file" (click)="openImport()">
+      Importar planilha
+    </button>
+  }
+</app-page-header>
 
 <app-people-tabs active="colaboradores" />
 
