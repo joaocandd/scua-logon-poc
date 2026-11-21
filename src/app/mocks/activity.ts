@@ -12,6 +12,16 @@ import { formatClock, toMinutes } from '../shared/time';
 /** Item do histórico antes de ganhar id. */
 export type NewActivityEvent = Omit<ActivityEvent, 'id'>;
 
+/** Entrada no console: pelo formulário ou pela conta corporativa. */
+export function signedIn(actor: Employee, at: string, corporate: boolean): NewActivityEvent {
+  return {
+    type: 'acesso',
+    at,
+    actorId: actor.id,
+    summary: `${actor.name} entrou no Scua Logon${corporate ? ' com a conta corporativa' : ''}.`,
+  };
+}
+
 export function requestCreated(request: ExtensionRequest, employee: Employee): NewActivityEvent {
   return {
     type: 'pedido_criado',

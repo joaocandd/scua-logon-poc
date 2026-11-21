@@ -1,0 +1,108 @@
+<app-page-header
+  heading="Auditoria"
+  description="Acessos, pedidos, decisões e mudanças de regra, do mais novo para o mais antigo."
+>
+  <a app-button variant="ghost" icon="arrow_back" routerLink="/relatorios">Relatórios</a>
+</app-page-header>
+
+<p class="readonly">
+  <app-icon name="lock" />
+  Os registros não podem ser editados.
+</p>
+
+<!-- Região de status para leitor de tela: existe desde o início, para os anúncios serem lidos. -->
+<p class="cdk-visually-hidden" role="status">{{ status() }}</p>
+
+@switch (state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso à auditoria"
+      description="Esta área é do RH e de quem audita o Scua Logon. Se você precisa dela, peça acesso ao administrador do Scua Logon."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não conseguimos carregar o registro"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @default {
+    <div class="toolbar">
+      <app-field label="Pessoa" class="filter">
+        <select appFieldControl #personSelect (change)="setPerson(personSelect.value)">
+          <option value="" [selected]="!personId()">Todas as pessoas</option>
+          @for (person of peopleOptions(); track person.id) {
+            <option [value]="person.id" [selected]="person.id === personId()">
+              {{ person.name }}
+            </option>
+          }
+        </select>
+      </app-field>
+      <app-field label="Tipo" class="filter">
+        <select appFieldControl #kindSelect (change)="setKind(kindSelect.value)">
+          <option value="" [selected]="!kind()">Todos os tipos</option>
+          @for (option of kinds; track option.value) {
+            <option [value]="option.value" [selected]="option.value === kind()">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+      </app-field>
+      <app-field label="Período" class="filter">
+        <select appFieldControl #periodSelect (change)="setPeriod(periodSelect.value)">
+          @for (option of periods; track option.value) {
+            <option [value]="option.value" [selected]="option.value === period()">
+              {{ option.label }}
+            </option>
+          }
+        </select>
+      </app-field>
+      @if (state() === 'ready' && rows().length > 0) {
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          icon="download"
+          class="export"
+          (click)="exportCsv()"
+        >
+          Exportar CSV
+        </button>
+      }
+    </div>
+
+    @if (state() === 'loading') {
+      <ul class="skeleton-list" aria-busy="true">
+        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+          <li aria-hidden="true">
+            <app-skeleton width="20%" />
+            <app-skeleton width="70%" />
+          </li>
+        }
+      </ul>
+    } @else if (rows().length === 0) {
+      @if (filtered()) {
+        <app-empty-state
+          icon="search_off"
+          heading="Nenhum evento encontrado"
+          description="Nenhum registro combina com os filtros. Mude a pessoa, o tipo ou o período."
+        >
+          <button app-button type="button" variant="secondary" (click)="clearFilters()">
+            Limpar filtros
+          </button>
+        </app-empty-state>
+      } @else {
+        <app-empty-state
+          icon="history"
+          heading="Nenhum evento registrado"
+          description="Os acessos, pedidos, decisões e mudanças de regra aparecem aqui assim que acontecem."
+        />
+      }
+    } @else {
+      <p class="count" aria-hidden="true">{{ status() }}</p>
+      <app-audit-table [rows]="rows()" />
+    }
+  }
+}

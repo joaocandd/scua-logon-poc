@@ -1,0 +1,139 @@
+// Estilos comuns do BarChart e do LineChart. Só tokens semânticos: o tema escuro vem junto.
+// O laranja de destaque (--color-accent) só nas marcas: com 3,16:1 no branco, serve para gráfico,
+// nunca para texto. Textos usam as cores de texto.
+:host {
+  display: block;
+}
+
+.plot {
+  position: relative;
+  width: 100%;
+}
+
+.svg {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+  font-family: var(--font-sans);
+}
+
+.grid line {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.tick,
+.label {
+  fill: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.category {
+  fill: var(--color-text);
+  font-size: var(--text-xs);
+}
+
+.value {
+  fill: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mark {
+  cursor: default;
+  outline: none;
+
+  // Anel de foco do design system em volta da faixa do ponto (a coluna ou a linha inteira).
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+}
+
+.band {
+  fill: transparent;
+
+  &.active {
+    fill: var(--color-bg-subtle);
+  }
+}
+
+.bar {
+  fill: var(--color-accent);
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.area {
+  fill: var(--color-accent);
+  opacity: 0.1;
+}
+
+.crosshair {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+// Anel de 2 px da cor da superfície: o marcador continua legível sobre a linha.
+.marker {
+  fill: var(--color-accent);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 10rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring), var(--shadow-raised);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+
+.tooltip-value {
+  font-size: var(--text-sm);
+}
+
+.tooltip-label {
+  color: var(--color-text-muted);
+}
+
+// Sem cores no modo de alto contraste do Windows: as marcas usam as cores do sistema.
+@media (forced-colors: active) {
+  .bar,
+  .marker,
+  .area {
+    fill: CanvasText;
+  }
+
+  .line {
+    stroke: CanvasText;
+  }
+
+  .band.active {
+    fill: Highlight;
+    opacity: 0.3;
+  }
+}

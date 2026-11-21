@@ -9,7 +9,7 @@ import {
   ExtensionRequest,
   OBSERVATION_DAYS,
   Settings,
-  Workstation,
+  WorkstationDetail,
   WorkSchedule,
 } from '../shared/models';
 import { requestContext } from '../shared/request-context';
@@ -17,8 +17,11 @@ import { requestTimeline } from '../shared/request-timeline';
 import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
-import { decisionUndone, requestDecided, scheduleSaved } from './activity';
+import { decisionUndone, requestDecided, scheduleSaved, signedIn } from './activity';
+import { createHistory, historyDaysFor } from './history';
+import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
+import { nowDate } from '../shared/clock';
 
 export interface MockRequest {
   method: string;
@@ -53,7 +56,7 @@ export const DEMO_INVALID_PASSWORD = 'erro';
 const ROUTES: [method: string, path: string, handler: Handler][] = [
   ['GET', '/api/eu', currentUser],
   ['POST', '/api/sessao', signIn],
-  ['POST', '/api/sessao/corporativa', currentUser],
+  ['POST', '/api/sessao/corporativa', (context) => signIn(context, true)],
   ['GET', '/api/colaboradores', ({ db }) => ok(db.data.employees)],
   ['GET', '/api/grupos', ({ db }) => ok(db.data.groups)],
   ['GET', '/api/feriados', ({ db }) => ok(db.data.holidays)],
@@ -82,6 +85,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
+  ['GET', '/api/relatorios/diario', dailyReport],
 
   ['GET', '/api/configuracoes', ({ db }) => ok(db.data.settings)],
   ['PUT', '/api/configuracoes', saveSettings],
@@ -98,7 +102,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
 ];
 
 /** Responde a uma chamada a /api/... a partir do banco em memória. */
-export function handleApiRequest(db: MockDb, request: MockRequest, now = new Date()): MockResponse {
+export function handleApiRequest(db: MockDb, request: MockRequest, now = nowDate()): MockResponse {
   const url = new URL(request.url, 'http://localhost');
   db.expirePending(now);
   db.deliverLiveRequests(now);
@@ -126,12 +130,20 @@ function currentUser({ db }: Context): MockResponse {
  * Login simulado: qualquer usuário e senha preenchidos entram como a usuária da demonstração
  * (Renata Albuquerque, que aprova todos os grupos). A senha "erro" simula credencial inválida.
  */
-function signIn(context: Context): MockResponse {
-  const { username, password } = (context.body ?? {}) as Record<string, unknown>;
-  const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
-  if (!filled(username) || !filled(password)) return fail(422, 'Informe o usuário e a senha.');
-  if (password === DEMO_INVALID_PASSWORD) return fail(401, 'Usuário ou senha incorretos.');
-  return currentUser(context);
+function signIn(context: Context, corporate = false): MockResponse {
+  if (!corporate) {
+    const { username, password } = (context.body ?? {}) as Record<string, unknown>;
+    const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
+    if (!filled(username) || !filled(password)) return fail(422, 'Informe o usuário e a senha.');
+    if (password === DEMO_INVALID_PASSWORD) return fail(401, 'Usuário ou senha incorretos.');
+  }
+  const response = currentUser(context);
+  // A auditoria registra cada entrada.
+  const actor = context.db.employee(context.db.currentUserId);
+  if (response.status === 200 && actor) {
+    context.db.log(signedIn(actor, context.now.toISOString(), corporate));
+  }
+  return response;
 }
 
 /**
@@ -217,7 +229,7 @@ function undo({ db, params, body, now }: Context): MockResponse {
  * do grupo) aprova o pedido. A tela recebe 409, "Este pedido já foi aprovado por Marina às 18h03.",
  * como aconteceria com dois gestores decidindo ao mesmo tempo.
  */
-export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = new Date()): void {
+export function decideElsewhereFirst(db: MockDb, request: MockRequest, now = nowDate()): void {
   const { pathname } = new URL(request.url, 'http://localhost');
   const params = matchPath('/api/pedidos/:id/:action', pathname);
   const target = db.data.requests.find((r) => r.id === params?.['id']);
@@ -399,14 +411,41 @@ function listActivity({ db, query }: Context): MockResponse {
  * Quem só está numa regra em observação vem marcado: o estado é o que a regra faria, sem bloquear.
  */
 function listWorkstations({ db, now }: Context): MockResponse {
-  const workstations: Workstation[] = db.data.employees.flatMap((employee) => {
+  const workstations: WorkstationDetail[] = db.data.employees.flatMap((employee) => {
     const schedule = db.scheduleFor(employee);
     if (!schedule) return [];
     const status = db.evaluate(schedule, employee, now);
     const observed = schedule.observationMode ? { observed: true } : {};
-    return [{ employeeId: employee.id, ...status, ...observed }];
+    const exceptions = db.data.exceptions.filter((e) => e.employeeId === employee.id);
+    const lastActivityAt = lastActivity(
+      schedule,
+      exceptions,
+      db.data.holidays,
+      status.state,
+      employee.id,
+      now,
+    );
+    return [
+      {
+        employeeId: employee.id,
+        ...status,
+        ...observed,
+        hostname: hostnameOf(employee),
+        scheduleId: schedule.id,
+        ...(lastActivityAt && { lastActivityAt }),
+      },
+    ];
   });
   return ok(workstations);
+}
+
+/**
+ * Série diária por grupo, desde o primeiro dia do mês anterior (no mínimo 30 dias), para os
+ * relatórios e para as horas extras do mês no painel Hoje. FICTÍCIA: sai do createHistory, com
+ * semente fixa, a partir das regras, feriados, exceções e pedidos aprovados do banco.
+ */
+function dailyReport({ db, now }: Context): MockResponse {
+  return ok(createHistory({ ...db.data, now }, historyDaysFor(now)));
 }
 
 /**

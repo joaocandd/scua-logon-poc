@@ -1,0 +1,25 @@
+<table class="table" aria-label="Registro de eventos">
+  <thead>
+    <tr>
+      <th scope="col">Quando</th>
+      <th scope="col">Tipo</th>
+      <th scope="col">Quem</th>
+      <th scope="col">O que aconteceu</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.id) {
+      <tr>
+        <td class="when">
+          <time [attr.datetime]="row.at">{{ row.when }}</time>
+        </td>
+        <td class="type">{{ row.typeLabel }}</td>
+        <td class="actor">
+          <span class="cell-label" aria-hidden="true">Quem:</span>
+          {{ row.actor }}
+        </td>
+        <td class="summary">{{ row.summary }}</td>
+      </tr>
+    }
+  </tbody>
+</table>

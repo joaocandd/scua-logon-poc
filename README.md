@@ -11,7 +11,7 @@ Esta prova de conceito mostra duas tarefas de ponta a ponta:
 - **Fluxo A · Aprovar hora extra** (gestor, celular primeiro): caixa de pedidos com o contexto de cada um, aprovar, recusar com motivo, aprovar em lote e desfazer. O gestor também decide pelo link do e-mail, sem entrar no app.
 - **Fluxo B · Configurar regra de jornada** (RH, desktop): editor com linha do tempo, resumo em português, conflitos explicados em texto, simulador "e se?" e prévia do impacto antes de salvar.
 
-E três extras: login acessível, a página pública de aprovação por e-mail com erros humanos e o painel "Hoje".
+E os extras: login acessível, a página pública de aprovação por e-mail com erros humanos, o painel "Hoje" com gráficos, relatórios (horas extras, tempo de bloqueio e ausência), a lista de estações, a auditoria e a ajuda. Onde cada item do menu do console atual fica na proposta está em [`docs/mapa-de-telas.md`](docs/mapa-de-telas.md).
 
 Não há backend, autenticação real nem integrações (Teams, WhatsApp, login corporativo). Tudo é simulado no navegador.
 
@@ -55,7 +55,8 @@ Para apresentar, use o build de produção, que é o que seria publicado: mais l
    ```
 
    O comando faz o build de produção (`npm run build`) e serve a pasta `dist/scua-logon-poc/browser` com o `scripts/serve-dist.mjs`, sem pacote extra.
-3. Espere a linha `Servindo … em http://localhost:4400` e abra http://localhost:4400 no Chrome. Qualquer endereço do app funciona direto, como http://localhost:4400/aprovacoes?demo=ao-vivo.
+3. Espere a linha `Servindo … em http://localhost:4400` e abra **http://localhost:4400/entrar?relogio=2026-11-24T17:40** no Chrome. Qualquer endereço do app funciona direto, como http://localhost:4400/aprovacoes?demo=ao-vivo.
+   O `?relogio=2026-11-24T17:40` liga o **relógio de demonstração**: o app vive numa terça-feira às 17h40, com gente em jornada, pedidos aguardando e o alerta da Noturna, qualquer que seja o dia real (a demo é num sábado). O tempo anda normalmente a partir dali. O relógio fica guardado na aba (sessionStorage) e vale em todas as telas; a faixa no topo mostra a hora e tem o botão **Desligar**. Cada aba nova precisa do parâmetro. Sem ele, nada muda.
 4. Para mostrar o celular, use o modo celular do DevTools (Ctrl+Shift+M) com 390 px de largura. Um celular na mesma rede também abre o app em `http://<IP do computador>:4400`, se o firewall deixar.
 5. Antes de cada apresentação, em **Configurações**, clique em **Restaurar dados de demonstração**. Recarregar a página também volta os dados ao começo.
 6. Para encerrar, Ctrl+C no terminal.
@@ -85,12 +86,16 @@ O CI (`.github/workflows/ci.yml`) roda, em cada push e pull request: a conferên
 | Endereço | O que mostra |
 |---|---|
 | `/entrar` | Login. `/entrar/esqueci-minha-senha` explica a quem pedir uma senha nova |
-| `/hoje` | Painel ao vivo: pedidos aguardando, alertas, estações por estado e horas extras do mês |
+| `/hoje` | Painel ao vivo: pedidos aguardando, alertas, estações por estado, pedidos de hoje por status, horas extras da semana e do mês |
 | `/aprovacoes` | Caixa de aprovações (fluxo A). `/aprovacoes/ped-02` abre o detalhe de um pedido |
 | `/aprovacao/:token` | Página pública do link do e-mail, fora do app (tokens abaixo) |
 | `/regras` | Regras de jornada (fluxo B). `/regras/nova` cria; `/regras/regra-comercial` edita; `/regras/regra-fechamento` já abre com um conflito entre regras |
+| `/estacoes` | Estações: máquina, colaborador, grupo, estado agora, regra e última atividade, com busca e filtros |
+| `/relatorios` | Horas extras, tempo de bloqueio e ausência por dia e por grupo, nos últimos 7 ou 30 dias, com CSV. Números fictícios (ADR 0021) |
+| `/relatorios/auditoria` | Registro de eventos (acessos, pedidos, decisões, desfazer, regras), com filtros e CSV |
 | `/configuracoes` | Custo médio da hora extra, usado no painel Hoje, e o botão "Restaurar dados de demonstração" |
-| `/pessoas`, `/relatorios` | Fora do escopo: a tela diz o que ficaria ali |
+| `/ajuda` | Perguntas frequentes (no menu do usuário, com o Sair) |
+| `/pessoas` | Fora do escopo: a tela diz o que ficaria ali e quais itens do sistema atual vão para lá |
 
 ## Como simular estados
 
@@ -104,8 +109,9 @@ Acrescente o parâmetro ao endereço de qualquer tela, por exemplo `/aprovacoes?
 | `?simular=sem-permissao` | A pessoa entra, mas não pode ver os dados |
 | `?simular=decidido` | Ao aprovar ou recusar, outro gestor já decidiu o pedido |
 | `?demo=ao-vivo` | Chega um pedido novo a cada 30 s na caixa de aprovações, até recarregar a página |
+| `?relogio=2026-11-24T17:40` | Relógio de demonstração: o app vive no dia e na hora escolhidos (São Paulo), e o tempo anda dali. Fica guardado na aba até clicar em **Desligar** na faixa do topo |
 
-O parâmetro vale para o endereço aberto. Ao navegar pelo menu, ele sai e as chamadas voltam ao normal (ADR 0005).
+O parâmetro vale para o endereço aberto. Ao navegar pelo menu, ele sai e as chamadas voltam ao normal (ADR 0005). A exceção é o `?relogio=`, que fica guardado na aba (ADR 0022).
 
 ## Tokens de aprovação de exemplo
 
@@ -132,9 +138,11 @@ src/
       today/         painel ao vivo                 /hoje
       approvals/     caixa de aprovações (fluxo A)  /aprovacoes  e  /aprovacao/:token
       schedules/     regras de jornada (fluxo B)    /regras  e  /regras/:id
+      workstations/  estações                       /estacoes
       people/        colaboradores e grupos         /pessoas
-      reports/       relatórios                     /relatorios
+      reports/       relatórios e auditoria         /relatorios  e  /relatorios/auditoria
       settings/      configurações                  /configuracoes
+      help/          ajuda                          /ajuda
     shared/          modelos, datas e horas, motor de regras (schedule-engine)
     mocks/           banco em memória, fixtures e rotas da API simulada
   styles/            tokens.css: as cores, medidas e fontes da marca
@@ -187,10 +195,11 @@ O axe não substitui o teste com leitor de tela, que continua manual.
 - [`docs/proposta-arquitetura.md`](docs/proposta-arquitetura.md): rascunho da proposta para a Scua, com o plano de migração.
 - [`docs/metricas.md`](docs/metricas.md): medições de desempenho e tamanho, e como repetir.
 - [`docs/roteiro-demo.md`](docs/roteiro-demo.md): o roteiro da apresentação, em 18 minutos.
+- [`docs/mapa-de-telas.md`](docs/mapa-de-telas.md): os 15 itens do menu do console atual, onde cada um fica na proposta e o status na PoC.
 - [`docs/tema-material.md`](docs/tema-material.md): o tema do Angular Material a partir dos tokens, para as telas atuais da Scua.
 - [`docs/prompts-claude-code.md`](docs/prompts-claude-code.md): os prompts usados para construir a PoC com o Claude Code.
 - [`CLAUDE.md`](CLAUDE.md): o contexto do projeto (regras de negócio, tokens, voz e acessibilidade). A cópia em `.github/copilot-instructions.md` precisa ficar igual; o CI confere.
 
 ## Dados
 
-Todos os dados são fictícios: nomes inventados e e-mails no domínio reservado `.example`. Nada da Scua entra neste repositório: nem dados de clientes, nem credenciais, nem documentos internos, nem código.
+Todos os dados são fictícios: nomes inventados e e-mails no domínio reservado `.example`. A série dos relatórios, os nomes das máquinas e a última atividade das estações são gerados com semente fixa (`src/app/mocks/history.ts` e `src/app/mocks/workstation-info.ts`). Nada da Scua entra neste repositório: nem dados de clientes, nem credenciais, nem documentos internos, nem código.

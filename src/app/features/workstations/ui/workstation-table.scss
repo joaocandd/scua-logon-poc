@@ -1,0 +1,134 @@
+// Desktop primeiro: tabela em 14 px, como a lista de regras e a do painel "Hoje". Abaixo de 48em,
+// cada linha vira um cartão (só CSS).
+:host {
+  display: block;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  thead th {
+    padding-block: var(--space-2);
+    border-bottom-color: var(--color-border-strong);
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+.host {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.status {
+  min-width: 14rem;
+}
+
+.reason {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.activity {
+  white-space: nowrap;
+}
+
+.cell-label {
+  display: none;
+}
+
+@media (max-width: 47.999em) {
+  // O cabeçalho sai da tela, mas continua para o leitor de tela.
+  thead tr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table {
+    display: block;
+  }
+
+  tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'host'
+      'employee'
+      'status'
+      'group'
+      'schedule'
+      'activity';
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-ring);
+  }
+
+  .table tbody th,
+  .table tbody td {
+    padding: 0;
+    border: 0;
+  }
+
+  .host {
+    grid-area: host;
+    font-size: var(--text-md);
+  }
+
+  .employee {
+    grid-area: employee;
+  }
+
+  .status {
+    grid-area: status;
+    min-width: 0;
+    margin-block: var(--space-2);
+  }
+
+  .group {
+    grid-area: group;
+  }
+
+  .schedule {
+    grid-area: schedule;
+  }
+
+  .activity {
+    grid-area: activity;
+    white-space: normal;
+  }
+
+  .cell-label {
+    display: inline;
+    color: var(--color-text-muted);
+  }
+
+  // Antes do link, o espaço do HTML some: a margem separa "Regra:" do nome.
+  .schedule .cell-label {
+    margin-inline-end: 0.25em;
+  }
+}

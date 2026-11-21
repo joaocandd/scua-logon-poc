@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  max-width: 48rem;
+}
+
+.title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-lg);
+}
+
+.item {
+  border-bottom: var(--border-width) solid var(--color-border);
+
+  &:first-of-type {
+    border-top: var(--border-width) solid var(--color-border);
+  }
+}
+
+// O <summary> inteiro é o alvo de toque, com 44 px de altura no mínimo.
+.question {
+  min-height: var(--control-height);
+  padding: var(--space-3) var(--space-2);
+  font-weight: 600;
+  cursor: pointer;
+  list-style-position: inside;
+
+  &:hover {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.answer {
+  margin: 0;
+  padding: 0 var(--space-2) var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.source {
+  margin-top: var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

@@ -1,0 +1,59 @@
+<section class="block" [attr.aria-labelledby]="blockId()">
+  <div class="header">
+    <div>
+      <h2 class="title" [id]="blockId()">{{ heading() }}</h2>
+      <p class="description">{{ description() }}</p>
+    </div>
+    <button
+      app-button
+      type="button"
+      variant="secondary"
+      size="sm"
+      icon="download"
+      [attr.aria-label]="'Exportar CSV de ' + heading().toLowerCase()"
+      (click)="exportCsv.emit()"
+    >
+      Exportar CSV
+    </button>
+  </div>
+
+  <dl class="stats">
+    @for (stat of stats(); track stat.label) {
+      <div class="stat">
+        <dt>{{ stat.label }}</dt>
+        <dd>{{ stat.value }}</dd>
+      </div>
+    }
+  </dl>
+
+  <div class="charts" [class.single]="!byGroup()">
+    @if (dayChart() === 'line') {
+      <app-line-chart
+        class="chart"
+        [heading]="dayHeading()"
+        [data]="byDay()"
+        [format]="format()"
+        [valueHeader]="valueHeader()"
+      />
+    } @else {
+      <app-bar-chart
+        class="chart"
+        [heading]="dayHeading()"
+        [data]="byDay()"
+        [format]="format()"
+        [valueHeader]="valueHeader()"
+      />
+    }
+    @if (byGroup(); as groups) {
+      <app-bar-chart
+        class="chart"
+        orientation="horizontal"
+        [heading]="groupHeading()"
+        [data]="groups"
+        [format]="format()"
+        labelHeader="Grupo"
+        [valueHeader]="valueHeader()"
+      />
+    }
+  </div>
+</section>

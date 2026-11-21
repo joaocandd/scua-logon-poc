@@ -52,6 +52,7 @@ import { SchedulePeriod } from '../ui/schedule-period';
 import { ScheduleSimulator } from '../ui/schedule-simulator';
 import { ScheduleSummary } from '../ui/schedule-summary';
 import { ScheduleWarnings } from '../ui/schedule-warnings';
+import { now as clockNow } from '../../../shared/clock';
 
 /** Estado da tela: o de carregamento, ou a regra da URL que não existe. */
 type EditorState = LoadState | 'not-found';
@@ -178,7 +179,7 @@ export class ScheduleEditorPage implements LeaveConfirmation {
           exceptions: this.simulation().exceptions,
           holidays: this.simulation().holidays,
           extensions: this.simulation().extensions,
-          now: Date.now(),
+          now: clockNow(),
         });
         if (!impact) {
           this.toast.show({ message: 'Nada mudou: a regra já está salva assim.' });

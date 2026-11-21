@@ -11,15 +11,18 @@ import { Employee } from '../../shared/models';
 @Injectable({ providedIn: 'root' })
 export class CurrentUser {
   private readonly signedIn = signal<Employee | null>(null);
-  /** Só pergunta à API se ninguém entrou pelo login. */
+  /** A pessoa clicou em "Sair": até entrar de novo, não há usuário atual. */
+  private readonly signedOut = signal(false);
+  /** Só pergunta à API se ninguém entrou pelo login e ninguém saiu. */
   private readonly session = httpResource<Employee>(() =>
-    this.signedIn() ? undefined : '/api/eu',
+    this.signedIn() || this.signedOut() ? undefined : '/api/eu',
   );
 
   /** A pessoa, ou nulo enquanto carrega ou se a chamada falhar. */
-  readonly profile = computed(
-    () => this.signedIn() ?? (this.session.hasValue() ? this.session.value() : null),
-  );
+  readonly profile = computed(() => {
+    if (this.signedOut()) return null;
+    return this.signedIn() ?? (this.session.hasValue() ? this.session.value() : null);
+  });
 
   /** Iniciais do primeiro e do último nome: "Renata Albuquerque" → "RA". */
   readonly initials = computed(() => {
@@ -30,6 +33,13 @@ export class CurrentUser {
 
   /** A pessoa que acabou de entrar vira o usuário atual. */
   setUser(user: Employee): void {
+    this.signedOut.set(false);
     this.signedIn.set(user);
+  }
+
+  /** "Sair": esquece quem estava usando o app. A sessão da API (/api/eu) não volta sozinha. */
+  clear(): void {
+    this.signedIn.set(null);
+    this.signedOut.set(true);
   }
 }

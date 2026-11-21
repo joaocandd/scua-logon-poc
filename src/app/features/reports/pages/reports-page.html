@@ -1,7 +1,127 @@
-<app-page-header heading="Relatórios" description="Horas extras, bloqueios e auditoria." />
+<app-page-header
+  heading="Relatórios"
+  description="Horas extras, tempo de bloqueio e ausências, por dia e por grupo."
+>
+  <a app-button variant="secondary" icon="history" routerLink="/relatorios/auditoria">
+    Auditoria
+  </a>
+</app-page-header>
 
-<app-empty-state
-  icon="bar_chart"
-  heading="Fora do escopo desta prova de conceito"
-  description="Aqui ficariam os relatórios de horas extras e de bloqueios por grupo e por período, e o histórico de auditoria, com exportação. O plano de migração desta área está na proposta de arquitetura."
-/>
+<!-- Região de status para leitor de tela: existe desde o início, para o anúncio ser lido. -->
+<p class="cdk-visually-hidden" role="status">
+  {{ state() === 'loading' ? 'Carregando os relatórios' : '' }}
+</p>
+
+@switch (state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso aos relatórios"
+      description="Esta área é do RH e de quem acompanha as jornadas. Se você precisa dela, peça acesso ao administrador do Scua Logon."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não conseguimos carregar os relatórios"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @default {
+    <div class="toolbar">
+      <app-field label="Período" class="filter">
+        <select appFieldControl #periodSelect (change)="setPeriod(periodSelect.value)">
+          @for (days of periods; track days) {
+            <option [value]="days" [selected]="days === period()">Últimos {{ days }} dias</option>
+          }
+        </select>
+      </app-field>
+      <app-field label="Grupo" class="filter">
+        <select appFieldControl #groupSelect (change)="setGroup(groupSelect.value)">
+          <option value="" [selected]="!groupId()">Todos os grupos</option>
+          @for (group of groups(); track group.id) {
+            <option [value]="group.id" [selected]="group.id === groupId()">
+              {{ group.name }}
+            </option>
+          }
+        </select>
+      </app-field>
+    </div>
+
+    @if (state() === 'loading') {
+      <div class="blocks" aria-busy="true">
+        @for (placeholder of [1, 2, 3]; track placeholder) {
+          <div class="block-skeleton" aria-hidden="true">
+            <app-skeleton variant="heading" width="30%" />
+            <app-skeleton width="50%" />
+            <app-skeleton variant="block" width="100%" />
+          </div>
+        }
+      </div>
+    } @else if (empty()) {
+      <app-empty-state
+        icon="bar_chart"
+        heading="Nenhum dado no período"
+        description="Os relatórios aparecem quando há jornadas registradas. Escolha outro período ou outro grupo."
+      >
+        <a app-button variant="secondary" routerLink="/relatorios">Ver os últimos 30 dias</a>
+      </app-empty-state>
+    } @else {
+      <p class="note">
+        Números fictícios, gerados para a demonstração. No produto, eles vêm do agente instalado nas
+        estações.
+      </p>
+      <div class="blocks">
+        @let ot = overtime();
+        <app-report-block
+          blockId="horas-extras"
+          heading="Horas extras"
+          [description]="'Horas extras aprovadas, pelo dia da jornada, ' + scope() + '.'"
+          [stats]="ot.stats"
+          [byDay]="ot.byDay"
+          dayHeading="Horas extras por dia"
+          [byGroup]="ot.byGroup"
+          groupHeading="Horas extras por grupo"
+          [format]="formats.hours"
+          valueHeader="Horas extras"
+          (exportCsv)="exportCsv('overtimeMinutes', 'horas-extras')"
+        />
+
+        @let bl = blocked();
+        <app-report-block
+          blockId="tempo-de-bloqueio"
+          heading="Tempo de bloqueio"
+          [description]="
+            'Minutos com a estação bloqueada e o colaborador diante dela, ' + scope() + '.'
+          "
+          [stats]="bl.stats"
+          [byDay]="bl.byDay"
+          dayChart="line"
+          dayHeading="Minutos bloqueados por dia"
+          [byGroup]="bl.byGroup"
+          groupHeading="Minutos bloqueados por grupo"
+          [format]="formats.minutes"
+          valueHeader="Minutos bloqueados"
+          (exportCsv)="exportCsv('blockedMinutes', 'tempo-de-bloqueio')"
+        />
+
+        @let ab = absences();
+        <app-report-block
+          blockId="ausencia"
+          heading="Ausência"
+          [description]="
+            'Colaboradores com jornada no dia que não registraram o início, ' + scope() + '.'
+          "
+          [stats]="ab.stats"
+          [byDay]="ab.byDay"
+          dayHeading="Ausentes por dia"
+          [byGroup]="ab.byGroup"
+          groupHeading="Ausências por grupo"
+          [format]="formats.people"
+          valueHeader="Ausentes"
+          (exportCsv)="exportCsv('absentCount', 'ausencia')"
+        />
+      </div>
+    }
+  }
+}

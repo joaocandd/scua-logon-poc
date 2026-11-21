@@ -26,9 +26,12 @@ export const screens: Screen[] = [
   { url: '/hoje?simular=erro', ready: 'Hoje' },
   { url: '/hoje?simular=vazio', ready: 'Hoje' },
   { url: '/hoje?simular=lento', ready: 'Hoje', loading: true },
+  // Relógio de demonstração: a faixa no topo, numa terça às 17h40.
+  { url: '/hoje?relogio=2026-11-24T17:40', ready: 'Hoje' },
+  { url: '/entrar?relogio=2026-11-24T17:40', ready: 'Entrar' },
   { url: '/pessoas', ready: 'Pessoas' },
-  { url: '/relatorios', ready: 'Relatórios' },
   { url: '/configuracoes', ready: 'Configurações' },
+  { url: '/ajuda', ready: 'Ajuda' },
   { url: '/endereco-que-nao-existe', ready: 'Página não encontrada' },
 
   // Fluxo A: caixa de aprovações
@@ -62,4 +65,33 @@ export const screens: Screen[] = [
   },
   { url: '/regras/nova', ready: 'Nova regra' },
   { url: '/regras/nao-existe', ready: 'Regra não encontrada' },
+
+  // Estações
+  { url: '/estacoes', ready: 'Estações' },
+  { url: '/estacoes?estado=sem_aprovacao', ready: 'Estações' },
+  { url: '/estacoes?busca=xyz', ready: 'Nenhuma estação encontrada' },
+  { url: '/estacoes?simular=erro', ready: 'Não conseguimos carregar as estações' },
+  { url: '/estacoes?simular=vazio', ready: 'Nenhuma estação controlada' },
+  { url: '/estacoes?simular=lento', ready: 'Estações', loading: true },
+  { url: '/estacoes?simular=sem-permissao', ready: 'Você não tem acesso às estações' },
+
+  // Relatórios
+  { url: '/relatorios', ready: 'Horas extras' },
+  { url: '/relatorios?periodo=7&grupo=grp-atendimento', ready: 'Horas extras' },
+  { url: '/relatorios?simular=erro', ready: 'Não conseguimos carregar os relatórios' },
+  { url: '/relatorios?simular=vazio', ready: 'Nenhum dado no período' },
+  { url: '/relatorios?simular=lento', ready: 'Relatórios', loading: true },
+  { url: '/relatorios?simular=sem-permissao', ready: 'Você não tem acesso aos relatórios' },
+
+  // Auditoria
+  { url: '/relatorios/auditoria', ready: 'Auditoria' },
+  { url: '/relatorios/auditoria?tipo=acessos&periodo=7', ready: 'Auditoria' },
+  { url: '/relatorios/auditoria?periodo=hoje&tipo=desfazer', ready: 'Nenhum evento encontrado' },
+  { url: '/relatorios/auditoria?simular=erro', ready: 'Não conseguimos carregar o registro' },
+  { url: '/relatorios/auditoria?simular=vazio', ready: 'Nenhum evento registrado' },
+  { url: '/relatorios/auditoria?simular=lento', ready: 'Auditoria', loading: true },
+  {
+    url: '/relatorios/auditoria?simular=sem-permissao',
+    ready: 'Você não tem acesso à auditoria',
+  },
 ];

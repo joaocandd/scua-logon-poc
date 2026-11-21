@@ -13,7 +13,7 @@ O Scua Logon bloqueia a estação de trabalho (Windows) fora do horário permiti
 ## Escopo desta PoC
 1. **Fluxo A · Aprovar hora extra** (gestor, mobile primeiro): caixa de pedidos com contexto, aprovar, recusar com motivo, aprovar em lote, desfazer.
 2. **Fluxo B · Configurar regra de jornada** (RH, desktop): editor com linha do tempo visual, resumo em português, prévia de impacto, conflitos e simulador "e se?".
-3. Extras: login acessível; página pública de aprovação por e-mail com estados de erro humanos; painel "Hoje".
+3. Extras: login acessível; página pública de aprovação por e-mail com estados de erro humanos; painel "Hoje"; relatórios, estações e auditoria com dados históricos fictícios (ADR 0021). Mapa do menu atual em `docs/mapa-de-telas.md`.
 
 Fora do escopo: backend, autenticação real e integrações reais (Teams, WhatsApp, login corporativo). Tudo isso é simulado.
 
@@ -60,10 +60,12 @@ src/app/
   features/
     today/         painel ao vivo                 /hoje
     approvals/     caixa de aprovações (fluxo A)  /aprovacoes  e  /aprovacao/:token (pública)
+    workstations/  estações                       /estacoes
     schedules/     regras de jornada (fluxo B)    /regras  e  /regras/:id
     people/        colaboradores e grupos         /pessoas
-    reports/       relatórios                     /relatorios
+    reports/       relatórios e auditoria         /relatorios  e  /relatorios/auditoria
     settings/      configurações                  /configuracoes
+    help/          ajuda (perguntas frequentes)   /ajuda
   shared/          modelos, utilitários de data e hora, schedule-engine
   mocks/           fixtures e handlers
 ```

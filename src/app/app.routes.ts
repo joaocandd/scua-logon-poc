@@ -51,6 +51,12 @@ export const routes: Routes = [
         ],
       },
       {
+        path: 'estacoes',
+        title: 'Estações',
+        loadComponent: () =>
+          import('./features/workstations/pages/workstations-page').then((m) => m.WorkstationsPage),
+      },
+      {
         path: 'regras',
         title: 'Regras de jornada',
         loadComponent: () =>
@@ -88,10 +94,20 @@ export const routes: Routes = [
           import('./features/reports/pages/reports-page').then((m) => m.ReportsPage),
       },
       {
+        path: 'relatorios/auditoria',
+        title: 'Auditoria',
+        loadComponent: () => import('./features/reports/pages/audit-page').then((m) => m.AuditPage),
+      },
+      {
         path: 'configuracoes',
         title: 'Configurações',
         loadComponent: () =>
           import('./features/settings/pages/settings-page').then((m) => m.SettingsPage),
+      },
+      {
+        path: 'ajuda',
+        title: 'Ajuda',
+        loadComponent: () => import('./features/help/pages/help-page').then((m) => m.HelpPage),
       },
       {
         path: '**',

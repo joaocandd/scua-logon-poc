@@ -2,6 +2,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { Workstation } from '../../../shared/models';
+import { now } from '../../../shared/clock';
 
 /** Estado das estações agora, calculado pelo schedule-engine na API simulada. */
 @Injectable({ providedIn: 'root' })
@@ -16,7 +17,7 @@ export class Workstations {
   constructor() {
     // A primeira carga e o "Tentar de novo" também contam como atualização.
     effect(() => {
-      if (this.list.status() === 'resolved') untracked(() => this.refreshedAt.set(Date.now()));
+      if (this.list.status() === 'resolved') untracked(() => this.refreshedAt.set(now()));
     });
   }
 
@@ -27,6 +28,6 @@ export class Workstations {
   async poll(): Promise<void> {
     const latest = await firstValueFrom(this.http.get<Workstation[]>('/api/estacoes'));
     this.list.set(latest);
-    this.refreshedAt.set(Date.now());
+    this.refreshedAt.set(now());
   }
 }

@@ -44,4 +44,17 @@ describe('CurrentUser', () => {
     currentUser.setUser(person('col-99', 'Renata'));
     expect(currentUser.initials()).toBe('R');
   });
+
+  it('"Sair" esquece o usuário e não busca a sessão da API de novo', () => {
+    currentUser.setUser(person('col-25', 'Renata Albuquerque'));
+    currentUser.clear();
+    TestBed.tick();
+
+    http.expectNone('/api/eu');
+    expect(currentUser.profile()).toBeNull();
+    expect(currentUser.initials()).toBe('');
+
+    currentUser.setUser(person('col-25', 'Renata Albuquerque'));
+    expect(currentUser.profile()?.name).toBe('Renata Albuquerque');
+  });
 });

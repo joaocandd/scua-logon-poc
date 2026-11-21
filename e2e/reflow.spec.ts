@@ -28,6 +28,7 @@ const screens: { url: string; ready: (page: Page) => Locator }[] = [
   { url: '/aprovacao/valido-ped-02', ready: heading('Pedido de Lucas Bittencourt') },
   { url: '/aprovacao/expirado-ped-22', ready: heading('Link expirado') },
   { url: '/hoje', ready: heading('Hoje') },
+  { url: '/hoje?relogio=2026-11-24T17:40', ready: heading('Hoje') },
   { url: '/aprovacoes', ready: heading('Lucas Bittencourt') },
   { url: '/aprovacoes?simular=vazio', ready: heading('Nenhum pedido aguardando') },
   { url: '/aprovacoes?simular=erro', ready: heading('Não conseguimos carregar os pedidos') },
@@ -36,6 +37,14 @@ const screens: { url: string; ready: (page: Page) => Locator }[] = [
   { url: '/regras/regra-comercial', ready: heading('Comercial') },
   { url: '/regras/regra-noturna', ready: heading('Noturna') },
   { url: '/regras/nova', ready: heading('Nova regra') },
+  { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
+  { url: '/ajuda', ready: heading('Ajuda') },
+  { url: '/relatorios', ready: heading('Horas extras') },
+  {
+    url: '/relatorios/auditoria',
+    ready: (page) => page.getByRole('table', { name: 'Registro de eventos' }),
+  },
+  { url: '/relatorios?periodo=7&grupo=grp-ti', ready: heading('Horas extras') },
 ];
 
 for (const { name, viewport, deviceScaleFactor } of sizes) {

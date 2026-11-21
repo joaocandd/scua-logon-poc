@@ -1,6 +1,7 @@
 // Modelo de domínio. Nomes em inglês (glossário do CLAUDE.md); valores da API em português.
 export type { ActivityEvent, ActivityEventType } from './activity-event';
 export type { ApprovalLink } from './approval-link';
+export type { DailyGroupStats } from './daily-stats';
 export type { Employee } from './employee';
 export type { ApprovalStep, ExtensionDecision, ExtensionRequest } from './extension-request';
 export type { Group } from './group';
@@ -26,4 +27,4 @@ export {
   type Weekday,
   type WorkSchedule,
 } from './work-schedule';
-export type { Workstation, WorkstationStatus } from './workstation';
+export type { Workstation, WorkstationDetail, WorkstationStatus } from './workstation';

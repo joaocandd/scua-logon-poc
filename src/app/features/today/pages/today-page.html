@@ -135,14 +135,36 @@
       }
     </section>
 
-    <!-- Só com o painel pronto: o custo chega antes dos pedidos, e o mês sairia incompleto. -->
     @if (panel.state() === 'ready') {
-      <app-overtime-month
+      <app-today-charts
         class="block"
-        [overtime]="overtime()"
-        [hourlyCost]="panel.hourlyCost()"
-        [groupName]="groupName()"
+        [byStatus]="requestsByStatus()"
+        [overtime]="weekOvertime()"
+        [overtimeState]="weekOvertimeState()"
+        [groupId]="groupId()"
       />
+    }
+
+    <!-- Só com o painel e a série prontos: o custo chega antes, e o mês sairia incompleto. -->
+    @if (panel.state() === 'ready') {
+      @switch (weekOvertimeState()) {
+        @case ('ready') {
+          <app-overtime-month
+            class="block"
+            [overtime]="overtime()"
+            [hourlyCost]="panel.hourlyCost()"
+            [groupName]="groupName()"
+          />
+        }
+        @case ('error') {
+          <section class="block" aria-labelledby="horas-extras-erro">
+            <h2 id="horas-extras-erro" class="block-title">Horas extras do mês</h2>
+            <p class="list-empty">
+              Não conseguimos carregar as horas extras. Os outros números do painel estão em dia.
+            </p>
+          </section>
+        }
+      }
     }
   }
 }

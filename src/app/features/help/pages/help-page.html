@@ -1,0 +1,18 @@
+<app-page-header heading="Ajuda" description="Perguntas frequentes sobre o Scua Logon." />
+
+<section class="faq" aria-labelledby="faq-titulo">
+  <h2 id="faq-titulo" class="title">Perguntas frequentes</h2>
+  @for (item of questions; track item.question) {
+    <details class="item">
+      <summary class="question">{{ item.question }}</summary>
+      <p class="answer">{{ item.answer }}</p>
+    </details>
+  }
+</section>
+
+<p class="source">
+  Perguntas do site da Scua:
+  <a href="https://scua.com.br/planos-e-precos" rel="noopener" target="_blank">
+    scua.com.br/planos-e-precos <span class="cdk-visually-hidden">(abre em outra aba)</span>
+  </a>
+</p>

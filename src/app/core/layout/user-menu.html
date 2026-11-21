@@ -17,28 +17,34 @@
       <span class="identity-role">{{ user.jobTitle }}</span>
     </p>
   }
-  <p class="heading" id="menu-usuario-tema">Tema</p>
-  <div
-    ngMenu
-    #menu="ngMenu"
-    class="menu"
-    aria-labelledby="menu-usuario-tema"
-    (itemSelected)="select($event)"
-  >
-    @for (option of themes; track option.value) {
-      <div
-        ngMenuItem
-        role="menuitemradio"
-        class="item"
-        [value]="option.value"
-        [attr.aria-checked]="theme.preference() === option.value"
-      >
-        <app-icon [name]="option.icon" />
-        <span class="item-label">{{ option.label }}</span>
-        @if (theme.preference() === option.value) {
-          <app-icon class="check" name="check" />
-        }
-      </div>
-    }
+  <!-- O título do grupo fica fora do menu: dentro de role="menu" só entram itens e grupos. -->
+  <p class="heading" id="menu-usuario-tema" aria-hidden="true">Tema</p>
+  <div ngMenu #menu="ngMenu" class="menu" aria-label="Sua conta" (itemSelected)="select($event)">
+    <div role="group" aria-labelledby="menu-usuario-tema">
+      @for (option of themes; track option.value) {
+        <div
+          ngMenuItem
+          role="menuitemradio"
+          class="item"
+          [value]="option.value"
+          [attr.aria-checked]="theme.preference() === option.value"
+        >
+          <app-icon [name]="option.icon" />
+          <span class="item-label">{{ option.label }}</span>
+          @if (theme.preference() === option.value) {
+            <app-icon class="check" name="check" />
+          }
+        </div>
+      }
+    </div>
+    <div role="separator" class="separator"></div>
+    <div ngMenuItem class="item" value="ajuda">
+      <app-icon name="help" />
+      <span class="item-label">Ajuda</span>
+    </div>
+    <div ngMenuItem class="item" value="sair">
+      <app-icon name="logout" />
+      <span class="item-label">Sair</span>
+    </div>
   </div>
 </div>

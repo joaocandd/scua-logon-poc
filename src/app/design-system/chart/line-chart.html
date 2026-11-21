@@ -1,0 +1,123 @@
+<app-chart-frame
+  [chartId]="id"
+  [heading]="heading()"
+  [description]="description()"
+  [headingLevel]="headingLevel()"
+  [rows]="rows()"
+  [labelHeader]="labelHeader()"
+  [valueHeader]="valueHeader()"
+  [emptyText]="emptyText()"
+>
+  <div #plot class="plot" (mouseleave)="onPointerLeave()">
+    <p class="cdk-visually-hidden" [id]="id + '-dica'">Use as setas para passar pelos valores.</p>
+    <svg
+      class="svg"
+      role="group"
+      [attr.aria-labelledby]="id + '-titulo'"
+      [attr.aria-describedby]="id + '-dica'"
+      [attr.width]="width()"
+      [attr.height]="height()"
+      [attr.viewBox]="'0 0 ' + width() + ' ' + height()"
+      (keydown)="onKeydown($event)"
+    >
+      <g class="grid" aria-hidden="true">
+        @for (tick of ticks(); track tick.value) {
+          <line
+            [attr.x1]="margins().left"
+            [attr.x2]="width() - margins().right"
+            [attr.y1]="tick.y"
+            [attr.y2]="tick.y"
+          />
+          <text
+            class="tick"
+            [attr.x]="margins().left - 8"
+            [attr.y]="tick.y"
+            dy="0.32em"
+            text-anchor="end"
+          >
+            {{ tick.label }}
+          </text>
+        }
+      </g>
+      <line
+        class="axis"
+        aria-hidden="true"
+        [attr.x1]="margins().left"
+        [attr.x2]="width() - margins().right"
+        [attr.y1]="baseline()"
+        [attr.y2]="baseline()"
+      />
+
+      <path class="area" aria-hidden="true" [attr.d]="areaPath()" />
+      <path class="line" aria-hidden="true" [attr.d]="linePath()" />
+
+      @for (point of slots(); track point.index) {
+        <g
+          class="mark"
+          role="img"
+          [attr.tabindex]="point.index === tabStop() ? 0 : -1"
+          [attr.data-index]="point.index"
+          [attr.aria-label]="point.name"
+          (focus)="onFocus(point.index)"
+          (blur)="onBlur()"
+          (mouseenter)="onPointerEnter(point.index)"
+        >
+          <rect
+            class="band"
+            [class.active]="active() === point.index"
+            [attr.x]="point.bandX"
+            [attr.y]="margins().top"
+            [attr.width]="point.bandWidth"
+            [attr.height]="plotHeight()"
+          />
+          @if (active() === point.index) {
+            <line
+              class="crosshair"
+              [attr.x1]="point.x"
+              [attr.x2]="point.x"
+              [attr.y1]="margins().top"
+              [attr.y2]="baseline()"
+            />
+          }
+          @if (showAllMarkers() || point.showValue || active() === point.index) {
+            <circle class="marker" [attr.cx]="point.x" [attr.cy]="point.y" r="4" />
+          }
+          @if (point.showValue) {
+            <text
+              class="value"
+              [attr.x]="point.x"
+              [attr.y]="point.y - 12"
+              [attr.text-anchor]="anchorOf(point.index)"
+              aria-hidden="true"
+            >
+              {{ point.valueText }}
+            </text>
+          }
+          @if (point.showLabel) {
+            <text
+              class="label"
+              [attr.x]="point.x"
+              [attr.y]="baseline() + 18"
+              text-anchor="middle"
+              aria-hidden="true"
+            >
+              {{ point.datum.label }}
+            </text>
+          }
+        </g>
+      }
+    </svg>
+
+    @if (activeSlot(); as slot) {
+      <div
+        class="tooltip"
+        aria-hidden="true"
+        [style.left.px]="tooltipLeft()"
+        [style.top.px]="slot.y - 24"
+      >
+        <strong class="tooltip-value">{{ slot.valueText }}</strong>
+        <span class="tooltip-label">{{ slot.datum.longLabel ?? slot.datum.label }}</span>
+      </div>
+    }
+  </div>
+</app-chart-frame>

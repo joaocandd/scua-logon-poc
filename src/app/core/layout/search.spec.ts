@@ -40,7 +40,15 @@ describe('Busca da paleta de comandos', () => {
     expect(labels('  ')).toEqual([
       [
         'Páginas',
-        ['Hoje', 'Aprovações', 'Pessoas', 'Regras de jornada', 'Relatórios', 'Configurações'],
+        [
+          'Hoje',
+          'Aprovações',
+          'Estações',
+          'Pessoas',
+          'Regras de jornada',
+          'Relatórios',
+          'Configurações',
+        ],
       ],
     ]);
   });

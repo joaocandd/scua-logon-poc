@@ -129,8 +129,11 @@ test('o filtro por grupo vale para os contadores e para a lista', async ({ page 
   await expect(region(page, 'Alertas')).toContainText('Nenhum alerta agora.');
   const overtime = region(page, 'Horas extras do mês');
   await expect(overtime).toContainText('Horas extras aprovadas, pelo dia da jornada · Comercial.');
-  await expect(overtime).toContainText('Nenhuma hora extra aprovada em novembro.');
-  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*1h30/);
+  // A mesma série fictícia dos relatórios, só do Comercial.
+  await expect(overtime).toContainText(
+    /Novembro até hoje\s*Horas aprovadas\s*4h\s*Custo estimado\s*R\$ 180,00/,
+  );
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*37h30/);
   await expect(counter(page, 'Em jornada')).toHaveAccessibleName('0 Em jornada');
   await counter(page, 'Bloqueada').click();
   await expect(page).toHaveURL('/hoje?grupo=grp-comercial&estado=bloqueada');
@@ -147,12 +150,14 @@ test('horas extras do mês: novembro até hoje ao lado de outubro inteiro, com o
 }) => {
   await openPanel(page);
   const overtime = region(page, 'Horas extras do mês');
-  // Novembro: Igor (1h), Natália (2h) e Tatiane (1h30). Outubro: Lucas, Márcio e Larissa.
+  // A série fictícia dos relatórios (com os pedidos aprovados das fixtures), em 3/11 às 18h20.
   const november = overtime.getByRole('heading', { level: 3, name: 'Novembro até hoje' });
   await expect(november).toBeVisible();
-  await expect(overtime).toContainText(/Horas aprovadas\s*4h30\s*Custo estimado\s*R\$ 202,50/);
-  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*5h30/);
-  await expect(overtime).toContainText('R$ 247,50');
+  await expect(overtime).toContainText(/Horas aprovadas\s*8h30\s*Custo estimado\s*R\$ 382,50/);
+  await expect(overtime).toContainText(/Pedidos aprovados\s*6 pedidos/);
+  await expect(overtime).toContainText(/Outubro inteiro\s*Horas aprovadas\s*85h30/);
+  await expect(overtime).toContainText('R$ 3.847,50');
+  await expect(overtime).toContainText('Série fictícia, a mesma dos relatórios.');
   await expect(overtime).toContainText(
     'Estimativa: horas aprovadas × custo médio de R$ 45,00 por hora. O valor real sai da folha de pagamento.',
   );
@@ -172,7 +177,7 @@ test('o custo médio salvo em Configurações muda a estimativa', async ({ page 
 
   await page.getByRole('link', { name: 'Hoje', exact: true }).first().click();
   const overtime = region(page, 'Horas extras do mês');
-  await expect(overtime).toContainText('R$ 270,00');
+  await expect(overtime).toContainText('R$ 510,00');
   await expect(overtime).toContainText('custo médio de R$ 60,00 por hora');
 });
 
@@ -232,4 +237,36 @@ test('sem permissão, diz a quem pedir acesso', async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText('peça acesso ao administrador do Scua Logon.')).toBeVisible();
   await expectNoA11yViolations(page);
+});
+
+test('abaixo dos contadores: pedidos de hoje por status e horas extras da semana', async ({
+  page,
+}) => {
+  await openPanel(page);
+
+  const byStatus = page.getByRole('group', { name: 'Pedidos de hoje por status' });
+  await expect(byStatus.getByRole('img')).toHaveCount(6);
+  // Status sempre pelo rótulo: o nome de cada barra diz qual é.
+  await expect(byStatus.getByRole('img').first()).toHaveAccessibleName(/^Aguardando gestor: \d+$/);
+  const week = page.getByRole('group', { name: 'Horas extras dos últimos 7 dias' });
+  await expect(week.getByRole('img')).toHaveCount(7);
+
+  // Só com teclado: as setas passam pelos status.
+  await byStatus.getByRole('img').first().focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(byStatus.getByRole('img').nth(1)).toBeFocused();
+
+  await expect(page.getByRole('link', { name: 'Ver relatório de horas extras' })).toHaveAttribute(
+    'href',
+    '/relatorios?periodo=7',
+  );
+  // O grupo do painel vai junto para o relatório.
+  await page.getByLabel('Grupo').selectOption({ label: 'TI' });
+  await expect(page.getByRole('link', { name: 'Ver relatório de horas extras' })).toHaveAttribute(
+    'href',
+    '/relatorios?periodo=7&grupo=grp-ti',
+  );
+  await page.getByRole('link', { name: 'Ver relatório de horas extras' }).click();
+  await expect(page).toHaveURL('/relatorios?periodo=7&grupo=grp-ti');
+  await expect(page.getByRole('heading', { level: 1, name: 'Relatórios' })).toBeVisible();
 });

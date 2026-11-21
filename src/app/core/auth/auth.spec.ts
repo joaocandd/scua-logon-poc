@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { Employee } from '../../shared/models';
 import { Auth, InvalidCredentialsError } from './auth';
 import { CurrentUser } from './current-user';
@@ -63,5 +64,18 @@ describe('Auth', () => {
 
     await expect(signIn).resolves.toEqual(RENATA);
     expect(TestBed.inject(CurrentUser).profile()?.id).toBe('col-25');
+  });
+
+  it('"Sair" limpa o usuário atual e volta para /entrar', async () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    const signIn = auth.signIn('marina.alves', 'qualquer-senha');
+    http.expectOne('/api/sessao').flush(RENATA);
+    await signIn;
+
+    await auth.signOut();
+
+    expect(TestBed.inject(CurrentUser).profile()).toBeNull();
+    expect(navigate).toHaveBeenCalledWith('/entrar');
   });
 });

@@ -1,0 +1,65 @@
+// Celular primeiro: os dois gráficos um embaixo do outro. A partir de 64em, lado a lado, com o
+// gráfico por dia mais largo.
+:host {
+  display: block;
+}
+
+.block {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-ring);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.description {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-8);
+  margin: var(--space-4) 0 var(--space-6);
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+  }
+}
+
+.charts {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.chart {
+  min-width: 0;
+}
+
+@media (min-width: 64em) {
+  .charts:not(.single) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}

@@ -7,6 +7,7 @@ import { expectNoA11yViolations } from './support/a11y';
 const AREAS = [
   { name: 'Hoje', path: '/hoje' },
   { name: 'Aprovações', path: '/aprovacoes' },
+  { name: 'Estações', path: '/estacoes' },
   { name: 'Pessoas', path: '/pessoas' },
   { name: 'Regras de jornada', path: '/regras' },
   { name: 'Relatórios', path: '/relatorios' },
@@ -69,7 +70,7 @@ test.describe('Casca no desktop', () => {
   test('percorre todo o menu só com teclado', async ({ page }) => {
     await open(page);
 
-    // Ordem do Tab: pular para o conteúdo, marca, busca, conta e as seis áreas.
+    // Ordem do Tab: pular para o conteúdo, marca, busca, conta e as sete áreas.
     const order = [
       'Pular para o conteúdo',
       'Scua Logon',
@@ -77,6 +78,7 @@ test.describe('Casca no desktop', () => {
       'Renata Albuquerque',
       'Hoje',
       PENDING,
+      'Estações',
       'Pessoas',
       'Regras de jornada',
       'Relatórios',
@@ -235,6 +237,31 @@ test.describe('Casca no desktop', () => {
   });
 });
 
+test('"Sair", no menu do usuário, volta para a tela de entrada e limpa a sessão', async ({
+  page,
+}) => {
+  await open(page);
+  const trigger = page.getByRole('button', { name: 'Renata Albuquerque' });
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  const menu = page.getByRole('menu', { name: 'Sua conta' });
+  await expect(menu.getByRole('group', { name: 'Tema' })).toBeVisible();
+  // Só com teclado: das opções de tema, a seta leva até "Sair".
+  const signOut = menu.getByRole('menuitem', { name: 'Sair' });
+  await pressUntilFocused(page, 'ArrowDown', signOut);
+  await page.keyboard.press('Enter');
+
+  await expect(page).toHaveURL('/entrar');
+  await expect(page.getByRole('heading', { level: 1, name: 'Entrar' })).toBeVisible();
+
+  // Entrando de novo, a mesma pessoa volta ao menu.
+  await page.getByLabel('Usuário', { exact: true }).fill('renata.albuquerque');
+  await page.getByLabel('Senha', { exact: true }).fill('qualquer-senha');
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+  await expect(page).toHaveURL('/hoje');
+  await expect(page.getByRole('button', { name: 'Renata Albuquerque' })).toBeVisible();
+});
+
 test.describe('Casca no celular', () => {
   test.skip(({ isMobile }) => !isMobile, 'A barra inferior só aparece abaixo de 1024 px');
 
@@ -265,8 +292,8 @@ test.describe('Casca no celular', () => {
   });
 
   test('"Mais" abre as outras áreas, só com teclado', async ({ page }) => {
-    // Relatórios não tem nada focável no conteúdo: do cabeçalho, o Tab vai direto à barra inferior.
-    await open(page, '/relatorios');
+    // Pessoas não tem nada focável no conteúdo: do cabeçalho, o Tab vai direto à barra inferior.
+    await open(page, '/pessoas');
     const more = page.getByRole('button', { name: 'Mais' });
 
     // Ordem do Tab: pular para o conteúdo, marca, busca, conta e a barra inferior.
@@ -297,8 +324,10 @@ test.describe('Casca no celular', () => {
     await expect(more).toBeFocused();
 
     // Cada área do "Mais" abre com Enter; o painel fecha e o foco vai para o <main>.
-    // Do <main>, o Tab segue para a barra inferior.
-    for (const area of AREAS.filter((a) => !['/hoje', '/aprovacoes'].includes(a.path))) {
+    // Do <main>, o Tab segue para a barra inferior. De trás para frente: Pessoas, onde o teste
+    // começa, fica por último (abrir a página em que já se está não move o foco).
+    const moreAreas = AREAS.filter((a) => !['/hoje', '/aprovacoes'].includes(a.path)).reverse();
+    for (const area of moreAreas) {
       await pressUntilFocused(page, 'Tab', more);
       await page.keyboard.press('Enter');
       await expect(sheet).toBeVisible();

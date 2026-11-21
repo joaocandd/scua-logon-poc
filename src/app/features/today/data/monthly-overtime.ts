@@ -1,16 +1,12 @@
 // Horas extras do mês no painel "Hoje": o mês atual até hoje ao lado do mês anterior inteiro, sem
 // percentual (comparar mês parcial com mês cheio engana). Funções puras.
+//
+// Os números saem da mesma série diária dos relatórios (/api/relatorios/diario, fictícia na PoC),
+// que já inclui os pedidos aprovados: Hoje e Relatórios mostram sempre o mesmo total.
 
-import {
-  Employee,
-  ExtensionRequest,
-  Holiday,
-  ScheduleException,
-  WorkSchedule,
-} from '../../../shared/models';
-import { overtimeMinutes } from '../../../shared/request-context';
-import { appliesTo } from '../../../shared/schedule-engine';
+import { DailyGroupStats } from '../../../shared/models';
 import { capitalize } from '../../../shared/text';
+import { inGroup, total } from '../../reports/data/report-series';
 
 /** Horas extras aprovadas de um mês. */
 export interface MonthOvertime {
@@ -18,7 +14,7 @@ export interface MonthOvertime {
   label: string;
   /** "novembro". */
   monthName: string;
-  /** Soma das horas extras aprovadas, em minutos (cada dia conta no máximo 2 h). */
+  /** Soma das horas extras aprovadas, em minutos (cada colaborador conta no máximo 2 h por dia). */
   minutes: number;
   requestCount: number;
 }
@@ -26,17 +22,6 @@ export interface MonthOvertime {
 export interface MonthlyOvertime {
   current: MonthOvertime;
   previous: MonthOvertime;
-}
-
-export interface MonthlyOvertimeInput {
-  requests: readonly ExtensionRequest[];
-  /** Colaboradores do grupo escolhido: só os pedidos deles contam. */
-  employees: readonly Employee[];
-  schedules: readonly WorkSchedule[];
-  exceptions: readonly ScheduleException[];
-  holidays: readonly Holiday[];
-  /** Hoje, "AAAA-MM-DD" em São Paulo. */
-  today: string;
 }
 
 const MONTHS = [
@@ -55,16 +40,21 @@ const MONTHS = [
 ];
 
 /**
- * Horas extras aprovadas no mês de hoje e no anterior. O mês é o do dia da jornada (`date`), que é
- * quando a hora extra é feita e entra na folha. Pedido já aprovado para um dia mais à frente do mês
- * conta: é o total aprovado até hoje.
+ * Horas extras aprovadas no mês de hoje e no anterior, a partir da série diária, só do grupo
+ * escolhido (nulo: todos). O mês é o do dia da jornada, que é quando a hora extra é feita e entra
+ * na folha. `today` é "AAAA-MM-DD" em São Paulo.
  */
-export function monthlyOvertime(input: MonthlyOvertimeInput): MonthlyOvertime {
-  const [year, month] = input.today.split('-').map(Number);
+export function monthlyOvertime(
+  rows: readonly DailyGroupStats[],
+  groupId: string | null,
+  today: string,
+): MonthlyOvertime {
+  const [year, month] = today.split('-').map(Number);
   const previous = month === 1 ? { year: year - 1, month: 12 } : { year, month: month - 1 };
+  const ofGroup = inGroup(rows, groupId);
   return {
-    current: monthOf(input, year, month, 'até hoje'),
-    previous: monthOf(input, previous.year, previous.month, 'inteiro'),
+    current: monthOf(ofGroup, year, month, 'até hoje', today),
+    previous: monthOf(ofGroup, previous.year, previous.month, 'inteiro', today),
   };
 }
 
@@ -73,35 +63,30 @@ export function estimatedCost(minutes: number, hourlyCost: number): number {
   return (minutes / 60) * hourlyCost;
 }
 
+/** Linhas de um mês, até hoje. */
+export function rowsOfMonth(
+  rows: readonly DailyGroupStats[],
+  year: number,
+  month: number,
+  today: string,
+): DailyGroupStats[] {
+  const prefix = `${year}-${String(month).padStart(2, '0')}-`;
+  return rows.filter((r) => r.date.startsWith(prefix) && r.date <= today);
+}
+
 function monthOf(
-  input: MonthlyOvertimeInput,
+  rows: readonly DailyGroupStats[],
   year: number,
   month: number,
   period: string,
+  today: string,
 ): MonthOvertime {
-  const prefix = `${year}-${String(month).padStart(2, '0')}-`;
-  const byId = new Map(input.employees.map((e) => [e.id, e]));
-  let minutes = 0;
-  let requestCount = 0;
-  for (const request of input.requests) {
-    const employee = byId.get(request.employeeId);
-    if (request.status !== 'aprovado' || !employee || !request.date.startsWith(prefix)) continue;
-    // Sem regra de jornada, a estação não é controlada e não há hora extra para contar.
-    const schedule = scheduleOf(input.schedules, employee);
-    if (!schedule) continue;
-    minutes += overtimeMinutes(request, {
-      schedule,
-      exceptions: input.exceptions.filter((e) => e.employeeId === employee.id),
-      holidays: input.holidays,
-    });
-    requestCount++;
-  }
+  const days = rowsOfMonth(rows, year, month, today);
   const monthName = MONTHS[month - 1];
-  return { label: `${capitalize(monthName)} ${period}`, monthName, minutes, requestCount };
-}
-
-/** A regra ativa vem antes da que está em observação, como na API (MockDb.scheduleFor). */
-function scheduleOf(schedules: readonly WorkSchedule[], employee: Employee) {
-  const rules = schedules.filter((s) => appliesTo(s, employee));
-  return rules.find((s) => !s.observationMode) ?? rules[0];
+  return {
+    label: `${capitalize(monthName)} ${period}`,
+    monthName,
+    minutes: total(days, 'overtimeMinutes'),
+    requestCount: days.reduce((sum, r) => sum + r.approvedCount, 0),
+  };
 }
