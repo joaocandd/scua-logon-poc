@@ -1,0 +1,218 @@
+// No celular, o perfil ocupa a página; no desktop, é um painel ao lado da lista (64em, o ponto de
+// quebra da casca). O painel em si (fundo, borda, rolagem) é desenhado pela página de Pessoas.
+:host {
+  display: block;
+}
+
+.nav {
+  margin-bottom: var(--space-3);
+}
+
+.back,
+.close {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  color: var(--color-link);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.close {
+  display: none;
+}
+
+.profile,
+.loading,
+.not-found {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.who {
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+
+  // Recebe o foco por código; sem anel de foco quando foi por clique.
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+.meta,
+.muted,
+.reason,
+.read-only {
+  margin: 0;
+}
+
+.meta,
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.read-only {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+a {
+  color: var(--color-link);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+
+  p {
+    margin: 0;
+  }
+}
+
+.section-title {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+// Cadastro em duas colunas de rótulo e valor; no painel estreito, uma embaixo da outra.
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+  font-size: var(--text-sm);
+
+  div {
+    min-width: 0;
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.station {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.host {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.reason {
+  font-size: var(--text-sm);
+}
+
+.requests {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  font-size: var(--text-sm);
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-2);
+    padding-block: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height);
+    font-weight: 600;
+  }
+
+  .day {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+}
+
+// Eventos: uma linha do tempo vertical, como o histórico do pedido.
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 0 var(--space-4);
+  border-inline-start: calc(var(--border-width) * 2) solid var(--color-border);
+  font-size: var(--text-sm);
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  time {
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+}
+
+@media (min-width: 64em) {
+  .nav {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0;
+  }
+
+  .back {
+    display: none;
+  }
+
+  .close {
+    display: inline-flex;
+  }
+}

@@ -37,6 +37,12 @@ describe('Rotas do app', () => {
     expect(TestBed.inject(Title).getTitle()).toBe(`${pageTitle} · Scua Logon`);
   });
 
+  it('/pessoas/:id fica dentro de Pessoas (o perfil abre ao lado da lista quando ela carrega)', async () => {
+    await harness.navigateByUrl('/pessoas/col-08');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Pessoas');
+    expect(TestBed.inject(Title).getTitle()).toBe('Colaborador · Scua Logon');
+  });
+
   it('/pessoas/grupos abre a aba Grupos, com o mesmo h1 de Pessoas', async () => {
     await harness.navigateByUrl('/pessoas/grupos');
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Pessoas');

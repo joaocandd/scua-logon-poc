@@ -61,8 +61,7 @@ export function search(query: string, sources: SearchSources): SearchSection[] {
     label: employee.name,
     detail: [employee.jobTitle, groupName.get(employee.groupId)].filter(Boolean).join(' · '),
     icon: 'person',
-    path: '/pessoas',
-    queryParams: { colaborador: employee.id },
+    path: `/pessoas/${employee.id}`,
   }));
   const groups = sources.groups.map((group): SearchResult => ({
     id: `group-${group.id}`,

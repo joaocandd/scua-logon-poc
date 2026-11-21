@@ -82,3 +82,66 @@ test('busca por nome ou matrícula e filtros vão para a URL', async ({ page }) 
   await expect(page.getByLabel('Estado da estação')).toHaveValue('sem_aprovacao');
   await expect(table(page).getByRole('rowheader')).toHaveCount(6);
 });
+
+test('o nome abre o perfil: cadastro, estação, jornada de hoje, horas extras, pedidos e eventos', async ({
+  page,
+  isMobile,
+}) => {
+  await openPeople(page, '/pessoas?grupo=grp-comercial');
+  await page.getByRole('link', { name: 'João Pedro Antunes' }).click();
+  await expect(page).toHaveURL('/pessoas/col-08?grupo=grp-comercial');
+
+  const profile = page.getByRole('article', { name: 'João Pedro Antunes' });
+  await expect(
+    profile.getByRole('heading', { level: 2, name: 'João Pedro Antunes' }),
+  ).toBeFocused();
+  await expect(profile).toContainText('Edição de cadastro fica fora desta prova de conceito.');
+  await expect(profile).toContainText('20296');
+  await expect(profile).toContainText('joao.antunes@empresa.example');
+  await expect(profile.getByRole('link', { name: 'Marina Couto' })).toHaveAttribute(
+    'href',
+    '/pessoas/col-07',
+  );
+  await expect(profile).toContainText(/Admissão\s*\d\d\/\d\d\/20\d\d/);
+  await expect(profile).toContainText('Bloqueada: fora da jornada Comercial');
+  await expect(
+    profile.getByRole('group', { name: /Jornada de João Pedro Antunes hoje/ }),
+  ).toBeVisible();
+  await expect(
+    profile.getByRole('heading', { name: 'Horas extras nos últimos 30 dias' }),
+  ).toBeVisible();
+  await expect(profile.getByRole('link', { name: /^Até \d+h/ }).first()).toHaveAttribute(
+    'href',
+    /^\/aprovacoes\/ped-/,
+  );
+  await expect(
+    profile.getByRole('link', { name: 'Ver tudo de João Pedro Antunes na auditoria' }),
+  ).toHaveAttribute('href', '/relatorios/auditoria?pessoa=col-08');
+  await expectNoA11yViolations(page);
+
+  // Fechar (desktop) ou Voltar (celular) leva à lista com os filtros, e o foco volta ao nome.
+  await page
+    .getByRole('link', { name: isMobile ? 'Voltar para a lista' : 'Fechar o perfil' })
+    .click();
+  await expect(page).toHaveURL('/pessoas?grupo=grp-comercial');
+  await expect(page.getByRole('link', { name: 'João Pedro Antunes' })).toBeFocused();
+});
+
+test('perfil de quem não existe diz isso', async ({ page }) => {
+  await page.goto('/pessoas/col-99');
+  await expect(
+    page.getByRole('heading', { name: 'Não encontramos este colaborador' }),
+  ).toBeVisible();
+});
+
+test('a busca (Ctrl+K) abre o perfil do colaborador', async ({ page }) => {
+  await page.goto('/hoje');
+  await expect(page.getByRole('button', { name: 'Renata Albuquerque' })).toBeVisible();
+  await page.getByRole('button', { name: 'Buscar' }).click();
+  await page
+    .getByRole('combobox', { name: 'Buscar páginas, colaboradores, grupos e regras' })
+    .fill('larissa');
+  await page.getByRole('option', { name: /Larissa Fontes/ }).click();
+  await expect(page).toHaveURL('/pessoas/col-02');
+  await expect(page.getByRole('heading', { level: 2, name: 'Larissa Fontes' })).toBeVisible();
+});

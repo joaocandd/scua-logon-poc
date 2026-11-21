@@ -76,9 +76,9 @@ describe('Busca da paleta de comandos', () => {
     expect(employeeResult).toMatchObject({
       id: 'employee-col-02',
       detail: 'Analista financeira · Financeiro',
-      path: '/pessoas',
-      queryParams: { colaborador: 'col-02' },
+      path: '/pessoas/col-02',
     });
+    expect(employeeResult.queryParams).toBeUndefined();
 
     const [groupResult] = search('financeiro', sources).find((s) => s.kind === 'group')!.results;
     expect(groupResult).toMatchObject({

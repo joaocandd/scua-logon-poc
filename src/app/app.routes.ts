@@ -93,6 +93,16 @@ export const routes: Routes = [
         title: 'Pessoas',
         loadComponent: () =>
           import('./features/people/pages/people-page').then((m) => m.PeoplePage),
+        children: [
+          {
+            path: ':id',
+            title: 'Colaborador',
+            loadComponent: () =>
+              import('./features/people/pages/person-profile-page').then(
+                (m) => m.PersonProfilePage,
+              ),
+          },
+        ],
       },
       {
         path: 'relatorios',

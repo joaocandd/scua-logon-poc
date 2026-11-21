@@ -1,0 +1,214 @@
+<!-- "Voltar" no celular (o perfil ocupa a página); "Fechar" no desktop (painel ao lado da lista). -->
+<div class="nav">
+  <a class="back" routerLink="/pessoas" queryParamsHandling="preserve">
+    <app-icon name="arrow_back" />
+    Voltar para a lista
+  </a>
+  <a class="close" routerLink="/pessoas" queryParamsHandling="preserve">
+    <app-icon name="close" />
+    Fechar<span class="cdk-visually-hidden"> o perfil</span>
+  </a>
+</div>
+
+@if (loading()) {
+  <div class="loading" aria-busy="true">
+    <app-skeleton variant="heading" width="60%" />
+    <app-skeleton width="40%" />
+    <app-skeleton variant="block" />
+    <app-skeleton variant="block" />
+  </div>
+} @else if (employee(); as person) {
+  <article class="profile" aria-labelledby="perfil-titulo">
+    <header class="head">
+      <app-person-avatar [initials]="initials()" size="lg" />
+      <div class="who">
+        <!-- tabindex="-1": recebe o foco ao abrir o perfil. -->
+        <h2 #heading id="perfil-titulo" class="name" tabindex="-1">{{ person.name }}</h2>
+        <p class="meta">{{ person.jobTitle }} · {{ group()?.name }}</p>
+      </div>
+    </header>
+
+    <p class="read-only">
+      <app-icon name="lock" />
+      Edição de cadastro fica fora desta prova de conceito.
+    </p>
+
+    <section class="section" aria-labelledby="perfil-cadastro">
+      <h3 id="perfil-cadastro" class="section-title">Cadastro</h3>
+      <dl class="facts">
+        <div>
+          <dt>Cargo</dt>
+          <dd>{{ person.jobTitle }}</dd>
+        </div>
+        <div>
+          <dt>Matrícula</dt>
+          <dd class="number">{{ person.registration || 'Não informada' }}</dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd>
+            <a [href]="'mailto:' + person.email">{{ person.email }}</a>
+          </dd>
+        </div>
+        <div>
+          <dt>Grupo</dt>
+          <dd>
+            @if (group(); as g) {
+              <a routerLink="/pessoas" [queryParams]="{ grupo: g.id }">{{ g.name }}</a>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Gestor</dt>
+          <dd>
+            @if (manager(); as m) {
+              <a [routerLink]="['/pessoas', m.id]">{{ m.name }}</a>
+            } @else {
+              Não responde a um gestor no Scua Logon
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>Admissão</dt>
+          <dd class="number">{{ hiredOn() ?? 'Não informada' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="perfil-estacao">
+      <h3 id="perfil-estacao" class="section-title">Estação agora</h3>
+      @if (station(); as s) {
+        <p class="station">
+          <app-status-badge [status]="s.status" />
+          <span class="host">{{ s.hostname }}</span>
+        </p>
+        <p class="reason">{{ s.reason }}</p>
+      } @else {
+        <p class="muted">
+          Estação sem controle: nenhuma regra de jornada vale para {{ person.name }}.
+        </p>
+      }
+    </section>
+
+    <section class="section" aria-labelledby="perfil-jornada">
+      <h3 id="perfil-jornada" class="section-title">Jornada de hoje</h3>
+      @if (timeline(); as day) {
+        @if (day.segments.length) {
+          <app-workday-timeline [segments]="day.segments" [label]="day.label" [now]="nowMarker()" />
+        }
+        <p class="muted">{{ day.summary }}</p>
+        @if (schedule(); as rule) {
+          <p class="muted">
+            Regra: <a [routerLink]="['/regras', rule.id]">{{ rule.name }}</a>
+          </p>
+        }
+      } @else {
+        <p class="muted">Sem regra de jornada: a estação não bloqueia.</p>
+      }
+    </section>
+
+    <section class="section">
+      @if (overtime.list.error()) {
+        <h3 class="section-title">Horas extras nos últimos 30 dias</h3>
+        <p class="muted">Não conseguimos carregar as horas extras.</p>
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          size="sm"
+          [loading]="overtime.list.isLoading()"
+          (click)="overtime.list.reload()"
+        >
+          Tentar de novo
+        </button>
+      } @else {
+        <app-bar-chart
+          heading="Horas extras nos últimos 30 dias"
+          [description]="'Total: ' + overtimeTotal() + '. Aprovadas, no máximo 2 h por dia.'"
+          [data]="overtimeDays()"
+          [format]="hours"
+          valueHeader="Horas extras"
+          [height]="140"
+        />
+      }
+    </section>
+
+    <section class="section" aria-labelledby="perfil-pedidos">
+      <h3 id="perfil-pedidos" class="section-title">Pedidos de extensão recentes</h3>
+      @if (requests.list.error()) {
+        <p class="muted">Não conseguimos carregar os pedidos.</p>
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          size="sm"
+          [loading]="requests.list.isLoading()"
+          (click)="requests.list.reload()"
+        >
+          Tentar de novo
+        </button>
+      } @else if (requests.list.isLoading() && recentRequests().length === 0) {
+        <div aria-busy="true">
+          <app-skeleton width="80%" />
+          <app-skeleton width="65%" />
+        </div>
+      } @else if (recentRequests().length === 0) {
+        <p class="muted">Nenhum pedido de extensão.</p>
+      } @else {
+        <ul class="requests">
+          @for (request of recentRequests(); track request.id) {
+            <li>
+              <a [routerLink]="['/aprovacoes', request.id]">
+                {{ request.until }}<span class="day"> · {{ request.day }}</span>
+              </a>
+              <app-status-badge [status]="request.status" />
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="section" aria-labelledby="perfil-eventos">
+      <h3 id="perfil-eventos" class="section-title">Últimos eventos</h3>
+      @if (activity.events.error()) {
+        <p class="muted">Não conseguimos carregar a auditoria.</p>
+        <button
+          app-button
+          type="button"
+          variant="secondary"
+          size="sm"
+          [loading]="activity.events.isLoading()"
+          (click)="activity.events.reload()"
+        >
+          Tentar de novo
+        </button>
+      } @else if (activity.events.isLoading() && recentEvents().length === 0) {
+        <div aria-busy="true">
+          <app-skeleton width="80%" />
+          <app-skeleton width="65%" />
+        </div>
+      } @else if (recentEvents().length === 0) {
+        <p class="muted">Nenhum evento registrado.</p>
+      } @else {
+        <ol class="history">
+          @for (event of recentEvents(); track event.id) {
+            <li>
+              <time [attr.datetime]="event.at">{{ event.when }}</time>
+              <span>{{ event.summary }}</span>
+            </li>
+          }
+        </ol>
+      }
+      <p>
+        <a routerLink="/relatorios/auditoria" [queryParams]="{ pessoa: person.id }">
+          Ver tudo de {{ person.name }} na auditoria
+        </a>
+      </p>
+    </section>
+  </article>
+} @else {
+  <section class="not-found" aria-labelledby="perfil-titulo">
+    <h2 #heading id="perfil-titulo" class="name" tabindex="-1">Não encontramos este colaborador</h2>
+    <p class="muted">O link pode estar incompleto. Os colaboradores estão na lista.</p>
+  </section>
+}

@@ -29,6 +29,7 @@ const screens: Screen[] = [
   { url: '/hoje', ready: button('Renata Albuquerque') },
   { url: '/pessoas', ready: (page) => page.getByRole('table', { name: 'Colaboradores' }) },
   { url: '/pessoas?busca=xyz', ready: button('Limpar filtros') },
+  { url: '/pessoas/col-08', ready: (page) => page.locator('#perfil-titulo') },
   { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
   { url: '/estacoes?busca=xyz', ready: button('Limpar filtros') },
   { url: '/relatorios', ready: heading('Horas extras') },
