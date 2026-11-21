@@ -145,3 +145,34 @@ test('a busca (Ctrl+K) abre o perfil do colaborador', async ({ page }) => {
   await expect(page).toHaveURL('/pessoas/col-02');
   await expect(page.getByRole('heading', { level: 2, name: 'Larissa Fontes' })).toBeVisible();
 });
+
+test('aba Grupos: um cartão por grupo, e "Ver colaboradores" abre a lista filtrada', async ({
+  page,
+}) => {
+  await page.goto('/pessoas');
+  await page.getByRole('link', { name: 'Grupos', exact: true }).click();
+  await expect(page).toHaveURL('/pessoas/grupos');
+  await expect(page.getByRole('link', { name: 'Grupos', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+
+  const cards = page.getByRole('article');
+  await expect(cards).toHaveCount(6);
+  const ti = page.getByRole('article', { name: 'TI' });
+  await expect(ti).toContainText('5 colaboradores');
+  await expect(ti.getByRole('link', { name: 'Thiago Moreira' })).toHaveAttribute(
+    'href',
+    '/pessoas/col-32',
+  );
+  await expect(ti.getByRole('link', { name: 'Renata Albuquerque' })).toBeVisible();
+  await expect(ti.getByRole('link', { name: 'Flexível' })).toHaveAttribute(
+    'href',
+    '/regras/regra-flexivel',
+  );
+  await expectNoA11yViolations(page);
+
+  await ti.getByRole('link', { name: 'Ver colaboradores de TI' }).click();
+  await expect(page).toHaveURL('/pessoas?grupo=grp-ti');
+  await expect(table(page).getByRole('rowheader')).toHaveCount(5);
+});

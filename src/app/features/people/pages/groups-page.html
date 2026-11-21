@@ -1,0 +1,109 @@
+<app-page-header
+  heading="Pessoas"
+  description="Colaboradores e grupos, com a regra de jornada e a estação de cada um."
+/>
+
+<app-people-tabs active="grupos" />
+
+<!-- Região de status para leitor de tela: existe desde o início, para os anúncios serem lidos. -->
+<p class="cdk-visually-hidden" role="status">{{ status() }}</p>
+
+@switch (state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso aos grupos"
+      description="Esta área é do RH e de quem administra o Scua Logon. Se você precisa dela, peça acesso ao administrador do Scua Logon."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não conseguimos carregar os grupos"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @case ('loading') {
+    <ul class="cards" aria-busy="true">
+      @for (placeholder of [1, 2, 3]; track placeholder) {
+        <li class="card" aria-hidden="true">
+          <app-skeleton variant="heading" width="40%" />
+          <app-skeleton width="70%" />
+          <app-skeleton width="55%" />
+        </li>
+      }
+    </ul>
+  }
+  @default {
+    @if (cards().length === 0) {
+      <app-empty-state
+        icon="group"
+        heading="Nenhum grupo cadastrado"
+        description="Os grupos aparecem aqui quando entram no cadastro da empresa ou numa importação de planilha."
+      />
+    } @else {
+      <p class="count" aria-hidden="true">{{ status() }}</p>
+      <ul class="cards">
+        @for (group of cards(); track group.id) {
+          <li class="card">
+            <article [attr.aria-labelledby]="'grupo-' + group.id">
+              <header class="card-head">
+                <h2 class="card-title" [id]="'grupo-' + group.id">{{ group.name }}</h2>
+                <p class="people-count">
+                  <app-icon name="group" />
+                  {{ countLabel(group.employeeCount) }}
+                </p>
+              </header>
+              <dl class="facts">
+                <div>
+                  <dt>Gestor</dt>
+                  <dd>
+                    @if (group.manager; as manager) {
+                      <a [routerLink]="['/pessoas', manager.id]">{{ manager.name }}</a>
+                    } @else {
+                      Sem gestor
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>Também aprovam</dt>
+                  <dd>
+                    @for (approver of group.approvers; track approver.id; let last = $last) {
+                      <a [routerLink]="['/pessoas', approver.id]">{{ approver.name }}</a
+                      >{{ last ? '' : ', ' }}
+                    } @empty {
+                      Só o gestor
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>Regra de jornada</dt>
+                  <dd class="schedules">
+                    @for (schedule of group.schedules; track schedule.id) {
+                      <span class="schedule">
+                        <a [routerLink]="['/regras', schedule.id]">{{ schedule.name }}</a>
+                        @if (schedule.observation) {
+                          <app-status-badge status="em_observacao" />
+                        }
+                      </span>
+                    } @empty {
+                      Nenhuma: a estação não é controlada
+                    }
+                  </dd>
+                </div>
+              </dl>
+              <a
+                app-button
+                variant="secondary"
+                size="sm"
+                routerLink="/pessoas"
+                [queryParams]="{ grupo: group.id }"
+                >Ver colaboradores<span class="cdk-visually-hidden"> de {{ group.name }}</span></a
+              >
+            </article>
+          </li>
+        }
+      </ul>
+    }
+  }
+}

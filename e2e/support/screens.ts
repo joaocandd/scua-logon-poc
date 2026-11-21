@@ -86,6 +86,11 @@ export const screens: Screen[] = [
   { url: '/pessoas?simular=vazio', ready: 'Nenhum colaborador cadastrado' },
   { url: '/pessoas?simular=lento', ready: 'Pessoas', loading: true },
   { url: '/pessoas?simular=sem-permissao', ready: 'Você não tem acesso aos colaboradores' },
+  { url: '/pessoas/grupos', ready: 'Atendimento' },
+  { url: '/pessoas/grupos?simular=erro', ready: 'Não conseguimos carregar os grupos' },
+  { url: '/pessoas/grupos?simular=vazio', ready: 'Nenhum grupo cadastrado' },
+  { url: '/pessoas/grupos?simular=lento', ready: 'Pessoas', loading: true },
+  { url: '/pessoas/grupos?simular=sem-permissao', ready: 'Você não tem acesso aos grupos' },
 
   // Relatórios
   { url: '/relatorios', ready: 'Horas extras' },
