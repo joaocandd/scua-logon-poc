@@ -1,7 +1,7 @@
 import { addDays, weekdayOf } from '../shared/date';
 import { DailyGroupStats } from '../shared/models';
 import { createFixtures } from './fixtures';
-import { createHistory, HISTORY_DAYS, seededRandom } from './history';
+import { createEmployeeOvertime, createHistory, HISTORY_DAYS, seededRandom } from './history';
 
 const NOW = new Date('2026-11-12T10:00:00-03:00'); // quinta-feira de manhã
 
@@ -119,5 +119,22 @@ describe('seededRandom', () => {
       expect(value).toBeLessThan(1);
     }
     expect(seededRandom('y')()).not.toBe(values[0]);
+  });
+});
+
+describe('horas extras por colaborador', () => {
+  it('somam, em cada grupo e dia, o mesmo que a série dos relatórios', () => {
+    const fixtures = createFixtures(NOW);
+    const groups = createHistory({ ...fixtures, now: NOW });
+    const people = createEmployeeOvertime({ ...fixtures, now: NOW });
+    const groupOf = new Map(fixtures.employees.map((e) => [e.id, e.groupId]));
+    for (const row of groups) {
+      const sumOfPeople = people
+        .filter((p) => p.date === row.date && groupOf.get(p.employeeId) === row.groupId)
+        .reduce((total, p) => total + p.overtimeMinutes, 0);
+      expect(sumOfPeople).toBe(row.overtimeMinutes);
+    }
+    expect(people.length).toBeGreaterThan(0);
+    expect(people.every((p) => p.overtimeMinutes > 0 && p.overtimeMinutes <= 120)).toBe(true);
   });
 });

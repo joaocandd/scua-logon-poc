@@ -1,7 +1,120 @@
-<app-page-header heading="Pessoas" description="Colaboradores, grupos e exceções de jornada." />
-
-<app-empty-state
-  icon="group"
-  heading="Fora do escopo desta prova de conceito"
-  description="Aqui o RH veria cada colaborador com o grupo e a regra de jornada dele, e cadastraria grupos e exceções. No sistema atual: Usuários e Carga de Dados. O plano de migração desta área está na proposta de arquitetura."
+<app-page-header
+  heading="Pessoas"
+  description="Colaboradores e grupos, com a regra de jornada e a estação de cada um."
 />
+
+<app-people-tabs active="colaboradores" />
+
+<!-- Região de status para leitor de tela: existe desde o início, para os anúncios serem lidos. -->
+<p class="cdk-visually-hidden" role="status">{{ status() }}</p>
+
+@switch (state()) {
+  @case ('forbidden') {
+    <app-empty-state
+      icon="lock"
+      heading="Você não tem acesso aos colaboradores"
+      description="Esta área é do RH e de quem administra o Scua Logon. Se você precisa dela, peça acesso ao administrador do Scua Logon."
+    />
+  }
+  @case ('error') {
+    <app-error-state
+      heading="Não conseguimos carregar os colaboradores"
+      [retrying]="retrying()"
+      (retry)="retry()"
+    />
+  }
+  @case ('loading') {
+    <ul class="skeleton-list" aria-busy="true">
+      @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+        <li aria-hidden="true">
+          <app-skeleton variant="heading" width="30%" />
+          <app-skeleton width="65%" />
+        </li>
+      }
+    </ul>
+  }
+  @default {
+    @if (!hasPeople()) {
+      <app-empty-state
+        icon="group"
+        heading="Nenhum colaborador cadastrado"
+        description="Os colaboradores aparecem aqui quando entram no cadastro da empresa ou numa importação de planilha."
+      >
+        <a app-button variant="secondary" routerLink="/regras">Ver regras de jornada</a>
+      </app-empty-state>
+    } @else {
+      <div class="layout">
+        <div class="list-column">
+          <div class="toolbar" role="search" aria-label="Filtrar colaboradores">
+            <app-field label="Buscar por nome ou matrícula" class="search">
+              <input
+                appFieldControl
+                type="search"
+                autocomplete="off"
+                [value]="search()"
+                (input)="setSearch($any($event.target).value)"
+              />
+            </app-field>
+            <app-field label="Grupo" class="filter">
+              <select appFieldControl #groupSelect (change)="setGroup(groupSelect.value)">
+                <option value="" [selected]="!groupId()">Todos os grupos</option>
+                @for (group of groups(); track group.id) {
+                  <option [value]="group.id" [selected]="group.id === groupId()">
+                    {{ group.name }}
+                  </option>
+                }
+              </select>
+            </app-field>
+            <app-field label="Regra" class="filter">
+              <select appFieldControl #scheduleSelect (change)="setSchedule(scheduleSelect.value)">
+                <option value="" [selected]="!scheduleId()">Todas as regras</option>
+                @for (schedule of scheduleOptions(); track schedule.id) {
+                  <option [value]="schedule.id" [selected]="schedule.id === scheduleId()">
+                    {{ schedule.name }}
+                  </option>
+                }
+              </select>
+            </app-field>
+            <app-field label="Estado da estação" class="filter">
+              <select appFieldControl #stateSelect (change)="setState(stateSelect.value)">
+                <option value="" [selected]="!stateFilter()">Todos os estados</option>
+                @for (option of stateOptions; track option.value) {
+                  <option [value]="option.value" [selected]="option.value === stateFilter()">
+                    {{ option.label }}
+                  </option>
+                }
+              </select>
+            </app-field>
+            <app-field label="Ordem" class="filter">
+              <select appFieldControl #orderSelect (change)="setOrder(orderSelect.value)">
+                <option value="asc" [selected]="order() === 'asc'">Nome, de A a Z</option>
+                <option value="desc" [selected]="order() === 'desc'">Nome, de Z a A</option>
+              </select>
+            </app-field>
+          </div>
+
+          <p class="count" aria-hidden="true">{{ status() }}</p>
+
+          @if (rows().length === 0) {
+            <app-empty-state
+              icon="search_off"
+              heading="Nenhum colaborador encontrado"
+              description="Ninguém combina com a busca e os filtros. Tente outro nome ou matrícula, ou limpe os filtros."
+            >
+              <button app-button type="button" variant="secondary" (click)="clearFilters()">
+                Limpar filtros
+              </button>
+            </app-empty-state>
+          } @else {
+            <app-people-table [rows]="rows()" [order]="order()" [selectedId]="selectedId()" />
+          }
+        </div>
+
+        <!-- Perfil (rota filha). Celular: ocupa a página no lugar da lista. Desktop: painel ao lado. -->
+        <section class="detail-column" aria-label="Perfil do colaborador">
+          <router-outlet (activate)="detailOpened()" (deactivate)="detailClosed()" />
+        </section>
+      </div>
+    }
+  }
+}

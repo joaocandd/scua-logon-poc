@@ -31,6 +31,21 @@ describe('fixtures', () => {
     expect(data.holidays.every((h) => h.date.startsWith('2026-'))).toBe(true);
   });
 
+  it('cada colaborador tem matrícula única, admissão e o gestor da área', () => {
+    expect(new Set(data.employees.map((e) => e.registration)).size).toBe(40);
+    expect(data.employees.every((e) => /^\d{5}$/.test(e.registration ?? ''))).toBe(true);
+    expect(data.employees.every((e) => /^20(1[3-9]|2[0-5])-\d\d-\d\d$/.test(e.hiredOn ?? ''))).toBe(
+      true,
+    );
+    const firstApprover = new Map(data.groups.map((g) => [g.id, g.approverIds[0]]));
+    for (const employee of data.employees) {
+      const manager = firstApprover.get(employee.groupId);
+      if (employee.id === CURRENT_USER_ID) expect(employee.managerId).toBeUndefined();
+      else if (employee.id === manager) expect(employee.managerId).toBe(CURRENT_USER_ID);
+      else expect(employee.managerId).toBe(manager);
+    }
+  });
+
   it('têm 25 pedidos cobrindo todos os status', () => {
     expect(data.requests).toHaveLength(25);
     expect(new Set(data.requests.map((r) => r.status))).toEqual(

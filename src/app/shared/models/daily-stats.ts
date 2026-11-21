@@ -23,3 +23,15 @@ export interface DailyGroupStats {
   /** Colaboradores com jornada no dia (a base das ausências). */
   scheduledCount: number;
 }
+
+/**
+ * Horas extras aprovadas de um colaborador em um dia (resposta de /api/relatorios/colaboradores).
+ * Sai do mesmo cálculo da série por grupo: a soma do grupo no dia é a soma destas linhas.
+ */
+export interface DailyEmployeeOvertime {
+  /** Dia, "AAAA-MM-DD" (America/Sao_Paulo). */
+  date: string;
+  employeeId: string;
+  /** Em minutos, no máximo 2 h por dia. */
+  overtimeMinutes: number;
+}

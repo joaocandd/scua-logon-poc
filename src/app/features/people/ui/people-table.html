@@ -1,0 +1,60 @@
+<table class="table" aria-label="Colaboradores">
+  <thead>
+    <tr>
+      <th scope="col" [attr.aria-sort]="order() === 'asc' ? 'ascending' : 'descending'">Nome</th>
+      <th scope="col">Matrícula</th>
+      <th scope="col">Cargo</th>
+      <th scope="col">Grupo</th>
+      <th scope="col">Regra</th>
+      <th scope="col">Estação agora</th>
+      <th scope="col" class="number">Horas extras (30 dias)</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.id) {
+      <tr [class.selected]="row.id === selectedId()">
+        <th scope="row" class="name">
+          <span class="who">
+            <app-person-avatar [initials]="row.initials" />
+            <a
+              [id]="'pessoa-' + row.id"
+              [routerLink]="['/pessoas', row.id]"
+              queryParamsHandling="preserve"
+              [attr.aria-current]="row.id === selectedId() ? 'true' : null"
+              >{{ row.name }}</a
+            >
+          </span>
+        </th>
+        <!-- Os rótulos dentro das células só aparecem no cartão, onde o cabeçalho some. -->
+        <td class="registration">
+          <span class="cell-label" aria-hidden="true">Matrícula:</span>
+          {{ row.registration }}
+        </td>
+        <td class="job">{{ row.jobTitle }}</td>
+        <td class="group">
+          <span class="cell-label" aria-hidden="true">Grupo:</span>
+          {{ row.groupName }}
+        </td>
+        <td class="schedule">
+          <span class="cell-label" aria-hidden="true">Regra:</span>
+          @if (row.scheduleId) {
+            {{ row.scheduleName }}
+          } @else {
+            <span class="muted">Sem regra</span>
+          }
+        </td>
+        <td class="status">
+          @if (row.station; as station) {
+            <app-status-badge [status]="station.status" />
+          } @else {
+            <span class="muted">Estação sem controle</span>
+          }
+        </td>
+        <td class="overtime number">
+          <span class="cell-label" aria-hidden="true">Horas extras (30 dias):</span>
+          {{ hoursLabel(row.overtimeMinutes) }}
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>

@@ -1,0 +1,39 @@
+// Abas sublinhadas: a aberta ganha a barra laranja e o peso, não só a cor.
+:host {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  margin-bottom: calc(-1 * var(--border-width));
+  padding: 0 var(--space-1);
+  border-bottom: 3px solid transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &[aria-current='page'] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--border-width);
+  }
+}

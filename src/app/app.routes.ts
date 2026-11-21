@@ -82,6 +82,13 @@ export const routes: Routes = [
           ),
       },
       {
+        // Antes de pessoas/:id, para "grupos" não virar o id de um colaborador.
+        path: 'pessoas/grupos',
+        title: 'Grupos',
+        loadComponent: () =>
+          import('./features/people/pages/groups-page').then((m) => m.GroupsPage),
+      },
+      {
         path: 'pessoas',
         title: 'Pessoas',
         loadComponent: () =>

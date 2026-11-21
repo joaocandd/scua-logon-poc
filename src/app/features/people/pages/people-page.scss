@@ -1,0 +1,99 @@
+// Celular primeiro: filtros um embaixo do outro. A partir de 64em (o ponto de quebra da casca),
+// o perfil abre num painel ao lado da lista, como o detalhe de /aprovacoes.
+:host {
+  display: block;
+  max-width: 84rem;
+}
+
+// Celular: a lista ou o perfil, nunca os dois. A coluna escondida sai do Tab e do leitor de tela.
+.detail-column {
+  display: none;
+}
+
+:host(.has-detail) {
+  .list-column {
+    display: none;
+  }
+
+  .detail-column {
+    display: block;
+  }
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.count {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-ring);
+  }
+}
+
+// Dois filtros por linha a partir de 36em; a busca sempre na largura toda.
+@media (min-width: 36em) {
+  .toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 64em) {
+  :host(.has-detail) .list-column {
+    display: block;
+  }
+
+  :host(.has-detail) .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  // Sem o perfil aberto, quantos filtros couberem lado a lado, sem cortar o texto; a busca ocupa
+  // duas colunas.
+  :host(:not(.has-detail)) .toolbar {
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+
+    .search {
+      grid-column: span 2;
+    }
+  }
+
+  // Painel preso abaixo do cabeçalho da casca, com rolagem própria. --header-height vem da casca.
+  .detail-column {
+    position: sticky;
+    top: calc(var(--header-height, 4rem) + var(--space-4));
+    max-height: calc(100dvh - var(--header-height, 4rem) - var(--space-8));
+    box-sizing: border-box;
+    padding: var(--space-4) var(--space-6) var(--space-6);
+    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-ring);
+  }
+}

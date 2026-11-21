@@ -37,6 +37,13 @@ describe('Rotas do app', () => {
     expect(TestBed.inject(Title).getTitle()).toBe(`${pageTitle} · Scua Logon`);
   });
 
+  it('/pessoas/grupos abre a aba Grupos, com o mesmo h1 de Pessoas', async () => {
+    await harness.navigateByUrl('/pessoas/grupos');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Pessoas');
+    expect(harness.routeNativeElement?.querySelector('app-groups-page')).not.toBeNull();
+    expect(TestBed.inject(Title).getTitle()).toBe('Grupos · Scua Logon');
+  });
+
   it('/aprovacoes/:id abre o detalhe dentro da caixa de aprovações', async () => {
     await harness.navigateByUrl('/aprovacoes/ped-02');
     expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Aprovações');

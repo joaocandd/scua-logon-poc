@@ -29,7 +29,8 @@ const focused = (page: Page) => page.locator(':focus');
 
 /** Aperta a tecla até o foco chegar em `target`. */
 async function pressUntilFocused(page: Page, key: string, target: Locator): Promise<void> {
-  for (let i = 0; i < 12; i++) {
+  // Até 60: a lista de Pessoas tem 40 colaboradores antes da barra inferior.
+  for (let i = 0; i < 60; i++) {
     await page.keyboard.press(key);
     if (await target.evaluate((el) => el === document.activeElement)) return;
   }
@@ -292,20 +293,19 @@ test.describe('Casca no celular', () => {
   });
 
   test('"Mais" abre as outras áreas, só com teclado', async ({ page }) => {
-    // Pessoas não tem nada focável no conteúdo: do cabeçalho, o Tab vai direto à barra inferior.
-    await open(page, '/pessoas');
+    // Busca sem resultado: o conteúdo tem poucos itens focáveis (abas, filtros e "Limpar filtros").
+    await open(page, '/pessoas?busca=xyz');
     const more = page.getByRole('button', { name: 'Mais' });
 
-    // Ordem do Tab: pular para o conteúdo, marca, busca, conta e a barra inferior.
-    for (const name of [
-      'Pular para o conteúdo',
-      'Scua Logon',
-      'Buscar',
-      'Renata Albuquerque',
-      'Hoje',
-      PENDING,
-      'Mais',
-    ]) {
+    // Ordem do Tab: pular para o conteúdo, marca, busca e conta; depois do conteúdo da página,
+    // a barra inferior.
+    for (const name of ['Pular para o conteúdo', 'Scua Logon', 'Buscar', 'Renata Albuquerque']) {
+      await page.keyboard.press('Tab');
+      await expect(focused(page)).toHaveAccessibleName(name);
+    }
+    const bottomBar = page.getByRole('navigation', { name: 'Principal' });
+    await pressUntilFocused(page, 'Tab', bottomBar.getByRole('link', { name: 'Hoje' }));
+    for (const name of [PENDING, 'Mais']) {
       await page.keyboard.press('Tab');
       await expect(focused(page)).toHaveAccessibleName(name);
     }

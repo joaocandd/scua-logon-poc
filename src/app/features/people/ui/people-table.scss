@@ -1,0 +1,194 @@
+// Tabela em 14 px, como a de estações. Com menos de 52em de largura (celular, ou o perfil aberto
+// ao lado da lista), cada linha vira um cartão: container query, não media query.
+:host {
+  display: block;
+  container-type: inline-size;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+
+  th,
+  td {
+    padding: var(--space-3) var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  thead th {
+    padding-block: var(--space-2);
+    border-bottom-color: var(--color-border-strong);
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .number {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // "Horas extras (30 dias)" em duas linhas: a coluna fica estreita como os números.
+  thead th.number {
+    width: 6.5rem;
+    white-space: normal;
+  }
+}
+
+tr.selected {
+  background: var(--color-bg-subtle);
+}
+
+.name {
+  font-weight: 600;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  a {
+    color: var(--color-link);
+    white-space: nowrap;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+
+    &:hover {
+      text-decoration-thickness: 2px;
+    }
+
+    &[aria-current='true'] {
+      font-weight: 700;
+    }
+  }
+}
+
+.registration {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.status {
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.cell-label {
+  display: none;
+}
+
+@container (max-width: 51.999em) {
+  // O cabeçalho sai da tela, mas continua para o leitor de tela.
+  thead tr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table {
+    display: block;
+  }
+
+  tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name status'
+      'job job'
+      'group group'
+      'schedule schedule'
+      'registration overtime';
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-ring);
+
+    &.selected {
+      background: var(--color-bg-subtle);
+      box-shadow: 0 0 0 var(--focus-ring-width) var(--color-border-strong);
+    }
+  }
+
+  .table tbody th,
+  .table tbody td {
+    padding: 0;
+    border: 0;
+  }
+
+  .name {
+    grid-area: name;
+    font-size: var(--text-md);
+
+    a {
+      white-space: normal;
+    }
+  }
+
+  .status {
+    grid-area: status;
+    align-self: start;
+  }
+
+  .job {
+    grid-area: job;
+    color: var(--color-text-muted);
+  }
+
+  .group {
+    grid-area: group;
+  }
+
+  .schedule {
+    grid-area: schedule;
+  }
+
+  .registration {
+    grid-area: registration;
+  }
+
+  .overtime {
+    grid-area: overtime;
+  }
+
+  .table .number {
+    text-align: start;
+  }
+
+  .cell-label {
+    display: inline;
+    color: var(--color-text-muted);
+  }
+}
+
+// Em 320 px, o estado desce para baixo do nome: nome e badge lado a lado não cabem.
+@container (max-width: 22em) {
+  tbody tr {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'name'
+      'status'
+      'job'
+      'group'
+      'schedule'
+      'registration'
+      'overtime';
+  }
+}

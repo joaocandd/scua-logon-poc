@@ -18,7 +18,7 @@ import { isShift, plannedShift } from '../shared/schedule-engine';
 import { formatClock, toMinutes } from '../shared/time';
 import { undoBlocker } from '../shared/undo-decision';
 import { decisionUndone, requestDecided, scheduleSaved, signedIn } from './activity';
-import { createHistory, historyDaysFor } from './history';
+import { createEmployeeOvertime, createHistory, historyDaysFor } from './history';
 import { hostnameOf, lastActivity } from './workstation-info';
 import { MockDb } from './db';
 import { nowDate } from '../shared/clock';
@@ -86,6 +86,7 @@ const ROUTES: [method: string, path: string, handler: Handler][] = [
   ['GET', '/api/historico', listActivity],
   ['GET', '/api/estacoes', listWorkstations],
   ['GET', '/api/relatorios/diario', dailyReport],
+  ['GET', '/api/relatorios/colaboradores', employeeOvertime],
 
   ['GET', '/api/configuracoes', ({ db }) => ok(db.data.settings)],
   ['PUT', '/api/configuracoes', saveSettings],
@@ -446,6 +447,14 @@ function listWorkstations({ db, now }: Context): MockResponse {
  */
 function dailyReport({ db, now }: Context): MockResponse {
   return ok(createHistory({ ...db.data, now }, historyDaysFor(now)));
+}
+
+/**
+ * Horas extras de cada colaborador nos últimos 30 dias, só os dias com hora extra. FICTÍCIA, da
+ * mesma conta da série diária por grupo: o perfil da pessoa bate com os relatórios.
+ */
+function employeeOvertime({ db, now }: Context): MockResponse {
+  return ok(createEmployeeOvertime({ ...db.data, now }));
 }
 
 /**

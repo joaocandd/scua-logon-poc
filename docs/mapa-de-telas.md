@@ -12,7 +12,7 @@ Status na PoC:
 | Item do menu atual | Onde fica na proposta | Status na PoC |
 |---|---|---|
 | Home | **Hoje** (`/hoje`): pedidos aguardando, alertas, estações agora, pedidos de hoje por status e horas extras | pronto |
-| Usuários | **Pessoas** (`/pessoas`) | fora do escopo |
+| Usuários | **Pessoas** (`/pessoas`): colaboradores com matrícula, cargo, grupo, regra, estação agora e horas extras dos últimos 30 dias, com busca e filtros | pronto (só leitura) |
 | Jornada de trabalho | **Regras de jornada** (`/regras`), fluxo B | pronto |
 | Extensão de jornada | **Aprovações** (`/aprovacoes`), fluxo A, e o link do e-mail (`/aprovacao/:token`) | pronto |
 | Relatórios | **Relatórios** (`/relatorios`): horas extras, tempo de bloqueio e ausência | pronto |

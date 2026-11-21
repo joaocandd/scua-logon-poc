@@ -29,7 +29,6 @@ export const screens: Screen[] = [
   // Relógio de demonstração: a faixa no topo, numa terça às 17h40.
   { url: '/hoje?relogio=2026-11-24T17:40', ready: 'Hoje' },
   { url: '/entrar?relogio=2026-11-24T17:40', ready: 'Entrar' },
-  { url: '/pessoas', ready: 'Pessoas' },
   { url: '/configuracoes', ready: 'Configurações' },
   { url: '/ajuda', ready: 'Ajuda' },
   { url: '/endereco-que-nao-existe', ready: 'Página não encontrada' },
@@ -74,6 +73,15 @@ export const screens: Screen[] = [
   { url: '/estacoes?simular=vazio', ready: 'Nenhuma estação controlada' },
   { url: '/estacoes?simular=lento', ready: 'Estações', loading: true },
   { url: '/estacoes?simular=sem-permissao', ready: 'Você não tem acesso às estações' },
+
+  // Pessoas
+  { url: '/pessoas', ready: 'Pessoas' },
+  { url: '/pessoas?grupo=grp-ti&estado=em_jornada', ready: 'Pessoas' },
+  { url: '/pessoas?busca=xyz', ready: 'Nenhum colaborador encontrado' },
+  { url: '/pessoas?simular=erro', ready: 'Não conseguimos carregar os colaboradores' },
+  { url: '/pessoas?simular=vazio', ready: 'Nenhum colaborador cadastrado' },
+  { url: '/pessoas?simular=lento', ready: 'Pessoas', loading: true },
+  { url: '/pessoas?simular=sem-permissao', ready: 'Você não tem acesso aos colaboradores' },
 
   // Relatórios
   { url: '/relatorios', ready: 'Horas extras' },

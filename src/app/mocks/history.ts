@@ -1,5 +1,6 @@
 // SÉRIE HISTÓRICA FICTÍCIA para os relatórios: horas extras aprovadas, minutos de estação
-// bloqueada e ausências por dia e por grupo, nos últimos 30 dias. Nada disto é dado real.
+// bloqueada e ausências por dia e por grupo, nos últimos 30 dias. Nada disto é dado real. As horas
+// extras de cada colaborador (perfil em /pessoas/:id) saem da mesma conta, dia a dia.
 //
 // O que vem do que já existe:
 // - quem trabalha em cada dia sai do motor de regras (plannedShift): a regra do colaborador, os
@@ -15,6 +16,7 @@
 
 import { addDays, toInstant, toLocal } from '../shared/date';
 import {
+  DailyEmployeeOvertime,
   DailyGroupStats,
   Employee,
   ExtensionRequest,
@@ -78,11 +80,8 @@ export interface HistoryInput {
  * no painel "Hoje".
  */
 export function createHistory(input: HistoryInput, days = HISTORY_DAYS): DailyGroupStats[] {
-  const today = toLocal(input.now).date;
-  const from = addDays(today, -(days - 1));
   const rows: DailyGroupStats[] = [];
-  for (let i = 0; i < days; i++) {
-    const date = addDays(from, i);
+  for (const date of datesUntilToday(input.now, days)) {
     for (const group of input.groups) {
       const row: DailyGroupStats = {
         date,
@@ -94,7 +93,13 @@ export function createHistory(input: HistoryInput, days = HISTORY_DAYS): DailyGr
         scheduledCount: 0,
       };
       for (const employee of input.employees.filter((e) => e.groupId === group.id)) {
-        addEmployeeDay(row, employee, input);
+        const day = employeeDay(employee, date, input);
+        if (!day) continue;
+        row.overtimeMinutes += day.overtimeMinutes;
+        row.approvedCount += day.approvedCount;
+        row.blockedMinutes += day.blockedMinutes;
+        if (day.scheduled) row.scheduledCount++;
+        if (day.absent) row.absentCount++;
       }
       rows.push(row);
     }
@@ -102,42 +107,83 @@ export function createHistory(input: HistoryInput, days = HISTORY_DAYS): DailyGr
   return rows;
 }
 
-function addEmployeeDay(row: DailyGroupStats, employee: Employee, input: HistoryInput): void {
+/**
+ * Horas extras de cada colaborador por dia, do mais antigo para hoje: as mesmas que entram na
+ * série por grupo (a soma de um grupo num dia é a do createHistory). Só dias com hora extra.
+ */
+export function createEmployeeOvertime(
+  input: HistoryInput,
+  days = HISTORY_DAYS,
+): DailyEmployeeOvertime[] {
+  const rows: DailyEmployeeOvertime[] = [];
+  for (const date of datesUntilToday(input.now, days)) {
+    for (const employee of input.employees) {
+      const overtimeMinutes = employeeDay(employee, date, input)?.overtimeMinutes ?? 0;
+      if (overtimeMinutes > 0) rows.push({ date, employeeId: employee.id, overtimeMinutes });
+    }
+  }
+  return rows;
+}
+
+/** Os `days` dias que terminam hoje, do mais antigo para hoje. */
+function datesUntilToday(now: Date, days: number): string[] {
+  const from = addDays(toLocal(now).date, -(days - 1));
+  return Array.from({ length: days }, (_, i) => addDays(from, i));
+}
+
+/** Números de um colaborador em um dia. */
+interface EmployeeDay {
+  overtimeMinutes: number;
+  approvedCount: number;
+  blockedMinutes: number;
+  /** A jornada do dia já terminou: entra na base das ausências. */
+  scheduled: boolean;
+  absent: boolean;
+}
+
+/** Nulo quando o colaborador não tem regra ou não tem jornada no dia. */
+function employeeDay(employee: Employee, date: string, input: HistoryInput): EmployeeDay | null {
   const schedule = scheduleOf(input.schedules, employee);
-  if (!schedule) return; // sem regra, a estação não é controlada
+  if (!schedule) return null; // sem regra, a estação não é controlada
   const exceptions = input.exceptions.filter((e) => e.employeeId === employee.id);
-  const plan = plannedShift(schedule, exceptions, input.holidays, row.date);
-  if (!isShift(plan)) return;
+  const plan = plannedShift(schedule, exceptions, input.holidays, date);
+  if (!isShift(plan)) return null;
 
   // Pedidos aprovados das fixtures (e da demo) contam do jeito do painel "Hoje".
   const approved = input.requests.filter(
-    (r) => r.employeeId === employee.id && r.date === row.date && r.status === 'aprovado',
+    (r) => r.employeeId === employee.id && r.date === date && r.status === 'aprovado',
   );
   const rules = { schedule, exceptions, holidays: input.holidays };
   const realOvertime = approved.reduce((sum, r) => sum + overtimeMinutes(r, rules), 0);
-  row.overtimeMinutes += Math.min(realOvertime, 120);
-  row.approvedCount += approved.length;
+  const day: EmployeeDay = {
+    overtimeMinutes: Math.min(realOvertime, 120),
+    approvedCount: approved.length,
+    blockedMinutes: 0,
+    scheduled: false,
+    absent: false,
+  };
 
   // A jornada ainda não terminou: ausência e bloqueio do dia ficam para depois.
-  const ended = Date.parse(toInstant(row.date, plan.end)) <= input.now.getTime();
-  if (!ended) return;
+  const ended = Date.parse(toInstant(date, plan.end)) <= input.now.getTime();
+  if (!ended) return day;
 
-  row.scheduledCount++;
-  const random = seededRandom(`${SEED}|${row.date}|${employee.id}`);
+  day.scheduled = true;
+  const random = seededRandom(`${SEED}|${date}|${employee.id}`);
   const profile = GROUP_PROFILE[employee.groupId] ?? DEFAULT_PROFILE;
   // Quem teve hora extra aprovada no dia veio trabalhar.
   if (approved.length === 0 && random() < profile.absence) {
-    row.absentCount++;
-    return;
+    day.absent = true;
+    return day;
   }
   // Regra em observação não bloqueia nem pede hora extra.
-  if (schedule.observationMode) return;
+  if (schedule.observationMode) return day;
 
-  if (random() < profile.blocked) row.blockedMinutes += 5 + Math.floor(random() * 36);
+  if (random() < profile.blocked) day.blockedMinutes += 5 + Math.floor(random() * 36);
   if (approved.length === 0 && random() < profile.overtime) {
-    row.overtimeMinutes += OVERTIME_STEPS[Math.floor(random() * OVERTIME_STEPS.length)];
-    row.approvedCount++;
+    day.overtimeMinutes += OVERTIME_STEPS[Math.floor(random() * OVERTIME_STEPS.length)];
+    day.approvedCount++;
   }
+  return day;
 }
 
 /** A regra ativa vem antes da que está em observação, como na API (MockDb.scheduleFor). */
