@@ -38,6 +38,9 @@ const screens: { url: string; ready: (page: Page) => Locator }[] = [
   { url: '/regras/regra-noturna', ready: heading('Noturna') },
   { url: '/regras/nova', ready: heading('Nova regra') },
   { url: '/estacoes', ready: (page) => page.getByRole('table', { name: 'Estações' }) },
+  { url: '/pessoas', ready: (page) => page.getByRole('table', { name: 'Colaboradores' }) },
+  { url: '/pessoas/col-08', ready: (page) => page.locator('#perfil-titulo') },
+  { url: '/pessoas/grupos', ready: heading('Atendimento') },
   { url: '/ajuda', ready: heading('Ajuda') },
   { url: '/relatorios', ready: heading('Horas extras') },
   {
